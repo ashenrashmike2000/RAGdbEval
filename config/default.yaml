@@ -1,0 +1,320 @@
+# =============================================================================
+# Vector Database Benchmarking Framework - Main Configuration
+# =============================================================================
+# This configuration file controls all aspects of the benchmarking process.
+# Switch databases, datasets, and metrics by modifying the 'active' fields.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Benchmark Metadata
+# -----------------------------------------------------------------------------
+benchmark:
+  name: "VectorDB Comprehensive Evaluation Study"
+  version: "1.0.0"
+  description: "Benchmarking vector databases for research paper"
+
+# -----------------------------------------------------------------------------
+# Statistical Configuration (Following ANN-Benchmarks methodology)
+# -----------------------------------------------------------------------------
+experiment:
+  runs: 5                          # Number of runs per configuration
+  warmup_queries: 1000             # Warmup queries before timing
+  measurement_queries: 10000       # Queries for measurement
+  seed: 42                         # Random seed for reproducibility
+  confidence_level: 0.95           # For confidence interval calculation
+
+# -----------------------------------------------------------------------------
+# Database Selection
+# -----------------------------------------------------------------------------
+database:
+  # Active database for single-database runs
+  active: "faiss"
+
+  # Enable multiple databases for comparison runs
+  compare_all: false
+
+  # Available databases (toggle enabled: true/false)
+  available:
+    faiss:
+      enabled: true
+      config_file: "databases/faiss.yaml"
+    qdrant:
+      enabled: true
+      config_file: "databases/qdrant.yaml"
+    milvus:
+      enabled: true
+      config_file: "databases/milvus.yaml"
+    lancedb:
+      enabled: true
+      config_file: "databases/lancedb.yaml"
+    weaviate:
+      enabled: true
+      config_file: "databases/weaviate.yaml"
+    chroma:
+      enabled: true
+      config_file: "databases/chroma.yaml"
+    pgvector:
+      enabled: true
+      config_file: "databases/pgvector.yaml"
+
+# -----------------------------------------------------------------------------
+# Dataset Selection
+# -----------------------------------------------------------------------------
+dataset:
+  # Active dataset for single-dataset runs
+  active: "sift1m"
+
+  # Enable multiple datasets for comparison runs
+  compare_all: false
+
+  # Data directory for downloaded datasets
+  data_dir: "./data"
+
+  # Available datasets
+  available:
+    sift1m:
+      enabled: true
+      config_file: "datasets/sift1m.yaml"
+    deep1m:
+      enabled: true
+      config_file: "datasets/deep1m.yaml"
+    msmarco:
+      enabled: true
+      config_file: "datasets/msmarco.yaml"
+    glove:
+      enabled: true
+      config_file: "datasets/glove.yaml"
+    gist1m:
+      enabled: true
+      config_file: "datasets/gist1m.yaml"
+    random:
+      enabled: true
+      config_file: "datasets/random.yaml"
+
+# -----------------------------------------------------------------------------
+# Query Configuration
+# -----------------------------------------------------------------------------
+query:
+  # Top-K values to evaluate
+  k_values: [1, 10, 50, 100]
+
+  # Number of queries for evaluation
+  num_queries: 10000
+
+  # Concurrency levels for QPS testing
+  thread_counts: [1, 4, 8, 16, 32, 64]
+
+  # Query batch sizes
+  batch_sizes: [1, 10, 100]
+
+# -----------------------------------------------------------------------------
+# Distance Metrics to Test
+# -----------------------------------------------------------------------------
+distance_metrics:
+  - metric: "l2"
+    name: "Euclidean (L2)"
+    datasets: ["sift1m", "deep1m", "gist1m", "random"]
+  - metric: "cosine"
+    name: "Cosine Similarity"
+    datasets: ["msmarco", "glove"]
+  - metric: "ip"
+    name: "Inner Product"
+    datasets: ["msmarco", "glove"]
+
+# -----------------------------------------------------------------------------
+# Metrics Configuration
+# -----------------------------------------------------------------------------
+metrics:
+  # Quality Metrics (Retrieval Accuracy)
+  quality:
+    enabled: true
+    metrics:
+      - name: "recall"
+        k_values: [1, 10, 50, 100]
+        description: "Fraction of true neighbors found"
+      - name: "precision"
+        k_values: [1, 10, 50, 100]
+        description: "Fraction of retrieved items that are relevant"
+      - name: "mrr"
+        description: "Mean Reciprocal Rank"
+      - name: "ndcg"
+        k_values: [10, 100]
+        description: "Normalized Discounted Cumulative Gain"
+      - name: "map"
+        k_values: [10, 100]
+        description: "Mean Average Precision"
+      - name: "hit_rate"
+        k_values: [1, 10]
+        description: "Success rate (at least one relevant item)"
+      - name: "f1"
+        k_values: [10]
+        description: "Harmonic mean of precision and recall"
+
+  # Performance Metrics (Speed)
+  performance:
+    enabled: true
+    metrics:
+      - name: "latency_p50"
+        description: "50th percentile query latency (ms)"
+      - name: "latency_p90"
+        description: "90th percentile query latency (ms)"
+      - name: "latency_p95"
+        description: "95th percentile query latency (ms)"
+      - name: "latency_p99"
+        description: "99th percentile query latency (ms)"
+      - name: "latency_mean"
+        description: "Mean query latency (ms)"
+      - name: "latency_std"
+        description: "Standard deviation of latency (ms)"
+      - name: "qps_single"
+        description: "Queries per second (single thread)"
+      - name: "qps_max"
+        description: "Maximum QPS at target recall"
+      - name: "coldstart_latency"
+        description: "First query latency after load (ms)"
+      - name: "warmup_time"
+        description: "Time to warm up cache (ms)"
+
+  # Resource Metrics (Efficiency)
+  resource:
+    enabled: true
+    metrics:
+      - name: "index_build_time"
+        description: "Time to build index (seconds)"
+      - name: "index_size_bytes"
+        description: "Serialized index size (bytes)"
+      - name: "disk_bytes"
+        description: "Total disk footprint (bytes)"
+      - name: "ram_bytes_peak"
+        description: "Peak RAM usage during search (bytes)"
+      - name: "ram_bytes_steady"
+        description: "Steady-state RAM usage (bytes)"
+      - name: "bytes_per_vector"
+        description: "Memory efficiency (bytes/vector)"
+      - name: "cpu_utilization"
+        description: "CPU usage percentage"
+
+  # Operational Metrics (Production Readiness)
+  operational:
+    enabled: true
+    metrics:
+      - name: "insert_latency"
+        description: "Single vector insert latency (ms)"
+      - name: "batch_insert_throughput"
+        description: "Batch insert vectors per second"
+      - name: "update_latency"
+        description: "Vector update latency (ms)"
+      - name: "delete_latency"
+        description: "Vector delete latency (ms)"
+      - name: "compaction_time"
+        description: "Index compaction time (seconds)"
+
+  # Scalability Metrics
+  scalability:
+    enabled: true
+    dataset_sizes: [10000, 100000, 500000, 1000000]
+    metrics:
+      - name: "qps_vs_threads"
+        description: "QPS scaling with thread count"
+      - name: "latency_vs_dataset_size"
+        description: "Latency scaling with dataset size"
+      - name: "memory_vs_dataset_size"
+        description: "Memory scaling with dataset size"
+      - name: "build_time_vs_dataset_size"
+        description: "Build time scaling with dataset size"
+
+# -----------------------------------------------------------------------------
+# Workload Types
+# -----------------------------------------------------------------------------
+workloads:
+  static:
+    enabled: true
+    description: "Build index once, then query"
+
+  streaming:
+    enabled: true
+    description: "Queries during continuous inserts"
+    insert_rate: 1000  # vectors per second
+    query_rate: 100    # queries per second
+    duration_seconds: 300
+
+  mixed:
+    enabled: true
+    description: "Concurrent reads and writes"
+    read_ratio: 0.8
+    write_ratio: 0.2
+    duration_seconds: 300
+
+# -----------------------------------------------------------------------------
+# Filtering Tests
+# -----------------------------------------------------------------------------
+filtering:
+  enabled: true
+  tests:
+    - name: "no_filter"
+      selectivity: 1.0
+      filter: null
+    - name: "low_selectivity"
+      selectivity: 0.5
+      description: "50% of data matches"
+    - name: "medium_selectivity"
+      selectivity: 0.1
+      description: "10% of data matches"
+    - name: "high_selectivity"
+      selectivity: 0.01
+      description: "1% of data matches"
+
+# -----------------------------------------------------------------------------
+# Hardware Configuration
+# -----------------------------------------------------------------------------
+hardware:
+  # Auto-detect or override
+  auto_detect: true
+
+  # Resource limits for fair comparison
+  cpu_limit: null              # null = use all available
+  memory_limit_gb: 16          # Memory limit per database
+
+  # GPU configuration
+  use_gpu: false
+  gpu_device_id: 0
+
+# -----------------------------------------------------------------------------
+# Output Configuration
+# -----------------------------------------------------------------------------
+output:
+  results_dir: "./results"
+
+  # Output formats
+  formats:
+    json: true
+    csv: true
+    latex: true
+
+  # Visualization
+  plots:
+    enabled: true
+    format: "png"  # png, pdf, svg
+    dpi: 300
+    style: "seaborn-v0_8-whitegrid"
+
+  # LaTeX table generation
+  latex:
+    enabled: true
+    float_precision: 3
+    highlight_best: true
+
+  # Logging
+  logging:
+    level: "INFO"
+    file: "./results/benchmark.log"
+
+# -----------------------------------------------------------------------------
+# Recall-Latency Tradeoff Analysis
+# -----------------------------------------------------------------------------
+tradeoff:
+  enabled: true
+  target_recalls: [0.90, 0.95, 0.99]
+  parameter_search:
+    max_iterations: 50
+    tolerance: 0.01

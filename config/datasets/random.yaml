@@ -1,0 +1,166 @@
+# =============================================================================
+# Random Dataset Configuration
+# =============================================================================
+# Synthetic random vectors for controlled experiments
+# =============================================================================
+
+dataset:
+  name: "random"
+  display_name: "Random"
+  description: "Synthetic random vectors for controlled experiments"
+  type: "synthetic"
+
+# -----------------------------------------------------------------------------
+# Data Specifications (Configurable)
+# -----------------------------------------------------------------------------
+specs:
+  # Default configuration
+  default:
+    num_vectors: 1000000
+    num_queries: 10000
+    dimensions: 128
+    data_type: "float32"
+    ground_truth_k: 100
+
+  # Preset configurations
+  presets:
+    - name: "random-128"
+      num_vectors: 1000000
+      dimensions: 128
+      description: "Standard 128-dim random"
+
+    - name: "random-256"
+      num_vectors: 1000000
+      dimensions: 256
+      description: "256-dim random"
+
+    - name: "random-512"
+      num_vectors: 1000000
+      dimensions: 512
+      description: "512-dim random"
+
+    - name: "random-768"
+      num_vectors: 1000000
+      dimensions: 768
+      description: "768-dim (BERT-like)"
+
+    - name: "random-1536"
+      num_vectors: 1000000
+      dimensions: 1536
+      description: "1536-dim (OpenAI-like)"
+
+# -----------------------------------------------------------------------------
+# Generation Configuration
+# -----------------------------------------------------------------------------
+generation:
+  # Random seed for reproducibility
+  seed: 42
+
+  # Distribution types
+  distribution:
+    type: "gaussian"  # gaussian, uniform, clustered
+    params:
+      gaussian:
+        mean: 0.0
+        std: 1.0
+      uniform:
+        min: -1.0
+        max: 1.0
+      clustered:
+        num_clusters: 100
+        cluster_std: 0.1
+
+  # Normalization
+  normalize: false
+
+  # Generate in batches (memory efficient)
+  batch_size: 100000
+
+# -----------------------------------------------------------------------------
+# Distance Metric
+# -----------------------------------------------------------------------------
+distance:
+  metric: "l2"  # l2, cosine, ip
+  normalize: false
+
+# -----------------------------------------------------------------------------
+# Ground Truth Computation
+# -----------------------------------------------------------------------------
+ground_truth:
+  # Compute exact k-NN as ground truth
+  method: "exact"
+  k: 100
+
+  # For large datasets, use approximation or sampling
+  large_dataset:
+    threshold: 10000000
+    method: "sampling"
+    sample_ratio: 0.1
+
+# -----------------------------------------------------------------------------
+# Subsets for Scalability Testing
+# -----------------------------------------------------------------------------
+subsets:
+  - name: "random10k"
+    size: 10000
+    description: "10K random vectors"
+  - name: "random100k"
+    size: 100000
+    description: "100K random vectors"
+  - name: "random500k"
+    size: 500000
+    description: "500K random vectors"
+  - name: "random1m"
+    size: 1000000
+    description: "1M random vectors"
+  - name: "random5m"
+    size: 5000000
+    description: "5M random vectors"
+  - name: "random10m"
+    size: 10000000
+    description: "10M random vectors"
+
+# -----------------------------------------------------------------------------
+# Dimensionality Scaling Tests
+# -----------------------------------------------------------------------------
+dimension_tests:
+  enabled: true
+  dimensions: [32, 64, 128, 256, 512, 768, 1024, 1536]
+  fixed_num_vectors: 100000
+
+# -----------------------------------------------------------------------------
+# Metadata Generation
+# -----------------------------------------------------------------------------
+metadata:
+  generate: true
+  fields:
+    category:
+      type: "categorical"
+      values: ["A", "B", "C", "D", "E"]
+      distribution: "uniform"
+    price:
+      type: "numeric"
+      min: 0.0
+      max: 1000.0
+      distribution: "uniform"
+    timestamp:
+      type: "integer"
+      min: 1609459200
+      max: 1704067200
+      distribution: "uniform"
+    active:
+      type: "boolean"
+      probability_true: 0.8
+
+# -----------------------------------------------------------------------------
+# Use Cases
+# -----------------------------------------------------------------------------
+use_cases:
+  - name: "baseline"
+    description: "Baseline performance without data-specific optimizations"
+  - name: "scaling"
+    description: "Test scaling behavior with dataset size"
+  - name: "dimensionality"
+    description: "Test effect of dimensions on performance"
+  - name: "controlled_experiments"
+    description: "Controlled A/B testing of configurations"

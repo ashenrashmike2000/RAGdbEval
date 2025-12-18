@@ -1,0 +1,130 @@
+# =============================================================================
+# GIST1M Dataset Configuration
+# =============================================================================
+# Global image descriptors (high dimensional)
+# Source: http://corpus-texmex.irisa.fr/
+# =============================================================================
+
+dataset:
+  name: "gist1m"
+  display_name: "GIST-1M"
+  description: "1M GIST global image descriptors (960-dim)"
+  type: "image_features"
+
+# -----------------------------------------------------------------------------
+# Data Specifications
+# -----------------------------------------------------------------------------
+specs:
+  num_vectors: 1000000
+  num_queries: 1000
+  dimensions: 960
+  data_type: "float32"
+  ground_truth_k: 100
+
+# -----------------------------------------------------------------------------
+# Distance Metric
+# -----------------------------------------------------------------------------
+distance:
+  metric: "l2"
+  normalize: false
+
+# -----------------------------------------------------------------------------
+# Download Configuration
+# -----------------------------------------------------------------------------
+download:
+  source: "texmex"
+  base_url: "ftp://ftp.irisa.fr/local/texmex/corpus"
+
+  files:
+    base_vectors: "gist/gist_base.fvecs"
+    query_vectors: "gist/gist_query.fvecs"
+    ground_truth: "gist/gist_groundtruth.ivecs"
+    learn_vectors: "gist/gist_learn.fvecs"
+
+  # Compressed archive
+  archive:
+    url: "ftp://ftp.irisa.fr/local/texmex/corpus/gist.tar.gz"
+    size_mb: 3600
+
+  # Mirror
+  mirrors:
+    - "http://corpus-texmex.irisa.fr"
+
+# -----------------------------------------------------------------------------
+# File Format
+# -----------------------------------------------------------------------------
+format:
+  type: "fvecs"
+  description: "Float vectors in .fvecs format"
+  byte_order: "little"
+
+# -----------------------------------------------------------------------------
+# Subsets for Scalability Testing
+# -----------------------------------------------------------------------------
+subsets:
+  - name: "gist10k"
+    size: 10000
+    description: "First 10K vectors"
+  - name: "gist100k"
+    size: 100000
+    description: "First 100K vectors"
+  - name: "gist500k"
+    size: 500000
+    description: "First 500K vectors"
+  - name: "gist1m"
+    size: 1000000
+    description: "Full dataset"
+
+# -----------------------------------------------------------------------------
+# High-Dimensional Considerations
+# -----------------------------------------------------------------------------
+high_dimensional:
+  # GIST is particularly challenging due to high dimensions
+  notes:
+    - "960 dimensions is significantly higher than SIFT (128)"
+    - "Tests dimensionality curse handling"
+    - "Product quantization particularly effective here"
+    - "Good for testing memory efficiency"
+
+  # Recommended index types for high-dim
+  recommended_indices:
+    faiss: ["IVF_PQ", "OPQ", "HNSW"]
+    qdrant: ["HNSW with product quantization"]
+    milvus: ["IVF_PQ", "HNSW"]
+
+# -----------------------------------------------------------------------------
+# Metadata Generation (Synthetic)
+# -----------------------------------------------------------------------------
+metadata:
+  generate: true
+  fields:
+    category:
+      type: "categorical"
+      values: ["landscape", "portrait", "architecture", "nature", "abstract"]
+      distribution: "uniform"
+    price:
+      type: "numeric"
+      min: 0.0
+      max: 1000.0
+      distribution: "uniform"
+    timestamp:
+      type: "integer"
+      min: 1609459200
+      max: 1704067200
+      distribution: "uniform"
+    active:
+      type: "boolean"
+      probability_true: 0.8
+
+# -----------------------------------------------------------------------------
+# Reference Papers
+# -----------------------------------------------------------------------------
+references:
+  - title: "Modeling the Shape of the Scene: A Holistic Representation of the Spatial Envelope"
+    authors: "Oliva, Torralba"
+    venue: "IJCV 2001"
+    url: "https://link.springer.com/article/10.1023/A:1011139631724"
+  - title: "Product quantization for nearest neighbor search"
+    authors: "Jegou et al."
+    venue: "TPAMI 2011"
+    url: "https://ieeexplore.ieee.org/document/5432202"

@@ -1,0 +1,182 @@
+# =============================================================================
+# LanceDB Configuration
+# =============================================================================
+# Serverless vector database built on Lance columnar format
+# Documentation: https://lancedb.github.io/lancedb/
+# =============================================================================
+
+database:
+  name: "lancedb"
+  display_name: "LanceDB"
+  version: "0.4.0"
+  type: "database"
+  language: "Rust"
+  license: "Apache-2.0"
+
+# -----------------------------------------------------------------------------
+# Connection Settings
+# -----------------------------------------------------------------------------
+connection:
+  type: "local"  # local or cloud
+  uri: "./data/lancedb"
+
+  # Cloud connection (if using LanceDB Cloud)
+  cloud:
+    enabled: false
+    uri: ""
+    api_key: ""
+    region: "us-east-1"
+
+# -----------------------------------------------------------------------------
+# Table Settings
+# -----------------------------------------------------------------------------
+table:
+  name_prefix: "benchmark"
+  mode: "overwrite"  # create, overwrite, append
+
+# -----------------------------------------------------------------------------
+# Index Configurations to Test
+# -----------------------------------------------------------------------------
+index_configurations:
+  # No index (brute force)
+  - name: "Flat"
+    type: "flat"
+    description: "No index, brute force search"
+    params: {}
+    search_params: {}
+
+  # IVF_PQ index
+  - name: "IVF_PQ_256"
+    type: "IVF_PQ"
+    description: "IVF with 256 partitions and PQ"
+    params:
+      num_partitions: 256
+      num_sub_vectors: 16
+      num_bits: 8
+      max_iterations: 50
+      sample_rate: 256
+    search_params:
+      nprobes: [1, 4, 8, 16, 32, 64]
+      refine_factor: [null, 10, 20]
+
+  - name: "IVF_PQ_512"
+    type: "IVF_PQ"
+    description: "IVF with 512 partitions"
+    params:
+      num_partitions: 512
+      num_sub_vectors: 32
+      num_bits: 8
+      max_iterations: 50
+      sample_rate: 256
+    search_params:
+      nprobes: [1, 4, 8, 16, 32, 64, 128]
+      refine_factor: [null, 10, 20]
+
+  - name: "IVF_PQ_1024"
+    type: "IVF_PQ"
+    description: "IVF with 1024 partitions for larger datasets"
+    params:
+      num_partitions: 1024
+      num_sub_vectors: 32
+      num_bits: 8
+      max_iterations: 50
+      sample_rate: 256
+    search_params:
+      nprobes: [1, 8, 16, 32, 64, 128, 256]
+      refine_factor: [null, 10, 50]
+
+  # IVF_HNSW_SQ (newer index type)
+  - name: "IVF_HNSW_SQ_256"
+    type: "IVF_HNSW_SQ"
+    description: "IVF + HNSW + Scalar Quantization"
+    params:
+      num_partitions: 256
+      max_degree: 16
+      ef_construction: 150
+      sq_type: "fp16"  # fp16, int8
+    search_params:
+      nprobes: [1, 4, 8, 16, 32]
+      ef: [50, 100, 200]
+
+  - name: "IVF_HNSW_SQ_512"
+    type: "IVF_HNSW_SQ"
+    description: "IVF + HNSW + SQ with more partitions"
+    params:
+      num_partitions: 512
+      max_degree: 32
+      ef_construction: 200
+      sq_type: "fp16"
+    search_params:
+      nprobes: [1, 8, 16, 32, 64]
+      ef: [64, 128, 256]
+
+# -----------------------------------------------------------------------------
+# Distance Metrics Support
+# -----------------------------------------------------------------------------
+distance_metrics:
+  l2:
+    supported: true
+    lance_name: "L2"
+  cosine:
+    supported: true
+    lance_name: "cosine"
+  ip:
+    supported: true
+    lance_name: "dot"
+
+# -----------------------------------------------------------------------------
+# Schema Configuration
+# -----------------------------------------------------------------------------
+schema:
+  # ID field
+  id_field:
+    name: "id"
+    type: "int64"
+
+  # Vector field
+  vector_field:
+    name: "vector"
+    type: "vector"
+
+  # Metadata fields
+  metadata_fields:
+    - name: "category"
+      type: "string"
+    - name: "price"
+      type: "float"
+    - name: "timestamp"
+      type: "int64"
+    - name: "active"
+      type: "bool"
+
+# -----------------------------------------------------------------------------
+# Storage Configuration
+# -----------------------------------------------------------------------------
+storage:
+  # Use memory mapping for large datasets
+  enable_mmap: true
+
+  # Compression
+  compression: "zstd"  # none, lz4, zstd
+
+  # Cache settings
+  cache:
+    enabled: true
+    size_mb: 2048
+
+# -----------------------------------------------------------------------------
+# Batch Settings
+# -----------------------------------------------------------------------------
+batch:
+  insert_batch_size: 10000
+  search_batch_size: 100
+
+# -----------------------------------------------------------------------------
+# Index Build Settings
+# -----------------------------------------------------------------------------
+build:
+  # Number of threads for index building
+  num_threads: 0  # 0 = auto
+
+  # Progress reporting
+  show_progress: true

@@ -1,0 +1,184 @@
+# =============================================================================
+# FAISS Configuration
+# =============================================================================
+# Facebook AI Similarity Search - Reference implementation for ANN research
+# Documentation: https://faiss.ai/
+# =============================================================================
+
+database:
+  name: "faiss"
+  display_name: "FAISS"
+  version: "1.7.4"
+  type: "library"
+  language: "C++/Python"
+  license: "MIT"
+
+# -----------------------------------------------------------------------------
+# Connection Settings (FAISS is in-process, no connection needed)
+# -----------------------------------------------------------------------------
+connection:
+  type: "in_process"
+
+# -----------------------------------------------------------------------------
+# Index Configurations to Test
+# -----------------------------------------------------------------------------
+index_configurations:
+  # Exact search baseline (no approximation)
+  - name: "Flat"
+    type: "Flat"
+    description: "Exact brute-force search (baseline)"
+    params: {}
+    search_params: {}
+
+  # IVF (Inverted File) configurations
+  - name: "IVF1024_Flat"
+    type: "IVF"
+    description: "IVF with 1024 centroids, exact search in cells"
+    params:
+      nlist: 1024
+      quantizer: "Flat"
+    search_params:
+      nprobe: [1, 4, 8, 16, 32, 64, 128]
+
+  - name: "IVF4096_Flat"
+    type: "IVF"
+    description: "IVF with 4096 centroids"
+    params:
+      nlist: 4096
+      quantizer: "Flat"
+    search_params:
+      nprobe: [1, 4, 8, 16, 32, 64, 128, 256]
+
+  - name: "IVF8192_Flat"
+    type: "IVF"
+    description: "IVF with 8192 centroids for larger datasets"
+    params:
+      nlist: 8192
+      quantizer: "Flat"
+    search_params:
+      nprobe: [1, 8, 16, 32, 64, 128, 256, 512]
+
+  # IVF with Product Quantization
+  - name: "IVF1024_PQ16"
+    type: "IVFPQ"
+    description: "IVF + PQ with 16 sub-quantizers"
+    params:
+      nlist: 1024
+      m: 16          # Number of sub-quantizers
+      nbits: 8       # Bits per sub-quantizer
+    search_params:
+      nprobe: [1, 4, 8, 16, 32, 64]
+
+  - name: "IVF4096_PQ32"
+    type: "IVFPQ"
+    description: "IVF + PQ with 32 sub-quantizers"
+    params:
+      nlist: 4096
+      m: 32
+      nbits: 8
+    search_params:
+      nprobe: [1, 4, 8, 16, 32, 64, 128]
+
+  # HNSW (Hierarchical Navigable Small World)
+  - name: "HNSW16"
+    type: "HNSW"
+    description: "HNSW with M=16"
+    params:
+      M: 16
+      efConstruction: 200
+    search_params:
+      efSearch: [16, 32, 64, 128, 256, 512]
+
+  - name: "HNSW32"
+    type: "HNSW"
+    description: "HNSW with M=32"
+    params:
+      M: 32
+      efConstruction: 200
+    search_params:
+      efSearch: [32, 64, 128, 256, 512]
+
+  - name: "HNSW64"
+    type: "HNSW"
+    description: "HNSW with M=64 (higher accuracy)"
+    params:
+      M: 64
+      efConstruction: 400
+    search_params:
+      efSearch: [64, 128, 256, 512, 1024]
+
+  # Scalar Quantizer
+  - name: "IVF1024_SQ8"
+    type: "IVFSQ"
+    description: "IVF with 8-bit scalar quantization"
+    params:
+      nlist: 1024
+      qtype: "QT_8bit"
+    search_params:
+      nprobe: [1, 4, 8, 16, 32, 64]
+
+  # OPQ (Optimized Product Quantization)
+  - name: "OPQ32_IVF4096_PQ32"
+    type: "OPQ"
+    description: "OPQ preprocessing + IVFPQ"
+    params:
+      M_OPQ: 32
+      nlist: 4096
+      m: 32
+      nbits: 8
+    search_params:
+      nprobe: [1, 4, 8, 16, 32, 64]
+
+# -----------------------------------------------------------------------------
+# Distance Metrics Support
+# -----------------------------------------------------------------------------
+distance_metrics:
+  l2:
+    supported: true
+    index_suffix: ""
+    metric_type: "METRIC_L2"
+  cosine:
+    supported: true
+    index_suffix: ""
+    metric_type: "METRIC_INNER_PRODUCT"
+    normalize: true  # Normalize vectors for cosine
+  ip:
+    supported: true
+    index_suffix: ""
+    metric_type: "METRIC_INNER_PRODUCT"
+
+# -----------------------------------------------------------------------------
+# Training Configuration
+# -----------------------------------------------------------------------------
+training:
+  # For IVF indices, number of vectors for training
+  train_size_ratio: 0.1  # Use 10% of data for training
+  min_train_size: 10000
+  max_train_size: 1000000
+
+# -----------------------------------------------------------------------------
+# GPU Configuration
+# -----------------------------------------------------------------------------
+gpu:
+  enabled: false
+  device_id: 0
+  use_precomputed_tables: true
+  # GPU-specific indices
+  gpu_indices:
+    - "GpuIVFFlat"
+    - "GpuIVFPQ"
+
+# -----------------------------------------------------------------------------
+# Memory Configuration
+# -----------------------------------------------------------------------------
+memory:
+  use_mmap: false           # Memory-map index from disk
+  precompute_table: true    # Precompute distance tables for PQ
+
+# -----------------------------------------------------------------------------
+# Persistence
+# -----------------------------------------------------------------------------
+persistence:
+  save_index: true
+  index_dir: "./data/faiss_indices"
+  file_extension: ".faiss"

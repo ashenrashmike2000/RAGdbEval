@@ -1,0 +1,108 @@
+# =============================================================================
+# SIFT1M Dataset Configuration
+# =============================================================================
+# Classic ANN benchmark dataset with SIFT descriptors
+# Source: http://corpus-texmex.irisa.fr/
+# =============================================================================
+
+dataset:
+  name: "sift1m"
+  display_name: "SIFT-1M"
+  description: "1M SIFT descriptors from image patches"
+  type: "image_features"
+
+# -----------------------------------------------------------------------------
+# Data Specifications
+# -----------------------------------------------------------------------------
+specs:
+  num_vectors: 1000000
+  num_queries: 10000
+  dimensions: 128
+  data_type: "float32"
+  ground_truth_k: 100
+
+# -----------------------------------------------------------------------------
+# Distance Metric
+# -----------------------------------------------------------------------------
+distance:
+  metric: "l2"
+  normalize: false
+
+# -----------------------------------------------------------------------------
+# Download Configuration
+# -----------------------------------------------------------------------------
+download:
+  source: "texmex"
+  base_url: "ftp://ftp.irisa.fr/local/texmex/corpus"
+  files:
+    base_vectors: "sift/sift_base.fvecs"
+    query_vectors: "sift/sift_query.fvecs"
+    ground_truth: "sift/sift_groundtruth.ivecs"
+    learn_vectors: "sift/sift_learn.fvecs"  # Optional training set
+
+  # Alternative URLs (mirrors)
+  mirrors:
+    - "http://corpus-texmex.irisa.fr"
+
+  # Compressed archive (if downloading all at once)
+  archive:
+    url: "ftp://ftp.irisa.fr/local/texmex/corpus/sift.tar.gz"
+    checksum_md5: "e8a5aab7e47bcf4b8a5e9bb7c8fc6f8d"
+
+# -----------------------------------------------------------------------------
+# File Format
+# -----------------------------------------------------------------------------
+format:
+  type: "fvecs"  # fvecs, bvecs, ivecs, hdf5
+  description: "Float vectors in .fvecs format"
+  byte_order: "little"
+
+# -----------------------------------------------------------------------------
+# Subsets for Scalability Testing
+# -----------------------------------------------------------------------------
+subsets:
+  - name: "sift10k"
+    size: 10000
+    description: "First 10K vectors"
+  - name: "sift100k"
+    size: 100000
+    description: "First 100K vectors"
+  - name: "sift500k"
+    size: 500000
+    description: "First 500K vectors"
+  - name: "sift1m"
+    size: 1000000
+    description: "Full dataset"
+
+# -----------------------------------------------------------------------------
+# Metadata Generation (Synthetic)
+# -----------------------------------------------------------------------------
+metadata:
+  generate: true
+  fields:
+    category:
+      type: "categorical"
+      values: ["A", "B", "C", "D", "E"]
+      distribution: "uniform"
+    price:
+      type: "numeric"
+      min: 0.0
+      max: 1000.0
+      distribution: "uniform"
+    timestamp:
+      type: "integer"
+      min: 1609459200  # 2021-01-01
+      max: 1704067200  # 2024-01-01
+      distribution: "uniform"
+    active:
+      type: "boolean"
+      probability_true: 0.8
+
+# -----------------------------------------------------------------------------
+# Reference Papers
+# -----------------------------------------------------------------------------
+references:
+  - title: "Product quantization for nearest neighbor search"
+    authors: "Jegou et al."
+    venue: "TPAMI 2011"
+    url: "https://ieeexplore.ieee.org/document/5432202"

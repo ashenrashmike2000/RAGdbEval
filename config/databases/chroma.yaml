@@ -1,0 +1,168 @@
+# =============================================================================
+# Chroma Configuration
+# =============================================================================
+# AI-native open-source embedding database
+# Documentation: https://docs.trychroma.com/
+# =============================================================================
+
+database:
+  name: "chroma"
+  display_name: "Chroma"
+  version: "0.4.0"
+  type: "database"
+  language: "Python"
+  license: "Apache-2.0"
+
+# -----------------------------------------------------------------------------
+# Connection Settings
+# -----------------------------------------------------------------------------
+connection:
+  # Mode: persistent (disk), ephemeral (memory), or http (client-server)
+  mode: "persistent"
+
+  # Persistent mode settings
+  persistent:
+    path: "./data/chroma"
+
+  # HTTP mode settings (client-server)
+  http:
+    host: "localhost"
+    port: 8000
+    ssl: false
+    headers: {}
+
+  # Docker configuration
+  docker:
+    enabled: true
+    image: "chromadb/chroma:0.4.22"
+    memory_limit: "16g"
+    cpu_limit: 8
+    port: 8000
+
+# -----------------------------------------------------------------------------
+# Collection Settings
+# -----------------------------------------------------------------------------
+collection:
+  name_prefix: "benchmark"
+
+  # Metadata for the collection
+  metadata:
+    description: "Benchmark collection"
+
+# -----------------------------------------------------------------------------
+# Index Configurations to Test
+# -----------------------------------------------------------------------------
+index_configurations:
+  # HNSW (default and only index type in Chroma)
+  - name: "HNSW_default"
+    type: "hnsw"
+    description: "Default HNSW configuration"
+    params:
+      space: "l2"  # l2, cosine, ip
+      construction_ef: 100
+      M: 16
+      search_ef: 100
+      num_threads: 4
+    search_params:
+      ef: [50, 100, 200, 300, 500]
+
+  - name: "HNSW_M32"
+    type: "hnsw"
+    description: "HNSW with M=32"
+    params:
+      space: "l2"
+      construction_ef: 200
+      M: 32
+      search_ef: 100
+      num_threads: 4
+    search_params:
+      ef: [64, 128, 256, 512]
+
+  - name: "HNSW_M48_highEF"
+    type: "hnsw"
+    description: "HNSW with higher accuracy"
+    params:
+      space: "l2"
+      construction_ef: 400
+      M: 48
+      search_ef: 200
+      num_threads: 4
+    search_params:
+      ef: [100, 200, 400, 600, 800]
+
+  - name: "HNSW_cosine"
+    type: "hnsw"
+    description: "HNSW with cosine distance"
+    params:
+      space: "cosine"
+      construction_ef: 200
+      M: 32
+      search_ef: 100
+      num_threads: 4
+    search_params:
+      ef: [64, 128, 256, 512]
+
+  - name: "HNSW_ip"
+    type: "hnsw"
+    description: "HNSW with inner product"
+    params:
+      space: "ip"
+      construction_ef: 200
+      M: 32
+      search_ef: 100
+      num_threads: 4
+    search_params:
+      ef: [64, 128, 256, 512]
+
+# -----------------------------------------------------------------------------
+# Distance Metrics Support
+# -----------------------------------------------------------------------------
+distance_metrics:
+  l2:
+    supported: true
+    chroma_name: "l2"
+  cosine:
+    supported: true
+    chroma_name: "cosine"
+  ip:
+    supported: true
+    chroma_name: "ip"
+
+# -----------------------------------------------------------------------------
+# Embedding Function Configuration
+# -----------------------------------------------------------------------------
+embedding:
+  # Use no embedding function (pre-computed vectors)
+  function: null
+
+# -----------------------------------------------------------------------------
+# Metadata Configuration
+# -----------------------------------------------------------------------------
+metadata:
+  # Fields for filtering
+  fields:
+    - name: "category"
+      type: "string"
+    - name: "price"
+      type: "float"
+    - name: "timestamp"
+      type: "int"
+    - name: "active"
+      type: "bool"
+
+# -----------------------------------------------------------------------------
+# Batch Settings
+# -----------------------------------------------------------------------------
+batch:
+  insert_batch_size: 5000
+  search_batch_size: 100
+
+# -----------------------------------------------------------------------------
+# Persistence Settings
+# -----------------------------------------------------------------------------
+persistence:
+  # Auto-persist on modifications
+  auto_persist: true
+
+  # Anonymized telemetry
+  anonymized_telemetry: false

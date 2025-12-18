@@ -1,0 +1,208 @@
+# =============================================================================
+# Qdrant Configuration
+# =============================================================================
+# High-performance vector database written in Rust
+# Documentation: https://qdrant.tech/documentation/
+# =============================================================================
+
+database:
+  name: "qdrant"
+  display_name: "Qdrant"
+  version: "1.7.0"
+  type: "database"
+  language: "Rust"
+  license: "Apache-2.0"
+
+# -----------------------------------------------------------------------------
+# Connection Settings
+# -----------------------------------------------------------------------------
+connection:
+  type: "grpc"  # grpc or http
+  host: "localhost"
+  grpc_port: 6334
+  http_port: 6333
+  timeout: 60
+  prefer_grpc: true
+
+  # Docker configuration for isolated testing
+  docker:
+    enabled: true
+    image: "qdrant/qdrant:v1.7.0"
+    memory_limit: "16g"
+    cpu_limit: 8
+    ports:
+      grpc: 6334
+      http: 6333
+
+# -----------------------------------------------------------------------------
+# Collection Settings
+# -----------------------------------------------------------------------------
+collection:
+  name_prefix: "benchmark"
+  shard_number: 1
+  replication_factor: 1
+  write_consistency_factor: 1
+
+  # Optimizer settings
+  optimizer:
+    deleted_threshold: 0.2
+    vacuum_min_vector_number: 1000
+    default_segment_number: 0
+    max_segment_size: null
+    memmap_threshold: 50000
+    indexing_threshold: 20000
+    flush_interval_sec: 5
+
+# -----------------------------------------------------------------------------
+# Index Configurations to Test
+# -----------------------------------------------------------------------------
+index_configurations:
+  # HNSW configurations
+  - name: "HNSW_M16_ef100"
+    type: "hnsw"
+    description: "HNSW with M=16, ef_construct=100"
+    params:
+      m: 16
+      ef_construct: 100
+      full_scan_threshold: 10000
+      max_indexing_threads: 0  # 0 = auto
+      on_disk: false
+    search_params:
+      ef: [50, 100, 200, 300, 500]
+
+  - name: "HNSW_M32_ef200"
+    type: "hnsw"
+    description: "HNSW with M=32, ef_construct=200"
+    params:
+      m: 32
+      ef_construct: 200
+      full_scan_threshold: 10000
+      max_indexing_threads: 0
+      on_disk: false
+    search_params:
+      ef: [64, 128, 256, 512]
+
+  - name: "HNSW_M48_ef400"
+    type: "hnsw"
+    description: "HNSW with M=48, ef_construct=400 (high accuracy)"
+    params:
+      m: 48
+      ef_construct: 400
+      full_scan_threshold: 10000
+      max_indexing_threads: 0
+      on_disk: false
+    search_params:
+      ef: [100, 200, 400, 600, 800]
+
+  # On-disk HNSW for memory efficiency
+  - name: "HNSW_M32_OnDisk"
+    type: "hnsw"
+    description: "HNSW with vectors stored on disk"
+    params:
+      m: 32
+      ef_construct: 200
+      full_scan_threshold: 10000
+      on_disk: true
+    search_params:
+      ef: [64, 128, 256, 512]
+
+  # Quantization configurations
+  - name: "HNSW_M32_ScalarQ"
+    type: "hnsw"
+    description: "HNSW with scalar quantization"
+    params:
+      m: 32
+      ef_construct: 200
+      on_disk: false
+    quantization:
+      scalar:
+        type: "int8"
+        quantile: 0.99
+        always_ram: true
+    search_params:
+      ef: [64, 128, 256, 512]
+
+  - name: "HNSW_M32_ProductQ"
+    type: "hnsw"
+    description: "HNSW with product quantization"
+    params:
+      m: 32
+      ef_construct: 200
+      on_disk: false
+    quantization:
+      product:
+        compression: "x16"
+        always_ram: true
+    search_params:
+      ef: [64, 128, 256, 512]
+
+  - name: "HNSW_M32_BinaryQ"
+    type: "hnsw"
+    description: "HNSW with binary quantization"
+    params:
+      m: 32
+      ef_construct: 200
+      on_disk: false
+    quantization:
+      binary:
+        always_ram: true
+    search_params:
+      ef: [64, 128, 256, 512]
+
+# -----------------------------------------------------------------------------
+# Distance Metrics Support
+# -----------------------------------------------------------------------------
+distance_metrics:
+  l2:
+    supported: true
+    qdrant_name: "Euclid"
+  cosine:
+    supported: true
+    qdrant_name: "Cosine"
+  ip:
+    supported: true
+    qdrant_name: "Dot"
+
+# -----------------------------------------------------------------------------
+# Payload (Metadata) Configuration
+# -----------------------------------------------------------------------------
+payload:
+  # Enable payload indexing for filtering tests
+  enable_indexing: true
+
+  # Payload fields for filtering benchmarks
+  fields:
+    - name: "category"
+      type: "keyword"
+      index: true
+    - name: "price"
+      type: "float"
+      index: true
+    - name: "timestamp"
+      type: "integer"
+      index: true
+    - name: "active"
+      type: "bool"
+      index: true
+
+# -----------------------------------------------------------------------------
+# Batch Settings
+# -----------------------------------------------------------------------------
+batch:
+  insert_batch_size: 1000
+  search_batch_size: 100
+  parallel_inserts: true
+  wait_for_index: true
+
+# -----------------------------------------------------------------------------
+# Performance Tuning
+# -----------------------------------------------------------------------------
+performance:
+  # Prefetch vectors for better cache utilization
+  prefetch: true
+
+  # Use async operations where possible
+  async_scoring: true
+
+  # IO configuration
+  max_optimization_threads: 0  # 0 = auto

@@ -1,0 +1,156 @@
+# =============================================================================
+# MS MARCO Dataset Configuration
+# =============================================================================
+# Microsoft Machine Reading Comprehension passage embeddings
+# Source: https://microsoft.github.io/msmarco/
+# =============================================================================
+
+dataset:
+  name: "msmarco"
+  display_name: "MS MARCO"
+  description: "8.8M passage embeddings from MS MARCO"
+  type: "text_embeddings"
+
+# -----------------------------------------------------------------------------
+# Data Specifications
+# -----------------------------------------------------------------------------
+specs:
+  num_vectors: 8841823
+  num_queries: 6980  # Dev set queries
+  dimensions: 768
+  data_type: "float32"
+  ground_truth_k: 100
+
+# -----------------------------------------------------------------------------
+# Distance Metric
+# -----------------------------------------------------------------------------
+distance:
+  metric: "cosine"  # or "ip" for inner product
+  normalize: true
+
+# -----------------------------------------------------------------------------
+# Download Configuration
+# -----------------------------------------------------------------------------
+download:
+  source: "huggingface"
+  base_url: "https://huggingface.co/datasets"
+
+  # Pre-computed embeddings (various models available)
+  embeddings:
+    # Sentence-BERT embeddings
+    sentence_bert:
+      url: "sentence-transformers/msmarco-distilbert-base-v4"
+      dimensions: 768
+
+    # E5 embeddings
+    e5:
+      url: "intfloat/e5-base-v2"
+      dimensions: 768
+
+    # BGE embeddings
+    bge:
+      url: "BAAI/bge-base-en-v1.5"
+      dimensions: 768
+
+  # Raw text (for generating embeddings)
+  raw:
+    passages: "ms_marco/passage_ranking"
+    queries: "ms_marco/passage_ranking"
+
+  # Pre-computed dataset files
+  precomputed:
+    base_url: "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets"
+    file: "msmarco.zip"
+
+# -----------------------------------------------------------------------------
+# File Format
+# -----------------------------------------------------------------------------
+format:
+  type: "hdf5"  # or tsv, jsonl
+  description: "HDF5 with embeddings and metadata"
+
+# -----------------------------------------------------------------------------
+# Subsets for Scalability Testing
+# -----------------------------------------------------------------------------
+subsets:
+  - name: "msmarco100k"
+    size: 100000
+    description: "First 100K passages"
+  - name: "msmarco500k"
+    size: 500000
+    description: "First 500K passages"
+  - name: "msmarco1m"
+    size: 1000000
+    description: "First 1M passages"
+  - name: "msmarco_full"
+    size: 8841823
+    description: "Full dataset"
+
+# -----------------------------------------------------------------------------
+# Query Sets
+# -----------------------------------------------------------------------------
+query_sets:
+  - name: "dev"
+    size: 6980
+    description: "Development set queries"
+  - name: "eval"
+    size: 6837
+    description: "Evaluation set queries (no labels)"
+  - name: "train_sample"
+    size: 10000
+    description: "Sample from training queries"
+
+# -----------------------------------------------------------------------------
+# Relevance Judgments
+# -----------------------------------------------------------------------------
+relevance:
+  # MS MARCO uses sparse judgments
+  type: "sparse"
+  format: "qrels"
+  graded: false  # Binary relevance
+
+  # For NDCG computation with graded relevance
+  graded_scale:
+    relevant: 1
+    non_relevant: 0
+
+# -----------------------------------------------------------------------------
+# Metadata (from passages)
+# -----------------------------------------------------------------------------
+metadata:
+  generate: false  # Use real metadata
+  fields:
+    passage_id:
+      type: "string"
+      source: "dataset"
+    passage_text:
+      type: "string"
+      source: "dataset"
+      store: false  # Don't store in vector DB
+
+# -----------------------------------------------------------------------------
+# Evaluation Configuration
+# -----------------------------------------------------------------------------
+evaluation:
+  # Standard MS MARCO metrics
+  metrics:
+    - "MRR@10"
+    - "Recall@100"
+    - "Recall@1000"
+    - "NDCG@10"
+
+  # TREC-style evaluation
+  trec_eval: true
+
+# -----------------------------------------------------------------------------
+# Reference Papers
+# -----------------------------------------------------------------------------
+references:
+  - title: "MS MARCO: A Human Generated MAchine Reading COmprehension Dataset"
+    authors: "Nguyen et al."
+    venue: "NeurIPS 2016 Workshop"
+    url: "https://arxiv.org/abs/1611.09268"
+  - title: "MS MARCO: Benchmarking Ranking Models in the Large-Data Regime"
+    authors: "Craswell et al."
+    venue: "SIGIR 2021"
+    url: "https://arxiv.org/abs/2105.04021"

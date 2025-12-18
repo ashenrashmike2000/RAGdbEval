@@ -1,0 +1,219 @@
+# =============================================================================
+# Weaviate Configuration
+# =============================================================================
+# AI-native vector database with hybrid search capabilities
+# Documentation: https://weaviate.io/developers/weaviate
+# =============================================================================
+
+database:
+  name: "weaviate"
+  display_name: "Weaviate"
+  version: "4.0.0"
+  type: "database"
+  language: "Go"
+  license: "BSD-3-Clause"
+
+# -----------------------------------------------------------------------------
+# Connection Settings
+# -----------------------------------------------------------------------------
+connection:
+  host: "localhost"
+  http_port: 8080
+  grpc_port: 50051
+  timeout: 60
+
+  # Authentication (if enabled)
+  auth:
+    enabled: false
+    api_key: ""
+
+  # Docker configuration
+  docker:
+    enabled: true
+    image: "semitechnologies/weaviate:1.23.0"
+    memory_limit: "16g"
+    cpu_limit: 8
+    ports:
+      http: 8080
+      grpc: 50051
+
+# -----------------------------------------------------------------------------
+# Class (Collection) Settings
+# -----------------------------------------------------------------------------
+class_config:
+  name_prefix: "Benchmark"
+  description: "Vector database benchmark collection"
+
+  # Vectorizer (none for pre-computed vectors)
+  vectorizer: "none"
+
+  # Module configuration
+  modules: []
+
+# -----------------------------------------------------------------------------
+# Index Configurations to Test
+# -----------------------------------------------------------------------------
+index_configurations:
+  # HNSW configurations
+  - name: "HNSW_ef64_max16"
+    type: "hnsw"
+    description: "HNSW with efConstruction=64, maxConnections=16"
+    params:
+      efConstruction: 64
+      maxConnections: 16
+      ef: -1  # Dynamic
+      dynamicEfMin: 100
+      dynamicEfMax: 500
+      dynamicEfFactor: 8
+      vectorCacheMaxObjects: 1000000
+      flatSearchCutoff: 40000
+      skip: false
+    search_params:
+      ef: [50, 100, 200, 300, 500]
+
+  - name: "HNSW_ef128_max32"
+    type: "hnsw"
+    description: "HNSW with efConstruction=128, maxConnections=32"
+    params:
+      efConstruction: 128
+      maxConnections: 32
+      ef: -1
+      dynamicEfMin: 100
+      dynamicEfMax: 500
+      dynamicEfFactor: 8
+      vectorCacheMaxObjects: 1000000
+      flatSearchCutoff: 40000
+    search_params:
+      ef: [64, 128, 256, 512]
+
+  - name: "HNSW_ef256_max48"
+    type: "hnsw"
+    description: "HNSW with higher accuracy settings"
+    params:
+      efConstruction: 256
+      maxConnections: 48
+      ef: -1
+      dynamicEfMin: 100
+      dynamicEfMax: 800
+      dynamicEfFactor: 8
+      vectorCacheMaxObjects: 2000000
+      flatSearchCutoff: 40000
+    search_params:
+      ef: [128, 256, 400, 600, 800]
+
+  # PQ (Product Quantization) enabled
+  - name: "HNSW_PQ_enabled"
+    type: "hnsw"
+    description: "HNSW with PQ compression"
+    params:
+      efConstruction: 128
+      maxConnections: 32
+      pq:
+        enabled: true
+        segments: 0  # auto
+        centroids: 256
+        trainingLimit: 100000
+        encoder:
+          type: "kmeans"
+    search_params:
+      ef: [64, 128, 256, 512]
+
+  # BQ (Binary Quantization)
+  - name: "HNSW_BQ_enabled"
+    type: "hnsw"
+    description: "HNSW with binary quantization"
+    params:
+      efConstruction: 128
+      maxConnections: 32
+      bq:
+        enabled: true
+    search_params:
+      ef: [64, 128, 256, 512]
+
+  # SQ (Scalar Quantization)
+  - name: "HNSW_SQ_enabled"
+    type: "hnsw"
+    description: "HNSW with scalar quantization"
+    params:
+      efConstruction: 128
+      maxConnections: 32
+      sq:
+        enabled: true
+        trainingLimit: 100000
+        rescoreLimit: 200
+    search_params:
+      ef: [64, 128, 256, 512]
+
+  # Flat index
+  - name: "Flat"
+    type: "flat"
+    description: "Flat/brute-force index"
+    params:
+      vectorCacheMaxObjects: 1000000
+    search_params: {}
+
+# -----------------------------------------------------------------------------
+# Distance Metrics Support
+# -----------------------------------------------------------------------------
+distance_metrics:
+  l2:
+    supported: true
+    weaviate_name: "l2-squared"
+  cosine:
+    supported: true
+    weaviate_name: "cosine"
+  ip:
+    supported: true
+    weaviate_name: "dot"
+
+# -----------------------------------------------------------------------------
+# Schema Configuration
+# -----------------------------------------------------------------------------
+schema:
+  properties:
+    - name: "category"
+      dataType: ["text"]
+      indexSearchable: true
+      indexFilterable: true
+    - name: "price"
+      dataType: ["number"]
+      indexFilterable: true
+    - name: "timestamp"
+      dataType: ["int"]
+      indexFilterable: true
+    - name: "active"
+      dataType: ["boolean"]
+      indexFilterable: true
+
+# -----------------------------------------------------------------------------
+# Hybrid Search Configuration
+# -----------------------------------------------------------------------------
+hybrid_search:
+  enabled: true
+  # BM25 configuration
+  bm25:
+    k1: 1.2
+    b: 0.75
+  # Fusion algorithm
+  fusion_type: "rankedFusion"  # rankedFusion or relativeScoreFusion
+
+# -----------------------------------------------------------------------------
+# Batch Settings
+# -----------------------------------------------------------------------------
+batch:
+  insert_batch_size: 1000
+  search_batch_size: 100
+  dynamic_batching: true
+  timeout_retries: 3
+
+# -----------------------------------------------------------------------------
+# Replication & Sharding
+# -----------------------------------------------------------------------------
+replication:
+  factor: 1
+
+sharding:
+  desiredCount: 1
+  actualCount: 1
+  desiredVirtualCount: 128
+  actualVirtualCount: 128

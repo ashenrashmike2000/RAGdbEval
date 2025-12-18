@@ -1,0 +1,148 @@
+# =============================================================================
+# GloVe Dataset Configuration
+# =============================================================================
+# Global Vectors for Word Representation
+# Source: https://nlp.stanford.edu/projects/glove/
+# =============================================================================
+
+dataset:
+  name: "glove"
+  display_name: "GloVe"
+  description: "Word embeddings from GloVe (various dimensions)"
+  type: "word_embeddings"
+
+# -----------------------------------------------------------------------------
+# Data Specifications (multiple versions available)
+# -----------------------------------------------------------------------------
+specs:
+  # GloVe 6B (Wikipedia + Gigaword)
+  glove_6b:
+    - name: "glove-50"
+      num_vectors: 400000
+      dimensions: 50
+    - name: "glove-100"
+      num_vectors: 400000
+      dimensions: 100
+    - name: "glove-200"
+      num_vectors: 400000
+      dimensions: 200
+    - name: "glove-300"
+      num_vectors: 400000
+      dimensions: 300
+
+  # GloVe 42B (Common Crawl)
+  glove_42b:
+    - name: "glove-42b-300"
+      num_vectors: 1917494
+      dimensions: 300
+
+  # Default configuration
+  default:
+    version: "glove-100"
+    num_vectors: 400000
+    num_queries: 10000
+    dimensions: 100
+    data_type: "float32"
+    ground_truth_k: 100
+
+# -----------------------------------------------------------------------------
+# Distance Metric
+# -----------------------------------------------------------------------------
+distance:
+  metric: "cosine"  # Word embeddings use cosine similarity
+  normalize: true
+
+# -----------------------------------------------------------------------------
+# Download Configuration
+# -----------------------------------------------------------------------------
+download:
+  source: "stanford"
+  base_url: "https://nlp.stanford.edu/data"
+
+  files:
+    glove_6b:
+      url: "glove.6B.zip"
+      size_mb: 822
+      checksum_md5: "056ea991adb4740ac6bf1b6d9b50408b"
+    glove_42b:
+      url: "glove.42B.300d.zip"
+      size_mb: 1877
+    glove_840b:
+      url: "glove.840B.300d.zip"
+      size_mb: 2176
+
+  # ANN-benchmarks format
+  ann_benchmarks:
+    base_url: "http://ann-benchmarks.com"
+    files:
+      glove_25: "glove-25-angular.hdf5"
+      glove_50: "glove-50-angular.hdf5"
+      glove_100: "glove-100-angular.hdf5"
+      glove_200: "glove-200-angular.hdf5"
+
+# -----------------------------------------------------------------------------
+# File Format
+# -----------------------------------------------------------------------------
+format:
+  type: "txt"  # Space-separated text format
+  description: "Word followed by space-separated float values"
+  has_header: false
+
+  # Convert to binary for faster loading
+  convert_to_binary: true
+
+# -----------------------------------------------------------------------------
+# Subsets for Scalability Testing
+# -----------------------------------------------------------------------------
+subsets:
+  - name: "glove10k"
+    size: 10000
+    description: "Most frequent 10K words"
+  - name: "glove50k"
+    size: 50000
+    description: "Most frequent 50K words"
+  - name: "glove100k"
+    size: 100000
+    description: "Most frequent 100K words"
+  - name: "glove400k"
+    size: 400000
+    description: "Full vocabulary"
+
+# -----------------------------------------------------------------------------
+# Query Generation
+# -----------------------------------------------------------------------------
+queries:
+  # Generate queries from the dataset
+  source: "dataset"
+  selection: "random"
+  num_queries: 10000
+  seed: 42
+
+# -----------------------------------------------------------------------------
+# Metadata Generation (from word properties)
+# -----------------------------------------------------------------------------
+metadata:
+  generate: true
+  fields:
+    word:
+      type: "string"
+      source: "dataset"
+    frequency_rank:
+      type: "integer"
+      source: "derived"
+    word_length:
+      type: "integer"
+      source: "derived"
+    category:
+      type: "categorical"
+      values: ["common", "technical", "proper", "other"]
+      distribution: "frequency_based"
+
+# -----------------------------------------------------------------------------
+# Reference Papers
+# -----------------------------------------------------------------------------
+references:
+  - title: "GloVe: Global Vectors for Word Representation"
+    authors: "Pennington, Socher, Manning"
+    venue: "EMNLP 2014"
+    url: "https://aclanthology.org/D14-1162/"

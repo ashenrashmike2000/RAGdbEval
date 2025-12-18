@@ -1,0 +1,114 @@
+# =============================================================================
+# DEEP1M Dataset Configuration
+# =============================================================================
+# Deep learning features from GoogLeNet
+# Source: https://research.yandex.com/datasets/biganns
+# =============================================================================
+
+dataset:
+  name: "deep1m"
+  display_name: "DEEP-1M"
+  description: "1M deep learning features from GoogLeNet"
+  type: "deep_features"
+
+# -----------------------------------------------------------------------------
+# Data Specifications
+# -----------------------------------------------------------------------------
+specs:
+  num_vectors: 1000000
+  num_queries: 10000
+  dimensions: 96
+  data_type: "float32"
+  ground_truth_k: 100
+
+# -----------------------------------------------------------------------------
+# Distance Metric
+# -----------------------------------------------------------------------------
+distance:
+  metric: "l2"
+  normalize: false
+
+# -----------------------------------------------------------------------------
+# Download Configuration
+# -----------------------------------------------------------------------------
+download:
+  source: "yandex"
+  base_url: "https://storage.yandexcloud.net/yandex-research/ann-datasets"
+  files:
+    base_vectors: "DEEP/base.1M.fbin"
+    query_vectors: "DEEP/query.public.10K.fbin"
+    ground_truth: "DEEP/ground_truth.public.10K.ibin"
+
+  # Alternative: download subset from texmex format
+  alternative:
+    base_url: "http://ann-benchmarks.com"
+    files:
+      hdf5: "deep-image-96-angular.hdf5"
+
+  # Checksums
+  checksums:
+    base_vectors_md5: ""
+    query_vectors_md5: ""
+
+# -----------------------------------------------------------------------------
+# File Format
+# -----------------------------------------------------------------------------
+format:
+  type: "fbin"  # fbin (Yandex binary format)
+  description: "Float binary format (4-byte header + vectors)"
+  byte_order: "little"
+  header_size: 8  # 2 x int32 (num_vectors, dimensions)
+
+# -----------------------------------------------------------------------------
+# Subsets for Scalability Testing
+# -----------------------------------------------------------------------------
+subsets:
+  - name: "deep10k"
+    size: 10000
+    description: "First 10K vectors"
+  - name: "deep100k"
+    size: 100000
+    description: "First 100K vectors"
+  - name: "deep500k"
+    size: 500000
+    description: "First 500K vectors"
+  - name: "deep1m"
+    size: 1000000
+    description: "Full dataset"
+
+# -----------------------------------------------------------------------------
+# Metadata Generation (Synthetic)
+# -----------------------------------------------------------------------------
+metadata:
+  generate: true
+  fields:
+    category:
+      type: "categorical"
+      values: ["nature", "urban", "people", "objects", "other"]
+      distribution: "uniform"
+    price:
+      type: "numeric"
+      min: 0.0
+      max: 1000.0
+      distribution: "uniform"
+    timestamp:
+      type: "integer"
+      min: 1609459200
+      max: 1704067200
+      distribution: "uniform"
+    active:
+      type: "boolean"
+      probability_true: 0.8
+
+# -----------------------------------------------------------------------------
+# Reference Papers
+# -----------------------------------------------------------------------------
+references:
+  - title: "Billion-scale similarity search with GPUs"
+    authors: "Johnson et al."
+    venue: "arXiv 2017"
+    url: "https://arxiv.org/abs/1702.08734"
+  - title: "Results of the NeurIPS'21 Challenge on Billion-Scale ANN Search"
+    authors: "Simhadri et al."
+    venue: "PMLR 2022"
+    url: "https://proceedings.mlr.press/v176/simhadri22a.html"
