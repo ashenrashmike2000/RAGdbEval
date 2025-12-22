@@ -24,6 +24,7 @@ def compute_recall_at_k(
     Compute Recall@K - fraction of true neighbors found in top-k results.
 
     This is the PRIMARY metric used in ANN-Benchmarks.
+    Definition: (Relevant items in Top K) / (Total Relevant items in GT)
 
     Args:
         retrieved: Retrieved indices of shape (n_queries, k)
@@ -38,7 +39,9 @@ def compute_recall_at_k(
 
     for i in range(n_queries):
         retrieved_k = set(retrieved[i, :k])
-        true_neighbors = set(ground_truth[i, :k])
+
+        # FIXED: Use ALL ground truth (usually top 100), not just top K
+        true_neighbors = set(ground_truth[i])
 
         # Remove invalid indices
         retrieved_k.discard(-1)
@@ -74,6 +77,8 @@ def compute_precision_at_k(
 
     for i in range(n_queries):
         retrieved_k = set(retrieved[i, :k])
+
+        # Precision also checks against the full set of known neighbors
         true_neighbors = set(ground_truth[i])
 
         retrieved_k.discard(-1)
@@ -150,20 +155,26 @@ def compute_ndcg_at_k(
     ndcg_scores = []
 
     for i in range(n_queries):
-        true_neighbors = set(ground_truth[i, :k])
-        true_neighbors.discard(-1)
+        # For NDCG, the ideal set is strictly the best K from ground truth
+        # But for 'dcg', we check if retrieved items are in the FULL ground truth
+        all_true_neighbors = set(ground_truth[i])
+        all_true_neighbors.discard(-1)
+
+        # Use top-K of ground truth for IDCG calculation
+        # (Assuming ground_truth is sorted by relevance)
+        ideal_neighbors_k = ground_truth[i, :k]
 
         # Compute DCG
         dcg = 0.0
         for rank, idx in enumerate(retrieved[i, :k], start=1):
-            if idx in true_neighbors:
+            if idx in all_true_neighbors:
                 # Binary relevance or graded
                 rel = 1.0 if relevance_scores is None else relevance_scores[i, rank - 1]
                 dcg += rel / np.log2(rank + 1)
 
         # Compute IDCG (ideal DCG)
         idcg = 0.0
-        for rank in range(1, min(k, len(true_neighbors)) + 1):
+        for rank in range(1, min(k, len(ideal_neighbors_k)) + 1):
             rel = 1.0
             idcg += rel / np.log2(rank + 1)
 
@@ -214,7 +225,9 @@ def compute_map_at_k(
                 precision_at_rank = hits / rank
                 precision_sum += precision_at_rank
 
-        # Average over relevant items
+        # Average over relevant items found or k?
+        # Standard MAP divides by min(len(truth), k) or len(truth)
+        # We divide by number of relevant items found in top k
         num_relevant = min(len(true_neighbors), k)
         if num_relevant > 0:
             average_precisions.append(precision_sum / num_relevant)

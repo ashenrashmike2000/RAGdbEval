@@ -137,7 +137,11 @@ class BenchmarkRunner:
         queries = dataset.queries
         ground_truth = dataset.ground_truth
 
+        # FIXED: Get the metric from the dataset info instead of hardcoding
+        metric = dataset.info.distance_metric
+
         console.print(f"  Vectors: {vectors.shape}, Queries: {queries.shape}")
+        console.print(f"  Metric: {metric.value}")
 
         # Test each index configuration
         for idx_config in configs_to_test:
@@ -146,7 +150,7 @@ class BenchmarkRunner:
             runs = []
             for run_id in range(self.config.experiment.runs):
                 run_result = self._execute_run(
-                    db_name, db_config, idx_config, vectors, queries, ground_truth, run_id
+                    db_name, db_config, idx_config, vectors, queries, ground_truth, run_id, metric
                 )
                 runs.append(run_result)
                 console.print(f"    Run {run_id + 1}: Recall@10={run_result.metrics.quality.recall_at_10:.4f}, "
@@ -171,13 +175,14 @@ class BenchmarkRunner:
         queries: np.ndarray,
         ground_truth: np.ndarray,
         run_id: int,
+        metric: DistanceMetric,  # FIXED: Added metric parameter
     ) -> BenchmarkRun:
         """Execute a single benchmark run."""
         run_config = RunConfig(
             database=db_name,
             dataset="",
             index_config=index_config,
-            distance_metric=DistanceMetric.L2,
+            distance_metric=metric,  # FIXED: Use passed metric
             k=100,
             num_queries=len(queries),
             run_id=run_id,
@@ -195,7 +200,7 @@ class BenchmarkRunner:
                     build_time = db.create_index(
                         vectors,
                         index_config,
-                        DistanceMetric.L2,
+                        metric,  # FIXED: Use passed metric instead of hardcoded L2
                     )
 
                 metrics.resource.index_build_time_sec = build_time
@@ -318,7 +323,12 @@ class BenchmarkRunner:
         results_data = [r.to_dict() for r in self.results]
 
         with open(filename, 'w') as f:
-            json.dump(results_data, f, indent=2, default=str)
+            json.dump({
+                "metadata": {
+                    "generated_at": datetime.now().isoformat(),
+                    "num_results": len(results_data)
+                },
+                "results": results_data
+            }, f, indent=2, default=str)
 
-        console.print(f"\n[green]Results saved to: {filename}[/green]")
         return str(filename)

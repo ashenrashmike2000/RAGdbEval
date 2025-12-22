@@ -316,6 +316,14 @@ class QdrantAdapter(VectorDBInterface):
         # Build filter if provided
         qdrant_filter = self._build_filter(filters) if filters else None
 
+        # Determine sort order
+        # Default to Descending (Higher Score = Better) for Cosine/IP
+        reverse_sort = True
+
+        # Exception: L2 (Euclid) in Qdrant can return distances where Lower = Better
+        if self._distance_metric == DistanceMetric.L2:
+             reverse_sort = False
+
         # Perform searches
         n_queries = len(queries)
         all_indices = []
@@ -325,6 +333,7 @@ class QdrantAdapter(VectorDBInterface):
         for query in queries:
             start_time = time.perf_counter()
 
+            # Updated: use query_points instead of search
             results_obj = self._client.query_points(
                 collection_name=self._collection_name,
                 query=query.tolist(),
@@ -333,7 +342,11 @@ class QdrantAdapter(VectorDBInterface):
                 query_filter=qdrant_filter,
             )
 
+            # Access points from the QueryResponse object
             results = results_obj.points
+
+            # Sort results based on metric logic
+            results.sort(key=lambda x: x.score, reverse=reverse_sort)
 
             latency_ms = (time.perf_counter() - start_time) * 1000
             latencies.append(latency_ms)
