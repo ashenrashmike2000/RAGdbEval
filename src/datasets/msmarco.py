@@ -1,5 +1,6 @@
 """MS MARCO dataset loader - Text passage embeddings with subset support."""
 
+import json
 import numpy as np
 from numpy.typing import NDArray
 from pathlib import Path
@@ -23,12 +24,15 @@ class MSMARCOLoader(DatasetLoader):
         # Get subset size from config
         subset_size = self.config.get("subset_size", 100000)
 
+        # Get query count from config specs
+        num_queries = self.config.get("specs", {}).get("num_queries", 1000)
+
         return DatasetInfo(
             name="msmarco",
             display_name="MS MARCO",
             description=f"MS MARCO passage embeddings (768-dim, {subset_size} vectors)",
             num_vectors=subset_size,
-            num_queries=1000,  # Reduced for faster testing
+            num_queries=num_queries,
             dimensions=768,
             data_type="float32",
             distance_metric=DistanceMetric.COSINE,
@@ -42,6 +46,10 @@ class MSMARCOLoader(DatasetLoader):
         url = "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/msmarco.zip"
         archive_path = self.data_dir / "msmarco.zip"
 
+        # Check if extracted folder already exists to avoid re-downloading
+        if (self.data_dir / "msmarco").exists():
+            return
+
         print("Downloading MS MARCO dataset (this may take a while)...")
         download_file(url, str(archive_path))
         extract_archive(str(archive_path), str(self.data_dir), remove_archive=True)
@@ -50,25 +58,29 @@ class MSMARCOLoader(DatasetLoader):
         """Load base vectors with subset support."""
         self.ensure_downloaded()
 
-        # Get subset size from config (default: 100k for faster testing)
+        # Get subset size from config
         subset_size = self.config.get("subset_size", 100000)
 
-        # Check for pre-computed embeddings
-        embeddings_path = self.data_dir / "corpus_embeddings.npy"
+        # FIXED: Include subset size in filename to prevent caching errors
+        embeddings_path = self.data_dir / f"corpus_embeddings_{subset_size}.npy"
 
         if embeddings_path.exists():
             print(f"Loading pre-computed embeddings (subset: {subset_size})...")
             embeddings = np.load(str(embeddings_path))
-            return embeddings[:subset_size]
+            # Verify length just in case
+            if len(embeddings) == subset_size:
+                return embeddings
+            print("Cached embeddings size mismatch. Regenerating...")
 
         # Generate embeddings using sentence-transformers
         print(f"Generating embeddings for {subset_size} passages (this will take a while)...")
 
         try:
             from sentence_transformers import SentenceTransformer
-            import json
 
-            model = SentenceTransformer('sentence-transformers/msmarco-distilbert-base-v4')
+            # Use model from config or default
+            model_name = self.config.get("embedding", {}).get("model", 'sentence-transformers/msmarco-distilbert-base-v4')
+            model = SentenceTransformer(model_name)
 
             # Load corpus
             corpus_path = self.data_dir / "msmarco" / "corpus.jsonl"
@@ -92,8 +104,8 @@ class MSMARCOLoader(DatasetLoader):
 
             print(f"Loaded {len(texts)} passages. Generating embeddings...")
 
-            # Generate embeddings in batches with progress bar
-            batch_size = 32  # Smaller batches for better progress tracking
+            # Generate embeddings in batches
+            batch_size = self.config.get("embedding", {}).get("batch_size", 32)
             embeddings = model.encode(
                 texts,
                 batch_size=batch_size,
@@ -103,7 +115,7 @@ class MSMARCOLoader(DatasetLoader):
             )
 
             # Save for future use
-            print("Saving embeddings for future use...")
+            print(f"Saving embeddings to {embeddings_path.name}...")
             np.save(str(embeddings_path), embeddings)
 
             return embeddings.astype(np.float32)
@@ -120,25 +132,27 @@ class MSMARCOLoader(DatasetLoader):
         """Load query vectors with subset support."""
         self.ensure_downloaded()
 
-        # Reduced number of queries for faster testing
-        num_queries = 1000
-        queries_path = self.data_dir / "query_embeddings.npy"
+        # Get number of queries from config
+        num_queries = self.config.get("specs", {}).get("num_queries", 1000)
+
+        # FIXED: Include query count in filename
+        queries_path = self.data_dir / f"query_embeddings_{num_queries}.npy"
 
         if queries_path.exists():
             queries = np.load(str(queries_path))
-            return queries[:num_queries]
+            if len(queries) == num_queries:
+                return queries
 
         try:
             from sentence_transformers import SentenceTransformer
-            import json
 
             print(f"Generating query embeddings ({num_queries} queries)...")
-            model = SentenceTransformer('sentence-transformers/msmarco-distilbert-base-v4')
+            model_name = self.config.get("embedding", {}).get("model", 'sentence-transformers/msmarco-distilbert-base-v4')
+            model = SentenceTransformer(model_name)
 
             queries_file = self.data_dir / "msmarco" / "queries.jsonl"
 
             if not queries_file.exists():
-                # Fallback: use random subset of corpus as queries
                 print("Query file not found. Using corpus subset as queries...")
                 vectors = self.vectors
                 np.random.seed(42)
@@ -166,7 +180,6 @@ class MSMARCOLoader(DatasetLoader):
         except ImportError:
             raise RuntimeError("sentence-transformers required")
         except Exception as e:
-            # Fallback to random queries from corpus
             print(f"Warning: Could not generate query embeddings ({e}). Using corpus subset.")
             vectors = self.vectors
             np.random.seed(42)
@@ -176,7 +189,12 @@ class MSMARCOLoader(DatasetLoader):
     def load_ground_truth(self) -> NDArray[np.int64]:
         """Load or compute ground truth."""
         self.ensure_downloaded()
-        gt_path = self.data_dir / "ground_truth_subset.npy"
+
+        subset_size = self.config.get("subset_size", 100000)
+
+        # FIXED: Include subset size in GT filename
+        # Ground truth depends on specific subset of vectors!
+        gt_path = self.data_dir / f"ground_truth_subset_{subset_size}.npy"
 
         if gt_path.exists():
             return np.load(str(gt_path))
@@ -191,18 +209,20 @@ class MSMARCOLoader(DatasetLoader):
             import faiss
 
             # Build flat index for exact search
-            index = faiss.IndexFlatIP(vectors.shape[1])  # Inner product for normalized vectors
+            # Note: Vectors are already normalized, so Inner Product == Cosine Similarity
+            index = faiss.IndexFlatIP(vectors.shape[1])
             index.add(vectors)
 
             # Search for ground truth
-            _, gt = index.search(queries, k=100)
+            k = self.config.get("specs", {}).get("ground_truth_k", 100)
+            _, gt = index.search(queries, k=k)
 
             np.save(str(gt_path), gt)
             return gt.astype(np.int64)
 
         except ImportError:
-            # Fallback to slower computation
             print("FAISS not available. Using slower ground truth computation...")
-            gt = self.compute_ground_truth(vectors, queries, k=100, metric=DistanceMetric.COSINE)
+            k = self.config.get("specs", {}).get("ground_truth_k", 100)
+            gt = self.compute_ground_truth(vectors, queries, k=k, metric=DistanceMetric.COSINE)
             np.save(str(gt_path), gt)
             return gt
