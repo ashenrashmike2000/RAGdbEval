@@ -325,13 +325,15 @@ class QdrantAdapter(VectorDBInterface):
         for query in queries:
             start_time = time.perf_counter()
 
-            results = self._client.search(
+            results_obj = self._client.query_points(
                 collection_name=self._collection_name,
-                query_vector=query.tolist(),
+                query=query.tolist(),
                 limit=k,
                 search_params=search_params_obj,
                 query_filter=qdrant_filter,
             )
+
+            results = results_obj.points
 
             latency_ms = (time.perf_counter() - start_time) * 1000
             latencies.append(latency_ms)
