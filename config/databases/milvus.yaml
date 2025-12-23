@@ -191,7 +191,7 @@ schema:
   primary_key:
     name: "id"
     type: "INT64"
-    auto_id: true
+    auto_id: false
 
   # Vector field
   vector_field:
@@ -199,16 +199,16 @@ schema:
     type: "FLOAT_VECTOR"
 
   # Metadata fields for filtering
-  metadata_fields:
-    - name: "category"
-      type: "VARCHAR"
-      max_length: 64
-    - name: "price"
-      type: "FLOAT"
-    - name: "timestamp"
-      type: "INT64"
-    - name: "active"
-      type: "BOOL"
+  metadata_fields: []
+#    - name: "category"
+#      type: "VARCHAR"
+#      max_length: 64
+#    - name: "price"
+#      type: "FLOAT"
+#    - name: "timestamp"
+#      type: "INT64"
+#    - name: "active"
+#      type: "BOOL"
 
 # -----------------------------------------------------------------------------
 # Batch Settings
