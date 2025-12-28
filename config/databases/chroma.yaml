@@ -1,8 +1,5 @@
 # =============================================================================
-# Chroma Configuration
-# =============================================================================
-# AI-native open-source embedding database
-# Documentation: https://docs.trychroma.com/
+# Chroma Configuration (Final Optimized)
 # =============================================================================
 
 database:
@@ -17,102 +14,62 @@ database:
 # Connection Settings
 # -----------------------------------------------------------------------------
 connection:
-  # Mode: persistent (disk), ephemeral (memory), or http (client-server)
-  mode: "persistent"
+  # Use HTTP to talk to Docker
+  mode: "http"
 
-  # Persistent mode settings
+  # Persistent path (ignored in http mode, but kept for reference)
   persistent:
     path: "./data/chroma"
 
-  # HTTP mode settings (client-server)
+  # Connection details
   http:
     host: "localhost"
-    port: 8000
+    port: 8100
     ssl: false
     headers: {}
 
-  # Docker configuration
+  # Docker info
   docker:
     enabled: true
-    image: "chromadb/chroma:0.4.22"
-    memory_limit: "16g"
-    cpu_limit: 8
-    port: 8000
+    image: "chromadb/chroma:latest"
+    port: 8100
 
 # -----------------------------------------------------------------------------
 # Collection Settings
 # -----------------------------------------------------------------------------
 collection:
   name_prefix: "benchmark"
-
-  # Metadata for the collection
   metadata:
     description: "Benchmark collection"
 
 # -----------------------------------------------------------------------------
-# Index Configurations to Test
+# Index Configurations
 # -----------------------------------------------------------------------------
 index_configurations:
-  # HNSW (default and only index type in Chroma)
-  - name: "HNSW_default"
+  # 1. L2 Distance (Used for SIFT1M, GIST1M, Deep1M)
+  - name: "HNSW_L2"
     type: "hnsw"
-    description: "Default HNSW configuration"
-    params:
-      space: "l2"  # l2, cosine, ip
-      construction_ef: 100
-      M: 16
-      search_ef: 100
-      num_threads: 4
-    search_params:
-      ef: [50, 100, 200, 300, 500]
-
-  - name: "HNSW_M32"
-    type: "hnsw"
-    description: "HNSW with M=32"
     params:
       space: "l2"
-      construction_ef: 200
+      # --- TUNING FOR GIST1M ---
+      # Increase M (Neighbors per node): 16 -> 32
       M: 32
-      search_ef: 100
-      num_threads: 4
-    search_params:
-      ef: [64, 128, 256, 512]
-
-  - name: "HNSW_M48_highEF"
-    type: "hnsw"
-    description: "HNSW with higher accuracy"
-    params:
-      space: "l2"
-      construction_ef: 400
-      M: 48
+      # Increase construction_ef (Search depth during build): 64 -> 128
+      construction_ef: 128
+      # Increase search_ef (Search depth during query): 100 -> 200
       search_ef: 200
-      num_threads: 4
-    search_params:
-      ef: [100, 200, 400, 600, 800]
+      # -------------------------
+      num_threads: 10
 
-  - name: "HNSW_cosine"
+  # 2. Cosine Distance (Used for MS MARCO, Glove)
+  - name: "HNSW_Cosine"
     type: "hnsw"
-    description: "HNSW with cosine distance"
     params:
       space: "cosine"
-      construction_ef: 200
       M: 32
-      search_ef: 100
-      num_threads: 4
-    search_params:
-      ef: [64, 128, 256, 512]
-
-  - name: "HNSW_ip"
-    type: "hnsw"
-    description: "HNSW with inner product"
-    params:
-      space: "ip"
-      construction_ef: 200
-      M: 32
-      search_ef: 100
-      num_threads: 4
-    search_params:
-      ef: [64, 128, 256, 512]
+      construction_ef: 128
+      search_ef: 200
+      num_threads: 10
 
 # -----------------------------------------------------------------------------
 # Distance Metrics Support
@@ -120,49 +77,28 @@ index_configurations:
 distance_metrics:
   l2:
     supported: true
-    chroma_name: "l2"
   cosine:
     supported: true
-    chroma_name: "cosine"
   ip:
     supported: true
-    chroma_name: "ip"
-
-# -----------------------------------------------------------------------------
-# Embedding Function Configuration
-# -----------------------------------------------------------------------------
-embedding:
-  # Use no embedding function (pre-computed vectors)
-  function: null
 
 # -----------------------------------------------------------------------------
 # Metadata Configuration
 # -----------------------------------------------------------------------------
 metadata:
-  # Fields for filtering
-  fields:
-    - name: "category"
-      type: "string"
-    - name: "price"
-      type: "float"
-    - name: "timestamp"
-      type: "int"
-    - name: "active"
-      type: "bool"
+  # Empty to prevent schema errors
+  fields: []
 
 # -----------------------------------------------------------------------------
 # Batch Settings
 # -----------------------------------------------------------------------------
 batch:
-  insert_batch_size: 5000
+  insert_batch_size: 2000
   search_batch_size: 100
 
 # -----------------------------------------------------------------------------
 # Persistence Settings
 # -----------------------------------------------------------------------------
 persistence:
-  # Auto-persist on modifications
   auto_persist: true
-
-  # Anonymized telemetry
   anonymized_telemetry: false

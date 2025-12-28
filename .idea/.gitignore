@@ -8,3 +8,20 @@
 /dataSources.local.xml
 # Editor-based HTTP Client requests
 /httpRequests/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Data (Don't upload massive files)
+data/
+results/
+volumes/
+*docker-compose.yml  # Optional: Keep this if you want to share config, remove if it has secrets
+
+# IDE
+.vscode/
+.idea/

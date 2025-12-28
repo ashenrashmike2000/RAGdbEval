@@ -1,0 +1,21 @@
+version: '3.9'
+
+services:
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: chroma-server
+    volumes:
+      - ./volumes/chroma:/chroma/chroma
+    ports:
+      - "8100:8000"  # <--- Changed to 8100 to avoid conflicts
+    environment:
+      - IS_PERSISTENT=TRUE
+#      - CHROMA_SERVER_AUTH_PROVIDER=chromadb.auth.basic_authn.BasicAuthServerProvider
+#      - CHROMA_SERVER_AUTH_CREDENTIALS_FILE=/chroma/chroma/auth.txt
+#      - CHROMA_SERVER_AUTH_CREDENTIALS=admin:admin
+      - PERSIST_DIRECTORY=/chroma/chroma
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

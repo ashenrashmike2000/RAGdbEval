@@ -1,0 +1,19 @@
+﻿# Python environments
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+
+# IDE settings
+.idea/
+.vscode/
+
+# Heavy Data & Results
+data/
+results/
+volumes/
+
+# Compiled files
+src/__pycache__/
+src/*/__pycache__/

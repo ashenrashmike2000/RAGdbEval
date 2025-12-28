@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant_benchmark
+    restart: always
+    ports:
+      - "6333:6333"  # HTTP Port (REST API)
+      - "6334:6334"  # gRPC Port (High performance)
+    volumes:
+      # Persist data to a local folder named 'qdrant_storage'
+      - ./volumes/qdrant_storage:/qdrant/storage
+    environment:
+      # strict_mode: ensures standard compliance
+      - QDRANT__SERVICE__ENABLE_GRPC=true
+
+volumes:
+  qdrant_storage:

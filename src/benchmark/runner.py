@@ -138,6 +138,13 @@ class BenchmarkRunner:
         # Load data
         vectors = dataset.vectors
         queries = dataset.queries
+
+        # === ADD THIS SAFETY SLICE ===
+        if dataset.name == "msmarco" and len(vectors) > 1000000:
+            print("✂️  Slicing MSMARCO to 1M vectors to save RAM...")
+            vectors = vectors[:1000000]
+            # =============================
+
         ground_truth = dataset.ground_truth
 
         # FIXED: Get the metric from the dataset info instead of hardcoding
@@ -148,6 +155,38 @@ class BenchmarkRunner:
 
         # Test each index configuration
         for idx_config in configs_to_test:
+
+            # =========================================================
+            # SMART FILTER: Automatically skip mismatched configurations
+            # =========================================================
+
+            # 1. Determine Dataset's Required Metric
+            # Convert dataset metric to lowercase string (e.g. "cosine", "l2")
+            req_metric = metric.value.lower()
+            if req_metric == 'angular': req_metric = 'cosine'
+            if req_metric == 'euclidean': req_metric = 'l2'
+
+            # 2. Determine Index Config's Metric
+            # Check for keys used by different DBs (Chroma='space', Milvus='metric_type', Weaviate='distance')
+            params = idx_config.params
+            cfg_metric = params.get('space') or params.get('metric_type') or params.get('distance')
+
+            if cfg_metric:
+                cfg_metric = cfg_metric.lower()
+                # Normalize common synonyms
+                if cfg_metric == 'ip': cfg_metric = 'cosine'
+                if cfg_metric == 'l2-squared': cfg_metric = 'l2'
+
+                # 3. Compare and Skip
+                # If both metrics are known but different, skip this config
+                if req_metric and cfg_metric and req_metric != cfg_metric:
+                    console.print(f"  [dim]Skipping {idx_config.name}: Dataset requires '{req_metric}', Config is '{cfg_metric}'[/dim]")
+                    continue
+
+            # =========================================================
+            # END SMART FILTER
+            # =========================================================
+
             console.print(f"\n  [yellow]Index: {idx_config.name}[/yellow]")
 
             runs = []
@@ -205,6 +244,11 @@ class BenchmarkRunner:
                         index_config,
                         metric,  # FIXED: Use passed metric instead of hardcoded L2
                     )
+
+                # If the adapter has the smart wait method, use it
+                if db_name == "weaviate":
+                    console.print("\n[yellow]⏳ Weaviate detected: Sleeping 300s to allow HNSW index build...[/yellow]")
+                    time.sleep(300)
 
                 metrics.resource.index_build_time_sec = build_time
                 metrics.resource.ram_bytes_peak = build_monitor.peak_memory_bytes
@@ -284,7 +328,9 @@ class BenchmarkRunner:
                 search_params=cfg.get("search_params", {}),
             ))
 
-        return configs[:3]  # Limit to 3 configs for initial testing
+        # NOTE: Removed the limit [:3] here to ensure all configs (like HNSW_L2 and HNSW_Cosine)
+        # are available for the Smart Filter to choose from.
+        return configs
 
     def _aggregate_metrics(self, metrics_list: List[MetricsResult]) -> MetricsResult:
         """Aggregate metrics across multiple runs."""

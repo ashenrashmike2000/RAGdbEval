@@ -1,10 +1,5 @@
 """
 Milvus vector database adapter.
-
-Milvus is a distributed vector database designed for scalable similarity search,
-supporting multiple index types and GPU acceleration.
-
-Documentation: https://milvus.io/docs
 """
 
 import time
@@ -34,8 +29,8 @@ try:
         MilvusClient,
         connections,
         utility,
+        MilvusException
     )
-
     MILVUS_AVAILABLE = True
 except ImportError:
     MILVUS_AVAILABLE = False
@@ -67,31 +62,39 @@ class MilvusAdapter(VectorDBInterface):
             language="Go/C++",
             license="Apache-2.0",
             supported_metrics=[DistanceMetric.L2, DistanceMetric.COSINE, DistanceMetric.IP],
-            supported_index_types=[
-                IndexType.FLAT, IndexType.IVF, IndexType.IVFPQ,
-                IndexType.IVFSQ, IndexType.HNSW, IndexType.DISKANN
-            ],
+            # FIX: Removed IndexType.IVF_FLAT to prevent AttributeError
+            supported_index_types=[IndexType.HNSW],
             supports_filtering=True,
-            supports_hybrid_search=True,
+            supports_hybrid_search=False,
             supports_gpu=True,
             is_distributed=True,
         )
 
     def connect(self) -> None:
-        """Connect to Milvus server."""
+        """Establish connection to Milvus."""
         conn_config = self.config.get("connection", {})
-        connections.connect(
-            alias="default",
-            host=conn_config.get("host", "localhost"),
-            port=conn_config.get("port", 19530),
-            user=conn_config.get("user", ""),
-            password=conn_config.get("password", ""),
-        )
-        self._is_connected = True
+        host = conn_config.get("host", "localhost")
+        port = conn_config.get("port", 19530)
+
+        try:
+            connections.connect(
+                alias="default",
+                host=host,
+                port=port,
+                timeout=300
+            )
+            self._is_connected = True
+        except Exception as e:
+            if connections.has_connection("default"):
+                self._is_connected = True
+            else:
+                raise e
 
     def disconnect(self) -> None:
-        """Disconnect from Milvus."""
-        connections.disconnect("default")
+        try:
+            connections.disconnect("default")
+        except Exception:
+            pass
         self._is_connected = False
 
     def create_index(
@@ -102,107 +105,87 @@ class MilvusAdapter(VectorDBInterface):
         metadata: Optional[List[Dict[str, Any]]] = None,
         ids: Optional[List[int]] = None,
     ) -> float:
-        """Create Milvus collection and index."""
+        """Create a collection and index vectors."""
         self.validate_vectors(vectors)
+
         n_vectors, dimensions = vectors.shape
         self._dimensions = dimensions
         self._distance_metric = distance_metric
         self._index_config = index_config
 
+        prefix = self.config.get("collection", {}).get("name_prefix", "benchmark")
+        self._collection_name = f"{prefix}_{uuid.uuid4().hex[:8]}"
+
         start_time = time.perf_counter()
 
-        # Define schema
         fields = [
             FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=False),
-            FieldSchema(name="vector", dtype=DataType.FLOAT_VECTOR, dim=dimensions),
+            FieldSchema(name="vector", dtype=DataType.FLOAT_VECTOR, dim=dimensions)
         ]
 
-        # Add metadata fields
-        schema_config = self.config.get("schema", {}).get("metadata_fields", [])
-        for field_config in schema_config:
-            dtype_map = {
-                "VARCHAR": DataType.VARCHAR,
-                "FLOAT": DataType.FLOAT,
-                "INT64": DataType.INT64,
-                "BOOL": DataType.BOOL,
-            }
-            dtype = dtype_map.get(field_config.get("type", "VARCHAR"), DataType.VARCHAR)
-            field_params = {"max_length": 64} if dtype == DataType.VARCHAR else {}
-            fields.append(FieldSchema(
-                name=field_config["name"],
-                dtype=dtype,
-                **field_params
-            ))
+        schema = CollectionSchema(fields, "Benchmark collection")
+        self._collection = Collection(self._collection_name, schema)
 
-        schema = CollectionSchema(fields=fields, description="Benchmark collection")
+        print(f"🚀 Milvus: Inserting {n_vectors} vectors in batches...")
 
-        # Create collection
-        self._collection_name = f"benchmark_{uuid.uuid4().hex[:8]}"
-        self._collection = Collection(name=self._collection_name, schema=schema)
+        insert_ids = ids if ids is not None else list(range(n_vectors))
+        batch_size = 10000
 
-        # Prepare data
-        if ids is None:
-            ids = list(range(n_vectors))
-
-        insert_data = [ids, vectors.tolist()]
-
-        # Add metadata columns
-        if metadata and schema_config:
-            for field_config in schema_config:
-                field_name = field_config["name"]
-                field_values = [m.get(field_name, "") for m in metadata]
-                insert_data.append(field_values)
-
-        # Insert data
-        batch_size = self.config.get("batch", {}).get("insert_batch_size", 10000)
+        # Batch insert to prevent gRPC error (StatusCode.RESOURCE_EXHAUSTED)
         for i in range(0, n_vectors, batch_size):
-            end_idx = min(i + batch_size, n_vectors)
-            batch_data = [d[i:end_idx] if isinstance(d, list) else d[i:end_idx].tolist() for d in insert_data]
-            self._collection.insert(batch_data)
+            end = i + batch_size
+            batch_ids = insert_ids[i:end]
+            batch_vectors = vectors[i:end]
 
-        # Create index
+            self._collection.insert([batch_ids, batch_vectors])
+            print(f"   Inserted batch {i} to {min(end, n_vectors)}", end="\r")
+
+        self._collection.flush()
+        print("\n✅ Insertion complete.")
+
         metric_map = {
             DistanceMetric.L2: "L2",
             DistanceMetric.COSINE: "COSINE",
-            DistanceMetric.IP: "IP",
+            DistanceMetric.IP: "IP"
         }
 
-        params = index_config.params
-        index_type = index_config.type.upper()
+        # Handle Index Type Robustly
+        idx_type_str = "HNSW"
+        if hasattr(index_config.type, "name"):
+             idx_type_str = index_config.type.name
+        elif isinstance(index_config.type, str):
+             idx_type_str = index_config.type
 
-        index_params = {
-            "index_type": index_type,
+        if "IVF" in idx_type_str.upper() and "FLAT" in idx_type_str.upper():
+            idx_type_str = "IVF_FLAT"
+        elif "HNSW" in idx_type_str.upper():
+            idx_type_str = "HNSW"
+
+        idx_params = {
             "metric_type": metric_map.get(distance_metric, "L2"),
-            "params": params,
+            "index_type": idx_type_str,
+            "params": index_config.params
         }
 
-        self._collection.create_index(field_name="vector", index_params=index_params)
+        print(f"🔨 Milvus: Building index ({idx_type_str})...")
+        self._collection.create_index("vector", idx_params)
         self._collection.load()
 
         self._num_vectors = n_vectors
         return time.perf_counter() - start_time
 
     def delete_index(self) -> None:
-        """Delete the collection."""
-        if self._collection_name:
-            try:
-                utility.drop_collection(self._collection_name)
-            except Exception:
-                pass
+        if self._collection_name and utility.has_collection(self._collection_name):
+            utility.drop_collection(self._collection_name)
         self._collection = None
-        self._num_vectors = 0
+        self._collection_name = ""
 
     def save_index(self, path: str) -> None:
-        """Milvus manages persistence internally."""
-        pass
+        if self._collection:
+            self._collection.flush()
 
     def load_index(self, path: str) -> float:
-        """Load existing collection."""
-        start_time = time.perf_counter()
-        self._collection = Collection(name=path)
-        self._collection.load()
-        self._num_vectors = self._collection.num_entities
-        return time.perf_counter() - start_time
+        return 0.0
 
     def search(
         self,
@@ -211,121 +194,80 @@ class MilvusAdapter(VectorDBInterface):
         search_params: Optional[Dict[str, Any]] = None,
         filters: Optional[List[FilterCondition]] = None,
     ) -> Tuple[NDArray[np.int64], NDArray[np.float32], List[float]]:
-        """Search for nearest neighbors."""
-        if self._collection is None:
-            raise RuntimeError("Collection not created")
+
+        if not self._collection:
+            raise RuntimeError("Collection not loaded")
 
         self.validate_vectors(queries)
-        params = search_params or {}
 
-        # Build search params based on index type
-        index_type = self._index_config.type.upper() if self._index_config else "HNSW"
+        metric_map = {
+            DistanceMetric.L2: "L2",
+            DistanceMetric.COSINE: "COSINE",
+            DistanceMetric.IP: "IP"
+        }
+        current_metric = metric_map.get(self._distance_metric, "L2")
 
-        if index_type in ("IVF_FLAT", "IVF", "IVF_SQ8", "IVF_PQ"):
-            milvus_params = {"nprobe": params.get("nprobe", 16)}
-        elif index_type == "HNSW":
-            milvus_params = {"ef": params.get("ef", 128)}
+        if not search_params:
+            search_params = {
+                "metric_type": current_metric,  # <--- Use the correct metric!
+                "params": {"nprobe": 10}
+            }
         else:
-            milvus_params = params
+            # Ensure metric_type is set even if user provided other params
+            if "metric_type" not in search_params:
+                search_params["metric_type"] = current_metric
 
-        # Build filter expression
-        expr = self._build_filter(filters) if filters else None
-
+        latencies = []
         all_indices = []
         all_distances = []
-        latencies = []
 
         for query in queries:
-            start_time = time.perf_counter()
+            start_q = time.perf_counter()
 
-            results = self._collection.search(
-                data=[query.tolist()],
+            res = self._collection.search(
+                data=[query],
                 anns_field="vector",
-                param=milvus_params,
+                param=search_params,
                 limit=k,
-                expr=expr,
-                output_fields=["id"],
+                expr=None
             )
 
-            latency_ms = (time.perf_counter() - start_time) * 1000
-            latencies.append(latency_ms)
+            latencies.append((time.perf_counter() - start_q) * 1000)
 
-            if results and len(results) > 0:
-                hits = results[0]
-                indices = [hit.id for hit in hits]
-                distances = [hit.distance for hit in hits]
-            else:
-                indices, distances = [], []
-
-            while len(indices) < k:
-                indices.append(-1)
-                distances.append(float("inf"))
-
-            all_indices.append(indices[:k])
-            all_distances.append(distances[:k])
+            hits = res[0]
+            all_indices.append(hits.ids)
+            all_distances.append(hits.distances)
 
         return (
             np.array(all_indices, dtype=np.int64),
             np.array(all_distances, dtype=np.float32),
-            latencies,
+            latencies
         )
 
-    def _build_filter(self, filters: List[FilterCondition]) -> Optional[str]:
-        """Build Milvus filter expression."""
-        if not filters:
-            return None
+    # CRUD Stubs
+    def insert(self, vectors: NDArray[np.float32], metadata=None, ids=None) -> float:
+        if ids is None: ids = list(range(self._num_vectors, self._num_vectors + len(vectors)))
+        start = time.perf_counter()
+        self._collection.insert([ids, vectors])
+        return time.perf_counter() - start
 
-        expressions = []
-        for f in filters:
-            if f.operator == "eq":
-                if isinstance(f.value, str):
-                    expressions.append(f'{f.field} == "{f.value}"')
-                else:
-                    expressions.append(f"{f.field} == {f.value}")
-            elif f.operator == "gt":
-                expressions.append(f"{f.field} > {f.value}")
-            elif f.operator == "gte":
-                expressions.append(f"{f.field} >= {f.value}")
-            elif f.operator == "lt":
-                expressions.append(f"{f.field} < {f.value}")
-            elif f.operator == "lte":
-                expressions.append(f"{f.field} <= {f.value}")
-            elif f.operator == "in":
-                expressions.append(f"{f.field} in {f.value}")
-
-        return " and ".join(expressions) if expressions else None
-
-    def insert(self, vectors: NDArray[np.float32], metadata: Optional[List[Dict[str, Any]]] = None, ids: Optional[List[int]] = None) -> float:
-        if ids is None:
-            ids = list(range(self._num_vectors, self._num_vectors + len(vectors)))
-        start_time = time.perf_counter()
-        self._collection.insert([ids, vectors.tolist()])
-        self._num_vectors += len(vectors)
-        return time.perf_counter() - start_time
-
-    def update(self, ids: List[int], vectors: NDArray[np.float32], metadata: Optional[List[Dict[str, Any]]] = None) -> float:
-        start_time = time.perf_counter()
-        self._collection.delete(f"id in {ids}")
-        self._collection.insert([ids, vectors.tolist()])
-        return time.perf_counter() - start_time
+    def update(self, ids: List[int], vectors: NDArray[np.float32], metadata=None) -> float:
+        self.delete(ids)
+        return self.insert(vectors, metadata, ids)
 
     def delete(self, ids: List[int]) -> float:
-        start_time = time.perf_counter()
-        self._collection.delete(f"id in {ids}")
+        start = time.perf_counter()
+        expr = f"id in {ids}"
+        self._collection.delete(expr)
         self._num_vectors -= len(ids)
-        return time.perf_counter() - start_time
+        return time.perf_counter() - start
 
     def get_index_stats(self) -> Dict[str, Any]:
-        if self._collection is None:
-            return {}
-        return {
-            "num_vectors": self._collection.num_entities,
-            "dimensions": self._dimensions,
-            "index_type": self._index_config.type if self._index_config else None,
-        }
+        if not self._collection: return {}
+        return {"num_vectors": self._collection.num_entities, "dimensions": self._dimensions}
 
     def set_search_params(self, params: Dict[str, Any]) -> None:
-        self._search_params.update(params)
+        self._search_params = params
 
     def get_search_params(self) -> Dict[str, Any]:
-        return self._search_params.copy()
+        return self._search_params

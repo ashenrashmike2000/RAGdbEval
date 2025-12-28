@@ -34,7 +34,7 @@ connection:
     memory_limit: "16g"
     cpu_limit: 8
     ports:
-      http: 8080
+      http: 8090
       grpc: 50051
 
 # -----------------------------------------------------------------------------
@@ -54,103 +54,123 @@ class_config:
 # Index Configurations to Test
 # -----------------------------------------------------------------------------
 index_configurations:
-  # HNSW configurations
-  - name: "HNSW_ef64_max16"
+  # --- L2 Indexes ---
+  - name: "HNSW_L2"
     type: "hnsw"
-    description: "HNSW with efConstruction=64, maxConnections=16"
     params:
-      efConstruction: 64
-      maxConnections: 16
-      ef: -1  # Dynamic
-      dynamicEfMin: 100
-      dynamicEfMax: 500
-      dynamicEfFactor: 8
-      vectorCacheMaxObjects: 1000000
-      flatSearchCutoff: 40000
-      skip: false
-    search_params:
-      ef: [50, 100, 200, 300, 500]
-
-  - name: "HNSW_ef128_max32"
-    type: "hnsw"
-    description: "HNSW with efConstruction=128, maxConnections=32"
-    params:
+      distance: "l2-squared" # <--- Tag for filter
       efConstruction: 128
       maxConnections: 32
-      ef: -1
-      dynamicEfMin: 100
-      dynamicEfMax: 500
-      dynamicEfFactor: 8
-      vectorCacheMaxObjects: 1000000
-      flatSearchCutoff: 40000
     search_params:
-      ef: [64, 128, 256, 512]
+      ef: [ 50, 100 ]
 
-  - name: "HNSW_ef256_max48"
+  # --- Cosine Indexes ---
+  - name: "HNSW_Cosine"
     type: "hnsw"
-    description: "HNSW with higher accuracy settings"
     params:
-      efConstruction: 256
-      maxConnections: 48
-      ef: -1
-      dynamicEfMin: 100
-      dynamicEfMax: 800
-      dynamicEfFactor: 8
-      vectorCacheMaxObjects: 2000000
-      flatSearchCutoff: 40000
-    search_params:
-      ef: [128, 256, 400, 600, 800]
-
-  # PQ (Product Quantization) enabled
-  - name: "HNSW_PQ_enabled"
-    type: "hnsw"
-    description: "HNSW with PQ compression"
-    params:
+      distance: "cosine"     # <--- Tag for filter
       efConstruction: 128
       maxConnections: 32
-      pq:
-        enabled: true
-        segments: 0  # auto
-        centroids: 256
-        trainingLimit: 100000
-        encoder:
-          type: "kmeans"
     search_params:
-      ef: [64, 128, 256, 512]
+      ef: [ 50, 100 ]
 
-  # BQ (Binary Quantization)
-  - name: "HNSW_BQ_enabled"
-    type: "hnsw"
-    description: "HNSW with binary quantization"
-    params:
-      efConstruction: 128
-      maxConnections: 32
-      bq:
-        enabled: true
-    search_params:
-      ef: [64, 128, 256, 512]
-
-  # SQ (Scalar Quantization)
-  - name: "HNSW_SQ_enabled"
-    type: "hnsw"
-    description: "HNSW with scalar quantization"
-    params:
-      efConstruction: 128
-      maxConnections: 32
-      sq:
-        enabled: true
-        trainingLimit: 100000
-        rescoreLimit: 200
-    search_params:
-      ef: [64, 128, 256, 512]
-
-  # Flat index
-  - name: "Flat"
-    type: "flat"
-    description: "Flat/brute-force index"
-    params:
-      vectorCacheMaxObjects: 1000000
-    search_params: {}
+#  # HNSW configurations
+#  - name: "HNSW_ef64_max16"
+#    type: "hnsw"
+#    description: "HNSW with efConstruction=64, maxConnections=16"
+#    params:
+#      efConstruction: 64
+#      maxConnections: 16
+#      ef: -1  # Dynamic
+#      dynamicEfMin: 100
+#      dynamicEfMax: 500
+#      dynamicEfFactor: 8
+#      vectorCacheMaxObjects: 1000000
+#      flatSearchCutoff: 40000
+#      skip: false
+#    search_params:
+#      ef: [50, 100, 200, 300, 500]
+#
+#  - name: "HNSW_ef128_max32"
+#    type: "hnsw"
+#    description: "HNSW with efConstruction=128, maxConnections=32"
+#    params:
+#      efConstruction: 128
+#      maxConnections: 32
+#      ef: -1
+#      dynamicEfMin: 100
+#      dynamicEfMax: 500
+#      dynamicEfFactor: 8
+#      vectorCacheMaxObjects: 1000000
+#      flatSearchCutoff: 40000
+#    search_params:
+#      ef: [64, 128, 256, 512]
+#
+#  - name: "HNSW_ef256_max48"
+#    type: "hnsw"
+#    description: "HNSW with higher accuracy settings"
+#    params:
+#      efConstruction: 256
+#      maxConnections: 48
+#      ef: -1
+#      dynamicEfMin: 100
+#      dynamicEfMax: 800
+#      dynamicEfFactor: 8
+#      vectorCacheMaxObjects: 2000000
+#      flatSearchCutoff: 40000
+#    search_params:
+#      ef: [128, 256, 400, 600, 800]
+#
+#  # PQ (Product Quantization) enabled
+#  - name: "HNSW_PQ_enabled"
+#    type: "hnsw"
+#    description: "HNSW with PQ compression"
+#    params:
+#      efConstruction: 128
+#      maxConnections: 32
+#      pq:
+#        enabled: true
+#        segments: 0  # auto
+#        centroids: 256
+#        trainingLimit: 100000
+#        encoder:
+#          type: "kmeans"
+#    search_params:
+#      ef: [64, 128, 256, 512]
+#
+#  # BQ (Binary Quantization)
+#  - name: "HNSW_BQ_enabled"
+#    type: "hnsw"
+#    description: "HNSW with binary quantization"
+#    params:
+#      efConstruction: 128
+#      maxConnections: 32
+#      bq:
+#        enabled: true
+#    search_params:
+#      ef: [64, 128, 256, 512]
+#
+#  # SQ (Scalar Quantization)
+#  - name: "HNSW_SQ_enabled"
+#    type: "hnsw"
+#    description: "HNSW with scalar quantization"
+#    params:
+#      efConstruction: 128
+#      maxConnections: 32
+#      sq:
+#        enabled: true
+#        trainingLimit: 100000
+#        rescoreLimit: 200
+#    search_params:
+#      ef: [64, 128, 256, 512]
+#
+#  # Flat index
+#  - name: "Flat"
+#    type: "flat"
+#    description: "Flat/brute-force index"
+#    params:
+#      vectorCacheMaxObjects: 1000000
+#    search_params: {}
 
 # -----------------------------------------------------------------------------
 # Distance Metrics Support

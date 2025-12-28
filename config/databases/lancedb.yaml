@@ -38,77 +38,97 @@ table:
 # Index Configurations to Test
 # -----------------------------------------------------------------------------
 index_configurations:
-  # No index (brute force)
-  - name: "Flat"
-    type: "flat"
-    description: "No index, brute force search"
-    params: {}
-    search_params: {}
-
-  # IVF_PQ index
-  - name: "IVF_PQ_256"
-    type: "IVF_PQ"
-    description: "IVF with 256 partitions and PQ"
+  # 1. IVF_PQ L2
+  - name: "IVF_PQ_L2"
+    type: "ivf_pq"
     params:
+      metric_type: "l2"      # <--- Auto-Selector Tag
       num_partitions: 256
-      num_sub_vectors: 16
-      num_bits: 8
-      max_iterations: 50
-      sample_rate: 256
+      num_sub_vectors: 4     # Universal (works for 96d/100d)
     search_params:
-      nprobes: [1, 4, 8, 16, 32, 64]
-      refine_factor: [null, 10, 20]
+      nprobes: [20]
 
-  - name: "IVF_PQ_512"
-    type: "IVF_PQ"
-    description: "IVF with 512 partitions"
+  # 2. IVF_PQ Cosine
+  - name: "IVF_PQ_Cosine"
+    type: "ivf_pq"
     params:
-      num_partitions: 512
-      num_sub_vectors: 32
-      num_bits: 8
-      max_iterations: 50
-      sample_rate: 256
-    search_params:
-      nprobes: [1, 4, 8, 16, 32, 64, 128]
-      refine_factor: [null, 10, 20]
-
-  - name: "IVF_PQ_1024"
-    type: "IVF_PQ"
-    description: "IVF with 1024 partitions for larger datasets"
-    params:
-      num_partitions: 1024
-      num_sub_vectors: 32
-      num_bits: 8
-      max_iterations: 50
-      sample_rate: 256
-    search_params:
-      nprobes: [1, 8, 16, 32, 64, 128, 256]
-      refine_factor: [null, 10, 50]
-
-  # IVF_HNSW_SQ (newer index type)
-  - name: "IVF_HNSW_SQ_256"
-    type: "IVF_HNSW_SQ"
-    description: "IVF + HNSW + Scalar Quantization"
-    params:
+      metric_type: "cosine"  # <--- Auto-Selector Tag
       num_partitions: 256
-      max_degree: 16
-      ef_construction: 150
-      sq_type: "fp16"  # fp16, int8
+      num_sub_vectors: 4
     search_params:
-      nprobes: [1, 4, 8, 16, 32]
-      ef: [50, 100, 200]
+      nprobes: [20]
 
-  - name: "IVF_HNSW_SQ_512"
-    type: "IVF_HNSW_SQ"
-    description: "IVF + HNSW + SQ with more partitions"
-    params:
-      num_partitions: 512
-      max_degree: 32
-      ef_construction: 200
-      sq_type: "fp16"
-    search_params:
-      nprobes: [1, 8, 16, 32, 64]
-      ef: [64, 128, 256]
+#  # No index (brute force)
+#  - name: "Flat"
+#    type: "flat"
+#    description: "No index, brute force search"
+#    params: {}
+#    search_params: {}
+#
+#  # IVF_PQ index
+#  - name: "IVF_PQ_256"
+#    type: "IVF_PQ"
+#    description: "IVF with 256 partitions and PQ"
+#    params:
+#      num_partitions: 256
+#      num_sub_vectors: 16
+#      num_bits: 8
+#      max_iterations: 50
+#      sample_rate: 256
+#    search_params:
+#      nprobes: [1, 4, 8, 16, 32, 64]
+#      refine_factor: [null, 10, 20]
+#
+#  - name: "IVF_PQ_512"
+#    type: "IVF_PQ"
+#    description: "IVF with 512 partitions"
+#    params:
+#      num_partitions: 512
+#      num_sub_vectors: 32
+#      num_bits: 8
+#      max_iterations: 50
+#      sample_rate: 256
+#    search_params:
+#      nprobes: [1, 4, 8, 16, 32, 64, 128]
+#      refine_factor: [null, 10, 20]
+#
+#  - name: "IVF_PQ_1024"
+#    type: "IVF_PQ"
+#    description: "IVF with 1024 partitions for larger datasets"
+#    params:
+#      num_partitions: 1024
+#      num_sub_vectors: 32
+#      num_bits: 8
+#      max_iterations: 50
+#      sample_rate: 256
+#    search_params:
+#      nprobes: [1, 8, 16, 32, 64, 128, 256]
+#      refine_factor: [null, 10, 50]
+#
+#  # IVF_HNSW_SQ (newer index type)
+#  - name: "IVF_HNSW_SQ_256"
+#    type: "IVF_HNSW_SQ"
+#    description: "IVF + HNSW + Scalar Quantization"
+#    params:
+#      num_partitions: 256
+#      max_degree: 16
+#      ef_construction: 150
+#      sq_type: "fp16"  # fp16, int8
+#    search_params:
+#      nprobes: [1, 4, 8, 16, 32]
+#      ef: [50, 100, 200]
+#
+#  - name: "IVF_HNSW_SQ_512"
+#    type: "IVF_HNSW_SQ"
+#    description: "IVF + HNSW + SQ with more partitions"
+#    params:
+#      num_partitions: 512
+#      max_degree: 32
+#      ef_construction: 200
+#      sq_type: "fp16"
+#    search_params:
+#      nprobes: [1, 8, 16, 32, 64]
+#      ef: [64, 128, 256]
 
 # -----------------------------------------------------------------------------
 # Distance Metrics Support

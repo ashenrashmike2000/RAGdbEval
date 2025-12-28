@@ -6,7 +6,7 @@ integration of vector search with existing SQL workflows.
 
 Documentation: https://github.com/pgvector/pgvector
 """
-
+import sys
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -32,6 +32,11 @@ try:
     PGVECTOR_AVAILABLE = True
 except ImportError:
     PGVECTOR_AVAILABLE = False
+
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+except AttributeError:
+    pass
 
 
 @register_database("pgvector")
@@ -77,6 +82,10 @@ class PgvectorAdapter(VectorDBInterface):
             user=conn_config.get("user", "postgres"),
             password=conn_config.get("password", "postgres"),
         )
+
+        with self._conn.cursor() as cur:
+            cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+
         register_vector(self._conn)
 
         # Enable pgvector extension
@@ -107,91 +116,70 @@ class PgvectorAdapter(VectorDBInterface):
         self._distance_metric = distance_metric
         self._index_config = index_config
 
+        prefix = self.config.get("collection", {}).get("name_prefix", "benchmark")
+        self._table_name = f"{prefix}_{int(time.time())}"
+
         start_time = time.perf_counter()
 
-        # Create table
-        self._table_name = f"benchmark_{int(time.time())}"
-
         with self._conn.cursor() as cur:
-            cur.execute(f"""
-                CREATE TABLE {self._table_name} (
-                    id BIGSERIAL PRIMARY KEY,
-                    vector vector({dimensions}),
-                    category VARCHAR(64),
-                    price REAL,
-                    timestamp BIGINT,
-                    active BOOLEAN
-                )
-            """)
+            # 1. Enable extension
+            cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
 
-        # Insert data
-        if ids is None:
-            ids = list(range(n_vectors))
+            # 2. Create Table (UNLOGGED)
+            cur.execute(
+                f"CREATE UNLOGGED TABLE IF NOT EXISTS {self._table_name} (id bigserial PRIMARY KEY, vector vector({dimensions}));")
 
-        batch_size = self.config.get("batch", {}).get("insert_batch_size", 1000)
+            # === BATCH INSERT FIX ===
+            print(f"🚀 Pgvector: Inserting {len(vectors)} vectors in batches...")
+            batch_size = 10000
+            insert_ids = ids if ids is not None else list(range(len(vectors)))
 
-        with self._conn.cursor() as cur:
-            for i in range(0, n_vectors, batch_size):
-                end_idx = min(i + batch_size, n_vectors)
-                batch_data = []
+            for i in range(0, len(vectors), batch_size):
+                end = min(i + batch_size, len(vectors))
+                # Convert only this chunk to list to save RAM
+                chunk_data = list(zip(insert_ids[i:end], vectors[i:end].tolist()))
+                execute_values(cur, f"INSERT INTO {self._table_name} (id, vector) VALUES %s", chunk_data)
+                print(f"   Inserted batch {end}/{len(vectors)}", end="\r")
+            # ========================
 
-                for j in range(i, end_idx):
-                    vec_id = ids[j]
-                    vector = vectors[j].tolist()
-                    meta = metadata[j] if metadata else {}
+            print(f"\n✅ Pgvector: Insertion complete.")
+            # =========================================================
 
-                    batch_data.append((
-                        vec_id,
-                        vector,
-                        meta.get("category"),
-                        meta.get("price"),
-                        meta.get("timestamp"),
-                        meta.get("active"),
-                    ))
+            # 3. Create Index
+            metric_op = {
+                DistanceMetric.L2: "vector_l2_ops",
+                DistanceMetric.COSINE: "vector_cosine_ops",
+                DistanceMetric.IP: "vector_ip_ops"
+            }.get(distance_metric, "vector_l2_ops")
 
-                execute_values(
-                    cur,
-                    f"""INSERT INTO {self._table_name}
-                        (id, vector, category, price, timestamp, active)
-                        VALUES %s""",
-                    batch_data,
-                    template="(%s, %s::vector, %s, %s, %s, %s)",
-                )
+            idx_method = "hnsw" if index_config.type == IndexType.HNSW else "ivfflat"
 
-        self._conn.commit()
+            params = index_config.params
+            idx_options = ""
 
-        # Create vector index
-        params = index_config.params
-        index_type = index_config.type.lower()
-
-        # Determine operator class based on distance metric
-        ops_class_map = {
-            DistanceMetric.L2: "vector_l2_ops",
-            DistanceMetric.COSINE: "vector_cosine_ops",
-            DistanceMetric.IP: "vector_ip_ops",
-        }
-        ops_class = ops_class_map.get(distance_metric, "vector_l2_ops")
-
-        with self._conn.cursor() as cur:
-            if index_type == "ivfflat":
-                lists = params.get("lists", 100)
-                cur.execute(f"""
-                    CREATE INDEX ON {self._table_name}
-                    USING ivfflat (vector {ops_class})
-                    WITH (lists = {lists})
-                """)
-            elif index_type == "hnsw":
+            if idx_method == "hnsw":
                 m = params.get("m", 16)
-                ef_construction = params.get("ef_construction", 64)
-                cur.execute(f"""
-                    CREATE INDEX ON {self._table_name}
-                    USING hnsw (vector {ops_class})
-                    WITH (m = {m}, ef_construction = {ef_construction})
-                """)
+                ef = params.get("ef_construct", 64)
 
-        self._conn.commit()
+                # Auto-tune for GIST1M
+                if dimensions > 700 and m < 32:
+                    print(f"⚡ High dimensionality ({dimensions}d) detected. Boosting HNSW parameters...")
+                    m = 32
+                    ef = 128
+
+                idx_options = f"(m = {m}, ef_construction = {ef})"
+            elif idx_method == "ivfflat":
+                lists = params.get("nlist", 100)
+                idx_options = f"(lists = {lists})"
+
+            print(f"🔨 Pgvector: Building {idx_method} index...")
+            cur.execute(
+                f"CREATE INDEX ON {self._table_name} USING {idx_method} (vector {metric_op}) WITH {idx_options}"
+            )
+
+            self._conn.commit()
+
         self._num_vectors = n_vectors
-
         return time.perf_counter() - start_time
 
     def delete_index(self) -> None:

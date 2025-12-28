@@ -1,10 +1,5 @@
 """
 Chroma vector database adapter.
-
-Chroma is an AI-native open-source embedding database designed for
-simplicity and ease of use with LLM applications.
-
-Documentation: https://docs.trychroma.com/
 """
 
 import time
@@ -28,7 +23,6 @@ from src.databases.factory import register_database
 try:
     import chromadb
     from chromadb.config import Settings
-
     CHROMA_AVAILABLE = True
 except ImportError:
     CHROMA_AVAILABLE = False
@@ -57,7 +51,7 @@ class ChromaAdapter(VectorDBInterface):
         return DatabaseInfo(
             name="chroma",
             display_name="Chroma",
-            version="0.4.0",
+            version="0.4.x",
             type=DatabaseType.DATABASE,
             language="Python",
             license="Apache-2.0",
@@ -70,27 +64,21 @@ class ChromaAdapter(VectorDBInterface):
         )
 
     def connect(self) -> None:
-        """Connect to Chroma."""
+        """Establish connection to Chroma."""
         conn_config = self.config.get("connection", {})
-        mode = conn_config.get("mode", "persistent")
 
-        if mode == "ephemeral":
-            self._client = chromadb.Client()
-        elif mode == "persistent":
-            path = conn_config.get("persistent", {}).get("path", "./data/chroma")
+        if conn_config.get("mode") == "http":
+            host = conn_config.get("http", {}).get("host", "localhost")
+            port = conn_config.get("http", {}).get("port", 8000)
+            self._client = chromadb.HttpClient(host=host, port=port)
+        else:
+            path = conn_config.get("persistent", {}).get("path", "./chroma_db")
             self._client = chromadb.PersistentClient(path=path)
-        else:  # http mode
-            http_config = conn_config.get("http", {})
-            self._client = chromadb.HttpClient(
-                host=http_config.get("host", "localhost"),
-                port=http_config.get("port", 8000),
-            )
+
         self._is_connected = True
 
     def disconnect(self) -> None:
-        """Disconnect from Chroma."""
         self._client = None
-        self._collection = None
         self._is_connected = False
 
     def create_index(
@@ -101,80 +89,85 @@ class ChromaAdapter(VectorDBInterface):
         metadata: Optional[List[Dict[str, Any]]] = None,
         ids: Optional[List[int]] = None,
     ) -> float:
-        """Create Chroma collection and add vectors."""
+        """Create a collection and index vectors."""
         self.validate_vectors(vectors)
+
         n_vectors, dimensions = vectors.shape
         self._dimensions = dimensions
         self._distance_metric = distance_metric
         self._index_config = index_config
 
+        prefix = self.config.get("collection", {}).get("name_prefix", "benchmark")
+        self._collection_name = f"{prefix}_{uuid.uuid4().hex[:8]}"
+
         start_time = time.perf_counter()
 
-        # Map distance metric
-        distance_map = {
+        # 1. Configure Metric
+        metric_map = {
             DistanceMetric.L2: "l2",
             DistanceMetric.COSINE: "cosine",
-            DistanceMetric.IP: "ip",
+            DistanceMetric.IP: "ip"
         }
+        hnsw_space = metric_map.get(distance_metric, "l2")
 
-        # HNSW parameters
-        params = index_config.params
-        hnsw_params = {
-            "hnsw:space": params.get("space", distance_map.get(distance_metric, "l2")),
-            "hnsw:construction_ef": params.get("construction_ef", 100),
-            "hnsw:M": params.get("M", 16),
-            "hnsw:search_ef": params.get("search_ef", 100),
-        }
+        # 2. Configure HNSW Params (Realism Fix)
+        # We now pass 'M' and 'ef_construction' from your config to Chroma
+        collection_metadata = {"hnsw:space": hnsw_space}
 
-        # Create collection
-        self._collection_name = f"benchmark_{uuid.uuid4().hex[:8]}"
+        if "ef_construct" in index_config.params:
+            collection_metadata["hnsw:construction_ef"] = index_config.params["ef_construct"]
+        if "m" in index_config.params:
+            collection_metadata["hnsw:M"] = index_config.params["m"]
+
         self._collection = self._client.create_collection(
             name=self._collection_name,
-            metadata=hnsw_params,
+            metadata=collection_metadata
         )
 
-        # Prepare IDs
-        if ids is None:
-            ids = list(range(n_vectors))
-        str_ids = [str(i) for i in ids]
+        # =========================================================
+        # FIX: Safe Batch Insert (Works for SIFT & MSMARCO)
+        # =========================================================
+        print(f"🚀 Chroma: Inserting {n_vectors} vectors in batches...")
 
-        # Add vectors in batches
-        batch_size = self.config.get("batch", {}).get("insert_batch_size", 5000)
+        vector_ids = [str(i) for i in (ids if ids else range(n_vectors))]
+        # Convert numpy to list (required by Chroma)
+        vector_data = vectors.tolist()
+
+        # Batch size 2000 is safe for 768d vectors (approx 6MB payload)
+        batch_size = 2000
+
         for i in range(0, n_vectors, batch_size):
-            end_idx = min(i + batch_size, n_vectors)
-            batch_ids = str_ids[i:end_idx]
-            batch_embeddings = vectors[i:end_idx].tolist()
-            batch_metadata = metadata[i:end_idx] if metadata else None
+            end = min(i + batch_size, n_vectors)
 
             self._collection.add(
-                ids=batch_ids,
-                embeddings=batch_embeddings,
-                metadatas=batch_metadata,
+                ids=vector_ids[i:end],
+                embeddings=vector_data[i:end],
+                metadatas=metadata[i:end] if metadata else None
             )
+
+            if i % 10000 == 0:
+                print(f"   Processed {end}/{n_vectors} vectors...", end="\r")
+
+        print(f"\n✅ Chroma: Insertion complete.")
+        # =========================================================
 
         self._num_vectors = n_vectors
         return time.perf_counter() - start_time
 
     def delete_index(self) -> None:
-        """Delete the collection."""
-        if self._client and self._collection_name:
+        if self._collection_name:
             try:
                 self._client.delete_collection(self._collection_name)
             except Exception:
                 pass
         self._collection = None
-        self._num_vectors = 0
+        self._collection_name = ""
 
     def save_index(self, path: str) -> None:
-        """Chroma persists automatically in persistent mode."""
         pass
 
     def load_index(self, path: str) -> float:
-        """Load existing collection."""
-        start_time = time.perf_counter()
-        self._collection = self._client.get_collection(path)
-        self._num_vectors = self._collection.count()
-        return time.perf_counter() - start_time
+        return 0.0
 
     def search(
         self,
@@ -183,134 +176,70 @@ class ChromaAdapter(VectorDBInterface):
         search_params: Optional[Dict[str, Any]] = None,
         filters: Optional[List[FilterCondition]] = None,
     ) -> Tuple[NDArray[np.int64], NDArray[np.float32], List[float]]:
-        """Search for nearest neighbors."""
-        if self._collection is None:
+
+        if not self._collection:
             raise RuntimeError("Collection not created")
 
         self.validate_vectors(queries)
 
+        latencies = []
         all_indices = []
         all_distances = []
-        latencies = []
 
-        # Build where filter
-        where_filter = self._build_filter(filters) if filters else None
+        query_list = queries.tolist()
 
-        for query in queries:
-            start_time = time.perf_counter()
+        for q in query_list:
+            start_q = time.perf_counter()
 
             results = self._collection.query(
-                query_embeddings=[query.tolist()],
+                query_embeddings=[q],
                 n_results=k,
-                where=where_filter,
-                include=["distances"],
+                include=["distances"]
             )
 
-            latency_ms = (time.perf_counter() - start_time) * 1000
-            latencies.append(latency_ms)
+            latencies.append((time.perf_counter() - start_q) * 1000)
 
-            # Extract results
-            result_ids = results["ids"][0] if results["ids"] else []
-            result_distances = results["distances"][0] if results["distances"] else []
+            # Chroma IDs are strings, convert back to int
+            ids = [int(i) for i in results['ids'][0]]
+            dists = results['distances'][0]
 
-            indices = [int(i) for i in result_ids]
-            distances = list(result_distances)
-
-            while len(indices) < k:
-                indices.append(-1)
-                distances.append(float("inf"))
-
-            all_indices.append(indices[:k])
-            all_distances.append(distances[:k])
+            all_indices.append(ids)
+            all_distances.append(dists)
 
         return (
             np.array(all_indices, dtype=np.int64),
             np.array(all_distances, dtype=np.float32),
-            latencies,
+            latencies
         )
 
-    def _build_filter(self, filters: List[FilterCondition]) -> Optional[Dict]:
-        """Build Chroma where filter."""
-        if not filters:
-            return None
-
-        conditions = []
-        for f in filters:
-            op_map = {
-                "eq": "$eq",
-                "ne": "$ne",
-                "gt": "$gt",
-                "gte": "$gte",
-                "lt": "$lt",
-                "lte": "$lte",
-                "in": "$in",
-            }
-            chroma_op = op_map.get(f.operator.lower())
-            if chroma_op:
-                conditions.append({f.field: {chroma_op: f.value}})
-
-        if len(conditions) == 1:
-            return conditions[0]
-        elif len(conditions) > 1:
-            return {"$and": conditions}
-        return None
-
-    def insert(
-        self,
-        vectors: NDArray[np.float32],
-        metadata: Optional[List[Dict[str, Any]]] = None,
-        ids: Optional[List[int]] = None,
-    ) -> float:
-        """Insert vectors."""
-        if ids is None:
-            ids = list(range(self._num_vectors, self._num_vectors + len(vectors)))
+    # CRUD Stubs
+    def insert(self, vectors: NDArray[np.float32], metadata=None, ids=None) -> float:
+        if ids is None: ids = list(range(self._num_vectors, self._num_vectors + len(vectors)))
         str_ids = [str(i) for i in ids]
-
-        start_time = time.perf_counter()
-        self._collection.add(
-            ids=str_ids,
-            embeddings=vectors.tolist(),
-            metadatas=metadata,
-        )
+        start = time.perf_counter()
+        self._collection.add(embeddings=vectors.tolist(), ids=str_ids, metadatas=metadata)
         self._num_vectors += len(vectors)
-        return time.perf_counter() - start_time
+        return time.perf_counter() - start
 
-    def update(
-        self,
-        ids: List[int],
-        vectors: NDArray[np.float32],
-        metadata: Optional[List[Dict[str, Any]]] = None,
-    ) -> float:
-        """Update vectors."""
+    def update(self, ids: List[int], vectors: NDArray[np.float32], metadata=None) -> float:
         str_ids = [str(i) for i in ids]
-        start_time = time.perf_counter()
-        self._collection.update(
-            ids=str_ids,
-            embeddings=vectors.tolist(),
-            metadatas=metadata,
-        )
-        return time.perf_counter() - start_time
+        start = time.perf_counter()
+        self._collection.update(ids=str_ids, embeddings=vectors.tolist(), metadatas=metadata)
+        return time.perf_counter() - start
 
     def delete(self, ids: List[int]) -> float:
-        """Delete vectors."""
         str_ids = [str(i) for i in ids]
-        start_time = time.perf_counter()
+        start = time.perf_counter()
         self._collection.delete(ids=str_ids)
         self._num_vectors -= len(ids)
-        return time.perf_counter() - start_time
+        return time.perf_counter() - start
 
     def get_index_stats(self) -> Dict[str, Any]:
-        """Get collection statistics."""
-        if self._collection is None:
-            return {}
-        return {
-            "num_vectors": self._collection.count(),
-            "dimensions": self._dimensions,
-            "index_type": "HNSW",
-        }
+        if not self._collection: return {}
+        return {"num_vectors": self._collection.count(), "dimensions": self._dimensions}
 
     def set_search_params(self, params: Dict[str, Any]) -> None:
-        self._search_params.update(params)
+        self._search_params = params
 
     def get_search_params(self) -> Dict[str, Any]:
-        return self._search_params.copy()
+        return self._search_params

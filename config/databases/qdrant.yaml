@@ -57,97 +57,117 @@ collection:
 # Index Configurations to Test
 # -----------------------------------------------------------------------------
 index_configurations:
-  # HNSW configurations
-  - name: "HNSW_M16_ef100"
+  # --- L2 Indexes ---
+  - name: "HNSW_L2"
     type: "hnsw"
-    description: "HNSW with M=16, ef_construct=100"
     params:
+      distance: "l2"     # <--- Tag for filter
       m: 16
       ef_construct: 100
-      full_scan_threshold: 10000
-      max_indexing_threads: 0  # 0 = auto
-      on_disk: false
     search_params:
-      ef: [50, 100, 200, 300, 500]
+      ef: [ 50, 100 ]
 
-  - name: "HNSW_M32_ef200"
+  # --- Cosine Indexes ---
+  - name: "HNSW_Cosine"
     type: "hnsw"
-    description: "HNSW with M=32, ef_construct=200"
     params:
-      m: 32
-      ef_construct: 200
-      full_scan_threshold: 10000
-      max_indexing_threads: 0
-      on_disk: false
+      distance: "Cosine"     # <--- Tag for filter
+      m: 16
+      ef_construct: 100
     search_params:
-      ef: [64, 128, 256, 512]
+      ef: [ 50, 100 ]
 
-  - name: "HNSW_M48_ef400"
-    type: "hnsw"
-    description: "HNSW with M=48, ef_construct=400 (high accuracy)"
-    params:
-      m: 48
-      ef_construct: 400
-      full_scan_threshold: 10000
-      max_indexing_threads: 0
-      on_disk: false
-    search_params:
-      ef: [100, 200, 400, 600, 800]
-
-  # On-disk HNSW for memory efficiency
-  - name: "HNSW_M32_OnDisk"
-    type: "hnsw"
-    description: "HNSW with vectors stored on disk"
-    params:
-      m: 32
-      ef_construct: 200
-      full_scan_threshold: 10000
-      on_disk: true
-    search_params:
-      ef: [64, 128, 256, 512]
-
-  # Quantization configurations
-  - name: "HNSW_M32_ScalarQ"
-    type: "hnsw"
-    description: "HNSW with scalar quantization"
-    params:
-      m: 32
-      ef_construct: 200
-      on_disk: false
-    quantization:
-      scalar:
-        type: "int8"
-        quantile: 0.99
-        always_ram: true
-    search_params:
-      ef: [64, 128, 256, 512]
-
-  - name: "HNSW_M32_ProductQ"
-    type: "hnsw"
-    description: "HNSW with product quantization"
-    params:
-      m: 32
-      ef_construct: 200
-      on_disk: false
-    quantization:
-      product:
-        compression: "x16"
-        always_ram: true
-    search_params:
-      ef: [64, 128, 256, 512]
-
-  - name: "HNSW_M32_BinaryQ"
-    type: "hnsw"
-    description: "HNSW with binary quantization"
-    params:
-      m: 32
-      ef_construct: 200
-      on_disk: false
-    quantization:
-      binary:
-        always_ram: true
-    search_params:
-      ef: [64, 128, 256, 512]
+#  # HNSW configurations
+#  - name: "HNSW_M16_ef100"
+#    type: "hnsw"
+#    description: "HNSW with M=16, ef_construct=100"
+#    params:
+#      m: 16
+#      ef_construct: 100
+#      full_scan_threshold: 10000
+#      max_indexing_threads: 0  # 0 = auto
+#      on_disk: false
+#    search_params:
+#      ef: [50, 100, 200, 300, 500]
+#
+#  - name: "HNSW_M32_ef200"
+#    type: "hnsw"
+#    description: "HNSW with M=32, ef_construct=200"
+#    params:
+#      m: 32
+#      ef_construct: 200
+#      full_scan_threshold: 10000
+#      max_indexing_threads: 0
+#      on_disk: false
+#    search_params:
+#      ef: [64, 128, 256, 512]
+#
+#  - name: "HNSW_M48_ef400"
+#    type: "hnsw"
+#    description: "HNSW with M=48, ef_construct=400 (high accuracy)"
+#    params:
+#      m: 48
+#      ef_construct: 400
+#      full_scan_threshold: 10000
+#      max_indexing_threads: 0
+#      on_disk: false
+#    search_params:
+#      ef: [100, 200, 400, 600, 800]
+#
+#  # On-disk HNSW for memory efficiency
+#  - name: "HNSW_M32_OnDisk"
+#    type: "hnsw"
+#    description: "HNSW with vectors stored on disk"
+#    params:
+#      m: 32
+#      ef_construct: 200
+#      full_scan_threshold: 10000
+#      on_disk: true
+#    search_params:
+#      ef: [64, 128, 256, 512]
+#
+#  # Quantization configurations
+#  - name: "HNSW_M32_ScalarQ"
+#    type: "hnsw"
+#    description: "HNSW with scalar quantization"
+#    params:
+#      m: 32
+#      ef_construct: 200
+#      on_disk: false
+#    quantization:
+#      scalar:
+#        type: "int8"
+#        quantile: 0.99
+#        always_ram: true
+#    search_params:
+#      ef: [64, 128, 256, 512]
+#
+#  - name: "HNSW_M32_ProductQ"
+#    type: "hnsw"
+#    description: "HNSW with product quantization"
+#    params:
+#      m: 32
+#      ef_construct: 200
+#      on_disk: false
+#    quantization:
+#      product:
+#        compression: "x16"
+#        always_ram: true
+#    search_params:
+#      ef: [64, 128, 256, 512]
+#
+#  - name: "HNSW_M32_BinaryQ"
+#    type: "hnsw"
+#    description: "HNSW with binary quantization"
+#    params:
+#      m: 32
+#      ef_construct: 200
+#      on_disk: false
+#    quantization:
+#      binary:
+#        always_ram: true
+#    search_params:
+#      ef: [64, 128, 256, 512]
 
 # -----------------------------------------------------------------------------
 # Distance Metrics Support

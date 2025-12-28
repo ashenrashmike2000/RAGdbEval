@@ -48,126 +48,146 @@ collection:
 # -----------------------------------------------------------------------------
 index_configurations:
   # Flat index (exact search)
-  - name: "FLAT"
-    type: "FLAT"
-    description: "Brute-force exact search"
-    params: {}
-    search_params: {}
-
-  # IVF_FLAT
-  - name: "IVF_FLAT_1024"
-    type: "IVF_FLAT"
-    description: "IVF with 1024 clusters"
-    params:
-      nlist: 1024
-    search_params:
-      nprobe: [1, 4, 8, 16, 32, 64, 128]
-
-  - name: "IVF_FLAT_4096"
-    type: "IVF_FLAT"
-    description: "IVF with 4096 clusters"
-    params:
-      nlist: 4096
-    search_params:
-      nprobe: [1, 4, 8, 16, 32, 64, 128, 256]
-
-  # IVF_SQ8
-  - name: "IVF_SQ8_1024"
-    type: "IVF_SQ8"
-    description: "IVF with 8-bit scalar quantization"
-    params:
-      nlist: 1024
-    search_params:
-      nprobe: [1, 4, 8, 16, 32, 64]
-
-  - name: "IVF_SQ8_4096"
-    type: "IVF_SQ8"
-    description: "IVF_SQ8 with 4096 clusters"
-    params:
-      nlist: 4096
-    search_params:
-      nprobe: [1, 4, 8, 16, 32, 64, 128]
-
-  # IVF_PQ
-  - name: "IVF_PQ_1024_m16"
-    type: "IVF_PQ"
-    description: "IVF with product quantization (16 sub-vectors)"
-    params:
-      nlist: 1024
-      m: 16
-      nbits: 8
-    search_params:
-      nprobe: [1, 4, 8, 16, 32, 64]
-
-  - name: "IVF_PQ_4096_m32"
-    type: "IVF_PQ"
-    description: "IVF_PQ with 4096 clusters, 32 sub-vectors"
-    params:
-      nlist: 4096
-      m: 32
-      nbits: 8
-    search_params:
-      nprobe: [1, 4, 8, 16, 32, 64, 128]
-
-  # HNSW
-  - name: "HNSW_M16"
+  # 1. HNSW L2 (For SIFT1M, DEEP1M, GIST1M)
+  - name: "HNSW_L2"
     type: "HNSW"
-    description: "HNSW with M=16"
     params:
+      metric_type: "L2"      # <--- Auto-Selector Tag
       M: 16
       efConstruction: 200
     search_params:
-      ef: [50, 100, 200, 300, 500]
+      ef: [ 50, 100, 200 ]
 
-  - name: "HNSW_M32"
+  # 2. HNSW Cosine (For Glove, MS MARCO)
+  - name: "HNSW_Cosine"
     type: "HNSW"
-    description: "HNSW with M=32"
     params:
-      M: 32
+      metric_type: "COSINE"  # <--- Auto-Selector Tag
+      M: 16
       efConstruction: 200
     search_params:
-      ef: [64, 128, 256, 512]
+      ef: [ 50, 100, 200 ]
 
-  - name: "HNSW_M48"
-    type: "HNSW"
-    description: "HNSW with M=48 (high accuracy)"
-    params:
-      M: 48
-      efConstruction: 400
-    search_params:
-      ef: [100, 200, 400, 600]
-
-  # DISKANN (disk-based ANN)
-  - name: "DISKANN"
-    type: "DISKANN"
-    description: "Disk-based ANN index"
-    params:
-      search_list_size: 100
-      max_degree: 56
-      build_list_size: 100
-    search_params:
-      search_list: [50, 100, 200]
-
-  # GPU indices (if available)
-  - name: "GPU_IVF_FLAT"
-    type: "GPU_IVF_FLAT"
-    description: "GPU-accelerated IVF"
-    params:
-      nlist: 1024
-    search_params:
-      nprobe: [1, 4, 8, 16, 32, 64]
-    requires_gpu: true
-
-  - name: "GPU_IVF_PQ"
-    type: "GPU_IVF_PQ"
-    description: "GPU-accelerated IVF_PQ"
-    params:
-      nlist: 1024
-      m: 16
-      nbits: 8
-    search_params:
-      nprobe: [1, 4, 8, 16, 32]
-    requires_gpu: true
+#  - name: "FLAT"
+#    type: "FLAT"
+#    description: "Brute-force exact search"
+#    params: {}
+#    search_params: {}
+#
+#  # IVF_FLAT
+#  - name: "IVF_FLAT_1024"
+#    type: "IVF_FLAT"
+#    description: "IVF with 1024 clusters"
+#    params:
+#      nlist: 1024
+#    search_params:
+#      nprobe: [1, 4, 8, 16, 32, 64, 128]
+#
+#  - name: "IVF_FLAT_4096"
+#    type: "IVF_FLAT"
+#    description: "IVF with 4096 clusters"
+#    params:
+#      nlist: 4096
+#    search_params:
+#      nprobe: [1, 4, 8, 16, 32, 64, 128, 256]
+#
+#  # IVF_SQ8
+#  - name: "IVF_SQ8_1024"
+#    type: "IVF_SQ8"
+#    description: "IVF with 8-bit scalar quantization"
+#    params:
+#      nlist: 1024
+#    search_params:
+#      nprobe: [1, 4, 8, 16, 32, 64]
+#
+#  - name: "IVF_SQ8_4096"
+#    type: "IVF_SQ8"
+#    description: "IVF_SQ8 with 4096 clusters"
+#    params:
+#      nlist: 4096
+#    search_params:
+#      nprobe: [1, 4, 8, 16, 32, 64, 128]
+#
+#  # IVF_PQ
+#  - name: "IVF_PQ_1024_m16"
+#    type: "IVF_PQ"
+#    description: "IVF with product quantization (16 sub-vectors)"
+#    params:
+#      nlist: 1024
+#      m: 16
+#      nbits: 8
+#    search_params:
+#      nprobe: [1, 4, 8, 16, 32, 64]
+#
+#  - name: "IVF_PQ_4096_m32"
+#    type: "IVF_PQ"
+#    description: "IVF_PQ with 4096 clusters, 32 sub-vectors"
+#    params:
+#      nlist: 4096
+#      m: 32
+#      nbits: 8
+#    search_params:
+#      nprobe: [1, 4, 8, 16, 32, 64, 128]
+#
+#  # HNSW
+#  - name: "HNSW_M16"
+#    type: "HNSW"
+#    description: "HNSW with M=16"
+#    params:
+#      M: 16
+#      efConstruction: 200
+#    search_params:
+#      ef: [50, 100, 200, 300, 500]
+#
+#  - name: "HNSW_M32"
+#    type: "HNSW"
+#    description: "HNSW with M=32"
+#    params:
+#      M: 32
+#      efConstruction: 200
+#    search_params:
+#      ef: [64, 128, 256, 512]
+#
+#  - name: "HNSW_M48"
+#    type: "HNSW"
+#    description: "HNSW with M=48 (high accuracy)"
+#    params:
+#      M: 48
+#      efConstruction: 400
+#    search_params:
+#      ef: [100, 200, 400, 600]
+#
+#  # DISKANN (disk-based ANN)
+#  - name: "DISKANN"
+#    type: "DISKANN"
+#    description: "Disk-based ANN index"
+#    params:
+#      search_list_size: 100
+#      max_degree: 56
+#      build_list_size: 100
+#    search_params:
+#      search_list: [50, 100, 200]
+#
+#  # GPU indices (if available)
+#  - name: "GPU_IVF_FLAT"
+#    type: "GPU_IVF_FLAT"
+#    description: "GPU-accelerated IVF"
+#    params:
+#      nlist: 1024
+#    search_params:
+#      nprobe: [1, 4, 8, 16, 32, 64]
+#    requires_gpu: true
+#
+#  - name: "GPU_IVF_PQ"
+#    type: "GPU_IVF_PQ"
+#    description: "GPU-accelerated IVF_PQ"
+#    params:
+#      nlist: 1024
+#      m: 16
+#      nbits: 8
+#    search_params:
+#      nprobe: [1, 4, 8, 16, 32]
+#    requires_gpu: true
 
 # -----------------------------------------------------------------------------
 # Distance Metrics Support

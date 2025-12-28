@@ -17,11 +17,11 @@ database:
 # Connection Settings
 # -----------------------------------------------------------------------------
 connection:
-  host: "localhost"
-  port: 5432
+  host: "127.0.0.1"
+  port: 5433
   database: "benchmark"
   user: "postgres"
-  password: "postgres"
+  password: "password"
   sslmode: "prefer"
   connect_timeout: 30
 
@@ -54,82 +54,102 @@ table:
 # -----------------------------------------------------------------------------
 index_configurations:
   # No index (exact search via sequential scan)
-  - name: "SeqScan"
-    type: "none"
-    description: "Sequential scan (exact search)"
-    params: {}
-    search_params:
-      set_enable_seqscan: true
-
-  # IVFFlat index
-  - name: "IVFFlat_100"
-    type: "ivfflat"
-    description: "IVFFlat with 100 lists"
-    params:
-      lists: 100
-    search_params:
-      probes: [1, 5, 10, 20, 50]
-
-  - name: "IVFFlat_500"
-    type: "ivfflat"
-    description: "IVFFlat with 500 lists"
-    params:
-      lists: 500
-    search_params:
-      probes: [1, 5, 10, 20, 50, 100]
-
-  - name: "IVFFlat_1000"
-    type: "ivfflat"
-    description: "IVFFlat with 1000 lists"
-    params:
-      lists: 1000
-    search_params:
-      probes: [1, 10, 20, 50, 100, 200]
-
-  - name: "IVFFlat_2000"
-    type: "ivfflat"
-    description: "IVFFlat with 2000 lists for larger datasets"
-    params:
-      lists: 2000
-    search_params:
-      probes: [1, 10, 20, 50, 100, 200, 400]
-
-  # HNSW index
-  - name: "HNSW_m16_ef64"
+  # --- L2 Indexes ---
+  - name: "HNSW_L2"
     type: "hnsw"
-    description: "HNSW with m=16, ef_construction=64"
     params:
+      distance: "l2"         # <--- Tag for filter
       m: 16
       ef_construction: 64
     search_params:
-      ef_search: [40, 80, 120, 200, 400]
+      ef_search: [ 40, 100 ]
 
-  - name: "HNSW_m32_ef128"
+  # --- Cosine Indexes ---
+  - name: "HNSW_Cosine"
     type: "hnsw"
-    description: "HNSW with m=32, ef_construction=128"
     params:
-      m: 32
-      ef_construction: 128
+      distance: "cosine"     # <--- Tag for filter
+      m: 16
+      ef_construction: 64
     search_params:
-      ef_search: [64, 128, 256, 400]
+      ef_search: [ 40, 100 ]
 
-  - name: "HNSW_m48_ef200"
-    type: "hnsw"
-    description: "HNSW with higher accuracy settings"
-    params:
-      m: 48
-      ef_construction: 200
-    search_params:
-      ef_search: [100, 200, 300, 500]
-
-  - name: "HNSW_m64_ef256"
-    type: "hnsw"
-    description: "HNSW with maximum accuracy"
-    params:
-      m: 64
-      ef_construction: 256
-    search_params:
-      ef_search: [128, 256, 512, 800]
+#  - name: "SeqScan"
+#    type: "none"
+#    description: "Sequential scan (exact search)"
+#    params: {}
+#    search_params:
+#      set_enable_seqscan: true
+#
+#  # IVFFlat index
+#  - name: "IVFFlat_100"
+#    type: "ivfflat"
+#    description: "IVFFlat with 100 lists"
+#    params:
+#      lists: 100
+#    search_params:
+#      probes: [1, 5, 10, 20, 50]
+#
+#  - name: "IVFFlat_500"
+#    type: "ivfflat"
+#    description: "IVFFlat with 500 lists"
+#    params:
+#      lists: 500
+#    search_params:
+#      probes: [1, 5, 10, 20, 50, 100]
+#
+#  - name: "IVFFlat_1000"
+#    type: "ivfflat"
+#    description: "IVFFlat with 1000 lists"
+#    params:
+#      lists: 1000
+#    search_params:
+#      probes: [1, 10, 20, 50, 100, 200]
+#
+#  - name: "IVFFlat_2000"
+#    type: "ivfflat"
+#    description: "IVFFlat with 2000 lists for larger datasets"
+#    params:
+#      lists: 2000
+#    search_params:
+#      probes: [1, 10, 20, 50, 100, 200, 400]
+#
+#  # HNSW index
+#  - name: "HNSW_m16_ef64"
+#    type: "hnsw"
+#    description: "HNSW with m=16, ef_construction=64"
+#    params:
+#      m: 16
+#      ef_construction: 64
+#    search_params:
+#      ef_search: [40, 80, 120, 200, 400]
+#
+#  - name: "HNSW_m32_ef128"
+#    type: "hnsw"
+#    description: "HNSW with m=32, ef_construction=128"
+#    params:
+#      m: 32
+#      ef_construction: 128
+#    search_params:
+#      ef_search: [64, 128, 256, 400]
+#
+#  - name: "HNSW_m48_ef200"
+#    type: "hnsw"
+#    description: "HNSW with higher accuracy settings"
+#    params:
+#      m: 48
+#      ef_construction: 200
+#    search_params:
+#      ef_search: [100, 200, 300, 500]
+#
+#  - name: "HNSW_m64_ef256"
+#    type: "hnsw"
+#    description: "HNSW with maximum accuracy"
+#    params:
+#      m: 64
+#      ef_construction: 256
+#    search_params:
+#      ef_search: [128, 256, 512, 800]
 
 # -----------------------------------------------------------------------------
 # Distance Metrics Support
@@ -205,7 +225,7 @@ postgres_settings:
 # Batch Settings
 # -----------------------------------------------------------------------------
 batch:
-  insert_batch_size: 1000
+  insert_batch_size: 5000
   search_batch_size: 100
 
   # Use COPY for bulk inserts
