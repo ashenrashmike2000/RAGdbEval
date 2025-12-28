@@ -253,6 +253,11 @@ class BenchmarkRunner:
                 metrics.resource.index_build_time_sec = build_time
                 metrics.resource.ram_bytes_peak = build_monitor.peak_memory_bytes
 
+                # === NEW: Calculate Batch Throughput ===
+                if build_time > 0:
+                    metrics.operational.insert_throughput_batch = len(vectors) / build_time
+                # =======================================
+
                 # Warmup
                 warmup_queries = queries[:self.config.experiment.warmup_queries]
                 for q in warmup_queries:
@@ -306,11 +311,15 @@ class BenchmarkRunner:
                 t0 = time.perf_counter()
                 try:
                     if hasattr(db, 'update_one'):
-                        # Modify vector slightly
                         updated_vec = dummy_vec + 0.01
                         db.update_one(dummy_id, updated_vec)
-                        # CORRECTED: .operational.update_latency_ms
-                        metrics.operational.update_latency_ms = (time.perf_counter() - t0) * 1000
+
+                        latency_ms = (time.perf_counter() - t0) * 1000
+                        metrics.operational.update_latency_ms = latency_ms
+
+                        # === NEW: Calculate Throughput ===
+                        if latency_ms > 0:
+                            metrics.operational.update_throughput = 1000 / latency_ms
                 except Exception as e:
                     logger.warning(f"Update ops failed: {e}")
 
@@ -319,8 +328,13 @@ class BenchmarkRunner:
                 try:
                     if hasattr(db, 'delete_one'):
                         db.delete_one(dummy_id)
-                        # CORRECTED: .operational.delete_latency_ms
-                        metrics.operational.delete_latency_ms = (time.perf_counter() - t0) * 1000
+
+                        latency_ms = (time.perf_counter() - t0) * 1000
+                        metrics.operational.delete_latency_ms = latency_ms
+
+                        # === NEW: Calculate Throughput ===
+                        if latency_ms > 0:
+                            metrics.operational.delete_throughput = 1000 / latency_ms
                 except Exception as e:
                     logger.warning(f"Delete ops failed: {e}")
 
