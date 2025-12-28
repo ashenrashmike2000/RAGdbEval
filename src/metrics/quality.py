@@ -51,7 +51,8 @@ def compute_recall_at_k(
             recalls.append(1.0)  # No ground truth to find
         else:
             intersection = len(retrieved_k & true_neighbors)
-            recalls.append(intersection / len(true_neighbors))
+            denominator = min(k, len(true_neighbors))
+            recalls.append(intersection / denominator)
 
     return np.mean(recalls)
 
