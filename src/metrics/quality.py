@@ -39,20 +39,25 @@ def compute_recall_at_k(
 
     for i in range(n_queries):
         retrieved_k = set(retrieved[i, :k])
-
-        # FIXED: Use ALL ground truth (usually top 100), not just top K
         true_neighbors = set(ground_truth[i])
 
-        # Remove invalid indices
         retrieved_k.discard(-1)
         true_neighbors.discard(-1)
 
         if len(true_neighbors) == 0:
-            recalls.append(1.0)  # No ground truth to find
+            recalls.append(1.0)
         else:
             intersection = len(retrieved_k & true_neighbors)
+
+            # --- THE FIX ---
+            # We divide by 'min(k, len)' so the score is relative to what we asked for.
+            # If we asked for 10 items, and found 10, we get 1.0.
             denominator = min(k, len(true_neighbors))
-            recalls.append(intersection / denominator)
+
+            if denominator == 0:
+                recalls.append(0.0)
+            else:
+                recalls.append(intersection / denominator)
 
     return np.mean(recalls)
 
@@ -80,7 +85,7 @@ def compute_precision_at_k(
         retrieved_k = set(retrieved[i, :k])
 
         # Precision also checks against the full set of known neighbors
-        true_neighbors = set(ground_truth[i])
+        true_neighbors = set(ground_truth[i])  # Checks against ALL 100 GT items
 
         retrieved_k.discard(-1)
         true_neighbors.discard(-1)
@@ -161,15 +166,14 @@ def compute_ndcg_at_k(
         all_true_neighbors = set(ground_truth[i])
         all_true_neighbors.discard(-1)
 
-        # Use top-K of ground truth for IDCG calculation
-        # (Assuming ground_truth is sorted by relevance)
+        # IDCG considers the 'best possible' k items
         ideal_neighbors_k = ground_truth[i, :k]
 
         # Compute DCG
         dcg = 0.0
         for rank, idx in enumerate(retrieved[i, :k], start=1):
             if idx in all_true_neighbors:
-                # Binary relevance or graded
+                # Binary relevance (1.0) unless scores provided
                 rel = 1.0 if relevance_scores is None else relevance_scores[i, rank - 1]
                 dcg += rel / np.log2(rank + 1)
 
