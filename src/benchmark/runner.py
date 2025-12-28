@@ -295,9 +295,10 @@ class BenchmarkRunner:
                     # You must implement 'insert_one' in your adapters!
                     if hasattr(db, 'insert_one'):
                         db.insert_one(dummy_id, dummy_vec)
-                        metrics.ops.ops_insert_latency_single_ms = (time.perf_counter() - t0) * 1000
+                        # CORRECTED: .operational.insert_latency_single_ms
+                        metrics.operational.insert_latency_single_ms = (time.perf_counter() - t0) * 1000
                     else:
-                        metrics.ops.ops_insert_latency_single_ms = 0.0
+                        metrics.operational.insert_latency_single_ms = 0.0
                 except Exception as e:
                     logger.warning(f"Insert ops failed: {e}")
 
@@ -308,7 +309,8 @@ class BenchmarkRunner:
                         # Modify vector slightly
                         updated_vec = dummy_vec + 0.01
                         db.update_one(dummy_id, updated_vec)
-                        metrics.ops.ops_update_latency_ms = (time.perf_counter() - t0) * 1000
+                        # CORRECTED: .operational.update_latency_ms
+                        metrics.operational.update_latency_ms = (time.perf_counter() - t0) * 1000
                 except Exception as e:
                     logger.warning(f"Update ops failed: {e}")
 
@@ -317,7 +319,8 @@ class BenchmarkRunner:
                 try:
                     if hasattr(db, 'delete_one'):
                         db.delete_one(dummy_id)
-                        metrics.ops.ops_delete_latency_ms = (time.perf_counter() - t0) * 1000
+                        # CORRECTED: .operational.delete_latency_ms
+                        metrics.operational.delete_latency_ms = (time.perf_counter() - t0) * 1000
                 except Exception as e:
                     logger.warning(f"Delete ops failed: {e}")
 
