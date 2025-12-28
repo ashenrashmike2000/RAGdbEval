@@ -60,7 +60,7 @@ def manage_container(db_name, action):
             print("⏳ Waiting 60s for Milvus to initialize...")
             time.sleep(60)  # Milvus needs time to start services!
         else:
-            time.sleep(10)
+            time.sleep(30)
 
     elif action == "down":
         print(f"🛑 Stopping {db_name}...")
