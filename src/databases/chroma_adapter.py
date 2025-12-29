@@ -212,7 +212,31 @@ class ChromaAdapter(VectorDBInterface):
             latencies
         )
 
-    # CRUD Stubs
+    # ==========================================
+    #  Added methods for Runner Compatibility
+    # ==========================================
+
+    def insert_one(self, id: str, vector: np.ndarray):
+        """Inserts a single object (Required for benchmark runner)."""
+        self._collection.add(
+            ids=[str(id)],
+            embeddings=[vector.tolist()]
+        )
+
+    def update_one(self, id: str, vector: np.ndarray):
+        """Updates a single object (Required for benchmark runner)."""
+        self._collection.update(
+            ids=[str(id)],
+            embeddings=[vector.tolist()]
+        )
+
+    def delete_one(self, id: str):
+        """Deletes a single object (Required for benchmark runner)."""
+        self._collection.delete(ids=[str(id)])
+
+    # ==========================================
+
+    # Standard Bulk CRUD (kept for interface compliance)
     def insert(self, vectors: NDArray[np.float32], metadata=None, ids=None) -> float:
         if ids is None: ids = list(range(self._num_vectors, self._num_vectors + len(vectors)))
         str_ids = [str(i) for i in ids]

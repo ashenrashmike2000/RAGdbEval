@@ -232,7 +232,7 @@ class WeaviateAdapter(VectorDBInterface):
         # Replicate the UUID generation logic from create_index
         try:
             vec_id_int = int(id) if str(id).isdigit() else 0
-            uid = str(uuid.uuid5(uuid.NAMESPACE_DNS, str(vec_id_int)))
+            uid = str(uuid.uuid4())
 
             self._collection.data.insert(
                 properties={"vec_id": vec_id_int},
