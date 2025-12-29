@@ -3,6 +3,7 @@ import time
 import argparse
 import sys
 import os
+import shutil
 
 # =============================================================================
 # SYSTEM CONFIGURATION
@@ -40,10 +41,37 @@ def run_command_simple(cmd):
         pass
 
 
+def cleanup_host_volumes():
+    """Forcefully deletes the local 'volumes' folder to ensure fresh state."""
+    vol_path = os.path.join(PROJECT_ROOT, "volumes")
+    if os.path.exists(vol_path):
+        print(f"🧹 Deleting local volumes folder: {vol_path}...")
+        try:
+            # Python's way of doing 'rm -rf'
+            shutil.rmtree(vol_path)
+        except PermissionError:
+            # If root created the files, Python might fail. Try shell command.
+            run_command_simple(f"rm -rf \"{vol_path}\"")
+        except Exception as e:
+            print(f"⚠️ Warning: Could not delete volumes: {e}")
+
+
+def wait_for_port(port, timeout=60):
+    """Wait until a port is open on localhost."""
+    import socket
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        try:
+            with socket.create_connection(("localhost", port), timeout=1):
+                return True
+        except (OSError, ConnectionRefusedError):
+            time.sleep(1)
+    return False
+
+
 def run_benchmark_command(cmd):
     """Executes the benchmark script and streams output to console."""
     print(f"Executing: {cmd}")
-    # check=True will raise CalledProcessError if the script crashes (exit code != 0)
     subprocess.run(cmd, shell=True, check=True, cwd=PROJECT_ROOT)
 
 
@@ -51,28 +79,49 @@ def manage_container(db_name, action):
     compose_file = DOCKER_MAP.get(db_name)
     if not compose_file: return
 
+    # =========================================================
+    # PART 1: EXECUTE DOCKER COMMANDS
+    # =========================================================
     if action == "up":
-        print(f"🚀 Initializing {db_name}...")
-        # Standard Docker Reset (Internal Volumes only)
-        run_command_simple(f"docker compose -f \"{compose_file}\" down -v")
+        # 1. CLEANUP OLD DATA
+        cleanup_host_volumes()
+
+        # 2. START CONTAINER
+        print(f"🚀 Starting {db_name}...")
         run_command_simple(f"docker compose -f \"{compose_file}\" up -d")
-        if db_name == "milvus":
-            print("⏳ Waiting 60s for Milvus to initialize...")
-            time.sleep(60)  # Milvus needs time to start services!
-        else:
-            time.sleep(30)
+
+    elif action == "restart":
+        print(f"♻️  RESET: Restarting {db_name}...")
+        run_command_simple(f"docker compose -f \"{compose_file}\" down -v")
+
+        # 1. CLEANUP DATA BEFORE RESTARTING
+        cleanup_host_volumes()
+
+        time.sleep(5)
+        run_command_simple(f"docker compose -f \"{compose_file}\" up -d")
 
     elif action == "down":
         print(f"🛑 Stopping {db_name}...")
         run_command_simple(f"docker compose -f \"{compose_file}\" down -v")
 
-    elif action == "restart":
-        print(f"♻️  RESET: Restarting {db_name}...")
-        run_command_simple(f"docker compose -f \"{compose_file}\" down -v")
-        time.sleep(5)
-        run_command_simple(f"docker compose -f \"{compose_file}\" up -d")
-        print(f"⏳ Waiting {WARMUP_TIME.get(db_name, 10)}s for recovery...")
-        time.sleep(WARMUP_TIME.get(db_name, 10))
+        # 1. FINAL CLEANUP
+        cleanup_host_volumes()
+        return
+
+    # =========================================================
+    # PART 2: WAIT FOR READINESS
+    # =========================================================
+    if db_name == "milvus":
+        print("⏳ Polling Milvus port 19530...")
+        if wait_for_port(19530, timeout=200):
+            print("✅ Milvus is ready!")
+            time.sleep(10)
+        else:
+            print("❌ Milvus failed to start (Port 19530 closed)!")
+    else:
+        wait_time = WARMUP_TIME.get(db_name, 30)
+        print(f"⏳ Waiting {wait_time}s for {db_name}...")
+        time.sleep(wait_time)
 
 
 def force_cleanup_all():
@@ -80,6 +129,7 @@ def force_cleanup_all():
     for db, file in DOCKER_MAP.items():
         if file and os.path.exists(file):
             run_command_simple(f"docker compose -f \"{file}\" down")
+    cleanup_host_volumes()
     print("✅ Cleanup complete.")
 
 
@@ -102,6 +152,7 @@ def main():
     print("🧹 Cleaning up workspace...")
     for db, file in DOCKER_MAP.items():
         if file and os.path.exists(file): run_command_simple(f"docker compose -f \"{file}\" down")
+    cleanup_host_volumes()
 
     try:
         # === OUTER LOOP: Databases ===
@@ -126,7 +177,6 @@ def main():
                     print(f"❌ Run Failed (Exit Code Error). Moving to next dataset.")
 
                 # --- SWITCHING LOGIC ---
-                # We restart the container between datasets to ensure a clean state
                 is_last_dataset = (i == len(args.dataset) - 1)
 
                 if not is_last_dataset:
