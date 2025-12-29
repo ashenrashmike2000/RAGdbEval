@@ -2,6 +2,7 @@
 Main benchmark runner orchestrating all benchmark operations.
 """
 
+import uuid
 import json
 import logging
 import time
@@ -292,7 +293,15 @@ class BenchmarkRunner:
 
                 # 1. Measure Single Insert Latency
                 # Create a dummy vector (random or from queries)
-                dummy_id = "bench_test_id_999999"
+                # Qdrant and Weaviate usually prefer/require UUIDs
+                # Pgvector, Milvus, Faiss usually prefer Integers
+                if db.name in ["qdrant", "weaviate", "lancedb"]:
+                    # Generate a REAL valid UUID to satisfy Qdrant/Weaviate
+                    dummy_id = str(uuid.uuid4())
+                else:
+                    # Use a massive integer to avoid collision with SIFT1M (0 to 999,999)
+                    # 10 million is safe
+                    dummy_id = "10000000"
                 dummy_vec = queries[0]  # Use first query vector as a test insert
 
                 t0 = time.perf_counter()
