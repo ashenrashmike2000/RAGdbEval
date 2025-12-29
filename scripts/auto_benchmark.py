@@ -48,11 +48,11 @@ def cleanup_host_volumes():
     if os.path.exists(vol_path):
         print(f"🧹 Deleting local volumes folder: {vol_path}...")
         try:
-            # Python's way of doing 'rm -rf'
+            # Python's way of doing 'sudo rm -rf'
             shutil.rmtree(vol_path)
         except PermissionError:
             # If root created the files, Python might fail. Try shell command.
-            run_command_simple(f"rm -rf \"{vol_path}\"")
+            run_command_simple(f"sudo rm -rf \"{vol_path}\"")
         except Exception as e:
             print(f"⚠️ Warning: Could not delete volumes: {e}")
 
