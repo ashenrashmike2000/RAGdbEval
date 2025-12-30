@@ -10,7 +10,7 @@ services:
       - ETCD_QUOTA_BACKEND_BYTES=4294967296
       - ETCD_SNAPSHOT_COUNT=50000
     volumes:
-      - F:/vector_db/milvus/etcd:/etcd
+      - ./volumes/milvus/etcd:/etcd
     command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
 
   minio:
@@ -23,7 +23,7 @@ services:
       - "9001:9001"
       - "9000:9000"
     volumes:
-      - F:/vector_db/milvus/minio:/minio_data
+      - ./volumes/milvus/minio:/minio_data
     command: minio server /minio_data --console-address ":9001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
