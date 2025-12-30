@@ -241,7 +241,23 @@ class LanceDBAdapter(VectorDBInterface):
 
     def get_index_stats(self) -> Dict[str, Any]:
         if not self._table: return {}
-        return {"num_vectors": len(self._table), "dimensions": self._dimensions}
+
+        # Calculate size of the specific table directory
+        import os
+        total_size = 0
+        table_path = os.path.join(self._db_path, f"{self._table_name}.lance")
+
+        if os.path.exists(table_path):
+            for dirpath, _, filenames in os.walk(table_path):
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    total_size += os.path.getsize(fp)
+
+        return {
+            "num_vectors": len(self._table),
+            "dimensions": self._dimensions,
+            "index_size_bytes": total_size  # <--- This fixes the "0 bytes" error for LanceDB
+        }
 
     def set_search_params(self, params: Dict[str, Any]) -> None:
         self._search_params = params
