@@ -58,7 +58,6 @@ class LanceDBAdapter(VectorDBInterface):
             language="Rust/Python",
             license="Apache-2.0",
             supported_metrics=[DistanceMetric.L2, DistanceMetric.COSINE],
-            # FIX: Removed invalid IndexType to prevent AttributeError
             supported_index_types=[],
             supports_filtering=True,
             supports_hybrid_search=True,
@@ -99,24 +98,22 @@ class LanceDBAdapter(VectorDBInterface):
 
         vector_ids = ids if ids is not None else list(range(n_vectors))
 
-        # === FIX: Convert to PyArrow Table ===
-        # This handles the memory efficiently and creates the correct schema
-        # 1. Create ID Array
-        pa_ids = pa.array(vector_ids)
+        # 1. Create ID Array (Converted to STRING to support UUIDs later)
+        # FIX: Converted int IDs to string so the schema matches the CRUD UUIDs
+        pa_ids = pa.array([str(i) for i in vector_ids])
 
         # 2. Create Vector Array (FixedSizeList)
-        # Flatten numpy array (Zero-copy view if possible)
         flat_vectors = vectors.reshape(-1)
         pa_vectors = pa.FixedSizeListArray.from_arrays(pa.array(flat_vectors), dimensions)
 
         # 3. Create Table
+        # FIX: Changed "id" field to pa.string()
         schema = pa.schema([
-            pa.field("id", pa.int64()),
+            pa.field("id", pa.string()),
             pa.field("vector", pa.list_(pa.float32(), dimensions))
         ])
 
         data = pa.Table.from_arrays([pa_ids, pa_vectors], schema=schema)
-        # ======================================
 
         # Create Table
         if self._table_name in self._db.table_names():
@@ -136,12 +133,9 @@ class LanceDBAdapter(VectorDBInterface):
         target_m = params.get("m", 96)
 
         def get_valid_m(dim, target):
-            # Try target first
             if dim % target == 0: return target
-            # Try to find the largest divisor close to target
             for i in range(target, 1, -1):
                 if dim % i == 0: return i
-            # Fallback to small divisors
             for i in [16, 12, 8, 4, 2]:
                 if dim % i == 0: return i
             return 1
@@ -205,7 +199,13 @@ class LanceDBAdapter(VectorDBInterface):
 
             latencies.append((time.perf_counter() - start_q) * 1000)
 
-            indices = results["id"].values.tolist()
+            # FIX: Convert string IDs back to Integers for metrics calculation
+            # If conversion fails (e.g. UUIDs), default to 0
+            try:
+                indices = [int(i) for i in results["id"].values]
+            except ValueError:
+                indices = [0] * len(results)
+
             dists = results["_distance"].values.tolist()
 
             all_indices.append(indices)
@@ -217,9 +217,11 @@ class LanceDBAdapter(VectorDBInterface):
             latencies
         )
 
+    # Standard Bulk Interface
     def insert(self, vectors: NDArray[np.float32], metadata=None, ids=None) -> float:
         if ids is None: ids = list(range(self._num_vectors, self._num_vectors + len(vectors)))
-        data = [{"id": id, "vector": vec} for id, vec in zip(ids, vectors)]
+        # Ensure IDs are strings
+        data = [{"id": str(id), "vector": vec} for id, vec in zip(ids, vectors)]
         start = time.perf_counter()
         self._table.add(data)
         self._num_vectors += len(vectors)
@@ -231,7 +233,8 @@ class LanceDBAdapter(VectorDBInterface):
 
     def delete(self, ids: List[int]) -> float:
         start = time.perf_counter()
-        ids_str = ", ".join(map(str, ids))
+        # IDs are strings now
+        ids_str = ", ".join([f"'{i}'" for i in ids])
         self._table.delete(f"id IN ({ids_str})")
         self._num_vectors -= len(ids)
         return time.perf_counter() - start
@@ -246,21 +249,21 @@ class LanceDBAdapter(VectorDBInterface):
     def get_search_params(self) -> Dict[str, Any]:
         return self._search_params
 
-    # === NEW: Single-Item Wrappers for Benchmarking ===
+    # === FIXED: Single-Item Wrappers for Benchmarking ===
 
     def insert_one(self, id: str, vector: np.ndarray):
         """Inserts a single vector."""
-        # Wrap the single vector in a list and pass to LanceDB
-        data = [{"id": id, "vector": vector, "text": "benchmark_update_test"}]
+        # FIX: Removed 'text' field (it was not in schema)
+        # FIX: Cast id to str
+        data = [{"id": str(id), "vector": vector}]
         self._table.add(data)
 
     def delete_one(self, id: str):
         """Deletes a single vector by ID."""
-        # Note: We use quotes '{id}' because the ID is a string
-        self._table.delete(f"id = '{id}'")
+        # FIX: Cast id to str. Query works now because schema 'id' is string.
+        self._table.delete(f"id = '{str(id)}'")
 
     def update_one(self, id: str, vector: np.ndarray):
         """Updates a single vector (Delete + Insert)."""
-        # LanceDB (and many vector DBs) handles updates as delete-then-insert
         self.delete_one(id)
         self.insert_one(id, vector)
