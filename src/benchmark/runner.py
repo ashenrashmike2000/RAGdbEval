@@ -194,11 +194,15 @@ class BenchmarkRunner:
             if self.strict_mode: raise RuntimeError(msg)
 
         # --- GUARD: Query Count Consistency ---
-        warmup_count = self.config.experiment.warmup_queries
-        if len(queries) <= warmup_count:
-            msg = f"Query set ({len(queries)}) is too small for warmup ({warmup_count})."
-            console.print(f"[red]❌ Error: {msg}[/red]")
-            if self.strict_mode: raise RuntimeError(msg)
+        target_warmup = self.config.experiment.warmup_queries
+        if len(queries) <= target_warmup:
+            # If dataset is small, use 20% of it for warmup (or at least 1)
+            new_warmup = max(1, int(len(queries) * 0.2))
+            console.print(
+                f"[yellow]⚠️  Dataset too small for {target_warmup} warmup queries. Auto-reduced to {new_warmup}.[/yellow]")
+            warmup_count = new_warmup
+        else:
+            warmup_count = target_warmup
 
         # --- GUARD: Data Leakage Check (Numerical Tolerance) ---
         console.print("  [dim]Verifying data integrity (Leakage Check)...[/dim]")
@@ -294,7 +298,7 @@ class BenchmarkRunner:
                         time.sleep(300)
 
                     # Warmup
-                    warmup_queries = queries[:self.config.experiment.warmup_queries]
+                    warmup_queries = queries[:warmup_count]
                     if len(warmup_queries) > 0:
                         console.print(f"    [dim]Running {len(warmup_queries)} warm-up queries...[/dim]")
                         for q in warmup_queries:
