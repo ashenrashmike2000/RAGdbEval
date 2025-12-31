@@ -1,5 +1,6 @@
 """
 Main benchmark runner orchestrating all benchmark operations.
+Refactored for "Build Once, Search Many" efficiency.
 """
 
 import uuid
@@ -9,6 +10,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+import statistics  # Required for Mean ± Std calculations
 
 import numpy as np
 from rich.console import Console
@@ -34,48 +36,58 @@ from src.metrics.resource import ResourceMonitor, compute_all_resource_metrics
 logger = logging.getLogger(__name__)
 console = Console()
 
+# =========================================================
+# DATASET TUNING CONFIGURATION (Design A)
+# =========================================================
+DATASET_TUNING = {
+    "sift1m": {
+        "params": {"m": 16, "ef_construct": 200},
+        "search_params": {"ef": 100, "nprobe": 10}
+    },
+    "deep1m": {
+        "params": {"m": 16, "ef_construct": 128},
+        "search_params": {"ef": 64, "nprobe": 10}
+    },
+    "gist1m": {
+        "params": {"m": 32, "ef_construct": 400},
+        "search_params": {"ef": 300, "nprobe": 64}
+    },
+    "glove": {
+        "params": {"m": 24, "ef_construct": 200},
+        "search_params": {"ef": 120, "nprobe": 20}
+    },
+    "msmarco": {
+        "params": {"m": 32, "ef_construct": 300},
+        "search_params": {"ef": 200, "nprobe": 32}
+    },
+    "random": {
+        "params": {"m": 16, "ef_construct": 100},
+        "search_params": {"ef": 50, "nprobe": 5}
+    }
+}
+
 
 class BenchmarkRunner:
     """
     Main benchmark orchestrator.
-
-    Coordinates database initialization, dataset loading, benchmark execution,
-    and results collection following SOTA methodologies.
     """
 
     def __init__(
-        self,
-        config: Optional[Config] = None,
-        config_path: Optional[str] = None,
+            self,
+            config: Optional[Config] = None,
+            config_path: Optional[str] = None,
     ):
-        """
-        Initialize benchmark runner.
-
-        Args:
-            config: Configuration object
-            config_path: Path to configuration file
-        """
         self.config = config or load_config(config_path)
         self.results: List[BenchmarkResult] = []
         self.hardware_info = detect_hardware()
 
     def run(
-        self,
-        databases: Optional[List[str]] = None,
-        datasets: Optional[List[str]] = None,
-        index_configs: Optional[List[str]] = None,
+            self,
+            databases: Optional[List[str]] = None,
+            datasets: Optional[List[str]] = None,
+            index_configs: Optional[List[str]] = None,
     ) -> List[BenchmarkResult]:
-        """
-        Run benchmarks for specified databases and datasets.
 
-        Args:
-            databases: List of database names (default: from config)
-            datasets: List of dataset names (default: from config)
-            index_configs: Specific index configs to test
-
-        Returns:
-            List of benchmark results
-        """
         # Determine what to benchmark
         if databases is None:
             if self.config.database.compare_all:
@@ -92,7 +104,7 @@ class BenchmarkRunner:
         console.print(f"\n[bold blue]VectorDB Benchmark[/bold blue]")
         console.print(f"Databases: {', '.join(databases)}")
         console.print(f"Datasets: {', '.join(datasets)}")
-        console.print(f"Runs per config: {self.config.experiment.runs}")
+        console.print(f"Runs per config: {self.config.experiment.runs} (Build Once, Search Many)")
         console.print()
 
         results = []
@@ -117,278 +129,221 @@ class BenchmarkRunner:
         return results
 
     def _run_single_benchmark(
-        self,
-        db_name: str,
-        dataset: DatasetLoader,
-        index_configs: Optional[List[str]] = None,
+            self,
+            db_name: str,
+            dataset: DatasetLoader,
+            index_configs: Optional[List[str]] = None,
     ) -> BenchmarkResult:
         """Run benchmark for a single database-dataset pair."""
         db_config = self.config.get_database_config(db_name)
         configs_to_test = self._get_index_configs(db_config, index_configs)
 
-        # FIXED: Instantiate temporary DB to get correct info for metadata
         temp_db = get_database(db_name, db_config)
 
         result = BenchmarkResult(
             experiment_name=f"{db_name}_{dataset.name}",
-            database_info=temp_db.info,  # FIXED: Populate database info
+            database_info=temp_db.info,
             dataset_info=dataset.info,
             hardware_info=self.hardware_info,
         )
 
-        # Load data
         vectors = dataset.vectors
         queries = dataset.queries
 
-        # === ADD THIS SAFETY SLICE ===
         if dataset.name == "msmarco" and len(vectors) > 1000000:
             print("✂️  Slicing MSMARCO to 1M vectors to save RAM...")
             vectors = vectors[:1000000]
-            # =============================
 
         ground_truth = dataset.ground_truth
-
-        # FIXED: Get the metric from the dataset info instead of hardcoding
         metric = dataset.info.distance_metric
 
         console.print(f"  Vectors: {vectors.shape}, Queries: {queries.shape}")
         console.print(f"  Metric: {metric.value}")
 
-        # Test each index configuration
+        # === OPTIMIZATION: CONNECT ONCE ===
+        # We perform connection/build once, then loop searches.
+
         for idx_config in configs_to_test:
 
-            # =========================================================
-            # SMART FILTER: Automatically skip mismatched configurations
-            # =========================================================
+            # 1. TUNING
+            tuning = DATASET_TUNING.get(dataset.name.lower())
+            if tuning:
+                console.print(f"  [magenta]Applying tuned parameters for {dataset.name}[/magenta]")
+                if idx_config.params is None: idx_config.params = {}
+                idx_config.params.update(tuning["params"])
+                if idx_config.search_params is None: idx_config.search_params = {}
+                idx_config.search_params.update(tuning["search_params"])
 
-            # 1. Determine Dataset's Required Metric
-            # Convert dataset metric to lowercase string (e.g. "cosine", "l2")
+            # 2. FILTERING
             req_metric = metric.value.lower()
             if req_metric == 'angular': req_metric = 'cosine'
             if req_metric == 'euclidean': req_metric = 'l2'
 
-            # 2. Determine Index Config's Metric
-            # Check for keys used by different DBs (Chroma='space', Milvus='metric_type', Weaviate='distance')
             params = idx_config.params
             cfg_metric = params.get('space') or params.get('metric_type') or params.get('distance')
-
             if cfg_metric:
                 cfg_metric = cfg_metric.lower()
-                # Normalize common synonyms
                 if cfg_metric == 'ip': cfg_metric = 'cosine'
                 if cfg_metric == 'l2-squared': cfg_metric = 'l2'
-
-                # 3. Compare and Skip
-                # If both metrics are known but different, skip this config
                 if req_metric and cfg_metric and req_metric != cfg_metric:
-                    console.print(f"  [dim]Skipping {idx_config.name}: Dataset requires '{req_metric}', Config is '{cfg_metric}'[/dim]")
+                    console.print(f"  [dim]Skipping {idx_config.name}: Metric mismatch[/dim]")
                     continue
-
-            # =========================================================
-            # END SMART FILTER
-            # =========================================================
 
             console.print(f"\n  [yellow]Index: {idx_config.name}[/yellow]")
 
+            # =================================================================
+            # CRITICAL OPTIMIZATION: BUILD ONCE, SEARCH MANY
+            # =================================================================
             runs = []
-            for run_id in range(self.config.experiment.runs):
-                run_result = self._execute_run(
-                    db_name, db_config, idx_config, vectors, queries, ground_truth, run_id, metric
-                )
-                runs.append(run_result)
-                console.print(f"    Run {run_id + 1}: Recall@10={run_result.metrics.quality.recall_at_10:.4f}, "
-                            f"Latency_p50={run_result.metrics.performance.latency_p50:.2f}ms")
+
+            try:
+                db = get_database(db_name, db_config)
+                with db:
+                    # --- A. BUILD PHASE ---
+                    console.print("    [bold]Building Index (Once)...[/bold]")
+
+                    with ResourceMonitor() as build_monitor:
+                        # FIX: Used idx_config instead of index_config
+                        build_duration_sec = db.create_index(vectors, idx_config, metric)
+
+                    # Store build metrics to copy to all runs later
+                    build_metrics = {
+                        "build_time": build_duration_sec,
+                        "ram_peak": build_monitor.peak_memory_bytes,
+                        "insert_throughput": len(vectors) / build_duration_sec if build_duration_sec > 0 else 0
+                    }
+
+                    if db_name == "weaviate":
+                        console.print("    [yellow]⏳ Weaviate: Sleeping 300s for HNSW convergence...[/yellow]")
+                        time.sleep(300)
+
+                    # Warmup (Run once globally)
+                    warmup_queries = queries[:self.config.experiment.warmup_queries]
+                    if len(warmup_queries) > 0:
+                        console.print(f"    [dim]Running {len(warmup_queries)} warm-up queries...[/dim]")
+                        for q in warmup_queries:
+                            db.search_single(q, k=10)
+
+                    # --- B. SEARCH PHASE (Loop) ---
+                    console.print(f"    [bold]Starting {self.config.experiment.runs} Search Runs...[/bold]")
+
+                    for run_id in range(self.config.experiment.runs):
+                        console.print(f"    Run {run_id + 1}/{self.config.experiment.runs}: Searching...", end="\r")
+
+                        run_start = time.perf_counter()
+                        current_metrics = MetricsResult()
+
+                        # Populate Build Metrics (Constant across runs)
+                        current_metrics.resource.index_build_time_sec = build_metrics["build_time"]
+                        current_metrics.resource.ram_bytes_peak = build_metrics["ram_peak"]
+                        current_metrics.operational.insert_throughput_batch = build_metrics["insert_throughput"]
+
+                        # 1. Search
+                        k = 100
+                        # FIX: Used idx_config instead of index_config
+                        search_params = idx_config.search_params
+
+                        # Fix params if list
+                        if search_params:
+                            resolved_params = {}
+                            for key, value in search_params.items():
+                                if isinstance(value, list) and len(value) > 0:
+                                    resolved_params[key] = value[len(value) // 2]
+                                else:
+                                    resolved_params[key] = value
+                            search_params = resolved_params
+
+                        indices, distances, latencies = db.search(queries, k, search_params)
+
+                        # 2. Compute Metrics
+                        current_metrics.quality = compute_all_quality_metrics(indices, ground_truth)
+                        current_metrics.performance = compute_all_performance_metrics(latencies)
+
+                        # 3. Ops Benchmark (Only run on last run to avoid muddying index)
+                        if run_id == self.config.experiment.runs - 1:
+                            # Ops logic
+                            if db.name in ["qdrant", "weaviate", "lancedb"]:
+                                dummy_id = str(uuid.uuid4())
+                            else:
+                                dummy_id = "10000000"
+                            dummy_vec = queries[0]
+
+                            t0 = time.perf_counter()
+                            try:
+                                if hasattr(db, 'insert_one'):
+                                    db.insert_one(dummy_id, dummy_vec)
+                                    current_metrics.operational.insert_latency_single_ms = (time.perf_counter() - t0) * 1000
+                            except:
+                                pass
+
+                            t0 = time.perf_counter()
+                            try:
+                                if hasattr(db, 'update_one'):
+                                    db.update_one(dummy_id, dummy_vec + 0.01)
+                                    current_metrics.operational.update_latency_ms = (time.perf_counter() - t0) * 1000
+                            except:
+                                pass
+
+                            t0 = time.perf_counter()
+                            try:
+                                if hasattr(db, 'delete_one'):
+                                    db.delete_one(dummy_id)
+                                    current_metrics.operational.delete_latency_ms = (time.perf_counter() - t0) * 1000
+                            except:
+                                pass
+
+                        # Index Stats
+                        stats = db.get_index_stats()
+                        current_metrics.resource.index_size_bytes = stats.get("index_size_bytes", 0)
+
+                        # Safety Check
+                        if current_metrics.quality.recall_at_10 > 0.99 and vectors.shape[1] > 500:
+                            console.print(
+                                "\n    [bold red]⚠️  WARNING: Suspiciously perfect Recall (>0.99) on high-dim data.[/bold red]")
+
+                        # Create Run Object
+                        runs.append(BenchmarkRun(
+                            config=RunConfig(
+                                # FIX: Used idx_config instead of index_config
+                                database=db_name, dataset="", index_config=idx_config,
+                                distance_metric=metric, k=100, num_queries=len(queries), run_id=run_id
+                            ),
+                            metrics=current_metrics,
+                            run_id=run_id,
+                            timestamp=datetime.now(),
+                            success=True,
+                            duration_sec=time.perf_counter() - run_start
+                        ))
+
+                        # Print mini-summary
+                        console.print(
+                            f"    Run {run_id + 1}: Recall@10={current_metrics.quality.recall_at_10:.4f}, Latency_p50={current_metrics.performance.latency_p50:.2f}ms")
+
+                    # --- CLEANUP ---
+                    db.delete_index()
+
+            except Exception as e:
+                logger.exception(f"Run failed: {e}")
+                console.print(f"[red]Failed: {e}[/red]")
 
             result.runs.extend(runs)
 
         result.num_runs = len(result.runs)
-
-        # Compute aggregated metrics
         if result.runs:
             result.mean_metrics = self._aggregate_metrics([r.metrics for r in result.runs])
 
         return result
 
-    def _execute_run(
-        self,
-        db_name: str,
-        db_config: Dict,
-        index_config: IndexConfig,
-        vectors: np.ndarray,
-        queries: np.ndarray,
-        ground_truth: np.ndarray,
-        run_id: int,
-        metric: DistanceMetric,  # FIXED: Added metric parameter
-    ) -> BenchmarkRun:
-        """Execute a single benchmark run."""
-        run_config = RunConfig(
-            database=db_name,
-            dataset="",
-            index_config=index_config,
-            distance_metric=metric,  # FIXED: Use passed metric
-            k=100,
-            num_queries=len(queries),
-            run_id=run_id,
-        )
-
-        start_time = time.perf_counter()
-        metrics = MetricsResult()
-
-        try:
-            db = get_database(db_name, db_config)
-
-            with db:
-                # Build index
-                with ResourceMonitor() as build_monitor:
-                    build_time = db.create_index(
-                        vectors,
-                        index_config,
-                        metric,  # FIXED: Use passed metric instead of hardcoded L2
-                    )
-
-                # If the adapter has the smart wait method, use it
-                if db_name == "weaviate":
-                    console.print("\n[yellow]⏳ Weaviate detected: Sleeping 300s to allow HNSW index build...[/yellow]")
-                    time.sleep(300)
-
-                metrics.resource.index_build_time_sec = build_time
-                metrics.resource.ram_bytes_peak = build_monitor.peak_memory_bytes
-
-                # === NEW: Calculate Batch Throughput ===
-                if build_time > 0:
-                    metrics.operational.insert_throughput_batch = len(vectors) / build_time
-                # =======================================
-
-                # Warmup
-                warmup_queries = queries[:self.config.experiment.warmup_queries]
-                for q in warmup_queries:
-                    db.search_single(q, k=10)
-
-                # Search with timing
-                k = 100
-                search_params = index_config.search_params
-
-                # Get first search param value if it's a list
-                if search_params:
-                    resolved_params = {}
-                    for key, value in search_params.items():
-                        if isinstance(value, list) and len(value) > 0:
-                            resolved_params[key] = value[len(value) // 2]  # Use middle value
-                        else:
-                            resolved_params[key] = value
-                    search_params = resolved_params
-
-                indices, distances, latencies = db.search(queries, k, search_params)
-
-                # Compute quality metrics
-                metrics.quality = compute_all_quality_metrics(indices, ground_truth)
-
-                # Compute performance metrics
-                metrics.performance = compute_all_performance_metrics(latencies)
-
-                # ======================================================
-                # NEW: CRUD Operations Benchmark (Ops Metrics)
-                # ======================================================
-                console.print("    [dim]Measuring CRUD Operations...[/dim]")
-
-                # 1. Measure Single Insert Latency
-                # Create a dummy vector (random or from queries)
-                # Qdrant and Weaviate usually prefer/require UUIDs
-                # Pgvector, Milvus, Faiss usually prefer Integers
-                if db.name in ["qdrant", "weaviate", "lancedb"]:
-                    # Generate a REAL valid UUID to satisfy Qdrant/Weaviate
-                    dummy_id = str(uuid.uuid4())
-                else:
-                    # Use a massive integer to avoid collision with SIFT1M (0 to 999,999)
-                    # 10 million is safe
-                    dummy_id = "10000000"
-                dummy_vec = queries[0]  # Use first query vector as a test insert
-
-                t0 = time.perf_counter()
-                try:
-                    # You must implement 'insert_one' in your adapters!
-                    if hasattr(db, 'insert_one'):
-                        db.insert_one(dummy_id, dummy_vec)
-                        # CORRECTED: .operational.insert_latency_single_ms
-                        metrics.operational.insert_latency_single_ms = (time.perf_counter() - t0) * 1000
-                    else:
-                        metrics.operational.insert_latency_single_ms = 0.0
-                except Exception as e:
-                    logger.warning(f"Insert ops failed: {e}")
-
-                # 2. Measure Update Latency
-                t0 = time.perf_counter()
-                try:
-                    if hasattr(db, 'update_one'):
-                        updated_vec = dummy_vec + 0.01
-                        db.update_one(dummy_id, updated_vec)
-
-                        latency_ms = (time.perf_counter() - t0) * 1000
-                        metrics.operational.update_latency_ms = latency_ms
-
-                        # === NEW: Calculate Throughput ===
-                        if latency_ms > 0:
-                            metrics.operational.update_throughput = 1000 / latency_ms
-                except Exception as e:
-                    logger.warning(f"Update ops failed: {e}")
-
-                # 3. Measure Delete Latency
-                t0 = time.perf_counter()
-                try:
-                    if hasattr(db, 'delete_one'):
-                        db.delete_one(dummy_id)
-
-                        latency_ms = (time.perf_counter() - t0) * 1000
-                        metrics.operational.delete_latency_ms = latency_ms
-
-                        # === NEW: Calculate Throughput ===
-                        if latency_ms > 0:
-                            metrics.operational.delete_throughput = 1000 / latency_ms
-                except Exception as e:
-                    logger.warning(f"Delete ops failed: {e}")
-
-                # ======================================================
-
-                # Get index stats
-                stats = db.get_index_stats()
-                metrics.resource.index_size_bytes = stats.get("index_size_bytes", 0)
-
-                # Cleanup
-                db.delete_index()
-
-            success = True
-            error_msg = None
-
-        except Exception as e:
-            logger.exception(f"Run failed: {e}")
-            success = False
-            error_msg = str(e)
-
-        duration = time.perf_counter() - start_time
-
-        return BenchmarkRun(
-            config=run_config,
-            metrics=metrics,
-            run_id=run_id,
-            timestamp=datetime.now(),
-            success=success,
-            error_message=error_msg,
-            duration_sec=duration,
-        )
-
     def _get_index_configs(
-        self,
-        db_config: Dict,
-        filter_names: Optional[List[str]] = None,
+            self,
+            db_config: Dict,
+            filter_names: Optional[List[str]] = None,
     ) -> List[IndexConfig]:
-        """Get index configurations to test."""
         configs = []
         raw_configs = db_config.get("index_configurations", [])
-
         for cfg in raw_configs:
             if filter_names and cfg["name"] not in filter_names:
                 continue
-
             configs.append(IndexConfig(
                 name=cfg["name"],
                 type=cfg["type"],
@@ -396,37 +351,56 @@ class BenchmarkRunner:
                 params=cfg.get("params", {}),
                 search_params=cfg.get("search_params", {}),
             ))
-
-        # NOTE: Removed the limit [:3] here to ensure all configs (like HNSW_L2 and HNSW_Cosine)
-        # are available for the Smart Filter to choose from.
         return configs
 
     def _aggregate_metrics(self, metrics_list: List[MetricsResult]) -> MetricsResult:
-        """Aggregate metrics across multiple runs."""
+        """Aggregate metrics across multiple runs by calculating the MEAN."""
         if not metrics_list:
             return MetricsResult()
 
-        # For simplicity, return the last run's metrics
-        # In production, compute mean/std across runs
-        return metrics_list[-1]
+        agg = MetricsResult()
+        n = len(metrics_list)
+
+        # Quality
+        agg.quality.recall_at_10 = sum(m.quality.recall_at_10 for m in metrics_list) / n
+        agg.quality.recall_at_100 = sum(m.quality.recall_at_100 for m in metrics_list) / n
+        agg.quality.mrr = sum(m.quality.mrr for m in metrics_list) / n
+
+        # Performance
+        agg.performance.latency_p50 = sum(m.performance.latency_p50 for m in metrics_list) / n
+        agg.performance.latency_p99 = sum(m.performance.latency_p99 for m in metrics_list) / n
+        agg.performance.qps_single_thread = sum(m.performance.qps_single_thread for m in metrics_list) / n
+
+        # Resource
+        agg.resource.index_build_time_sec = sum(m.resource.index_build_time_sec for m in metrics_list) / n
+
+        return agg
 
     def _print_summary(self, result: BenchmarkResult) -> None:
-        """Print a summary table of results."""
-        if not result.mean_metrics:
+        """Print a summary table of results with Variance (Mean ± Std)."""
+        if not result.runs:
             return
 
-        table = Table(title=f"Results: {result.experiment_name}")
+        table = Table(title=f"Results: {result.experiment_name} (runs={len(result.runs)})")
         table.add_column("Metric", style="cyan")
-        table.add_column("Value", style="green")
+        table.add_column("Value (Mean ± Std)", style="green")
 
-        m = result.mean_metrics
-        table.add_row("Recall@10", f"{m.quality.recall_at_10:.4f}")
-        table.add_row("Recall@100", f"{m.quality.recall_at_100:.4f}")
-        table.add_row("MRR", f"{m.quality.mrr:.4f}")
-        table.add_row("Latency p50 (ms)", f"{m.performance.latency_p50:.2f}")
-        table.add_row("Latency p99 (ms)", f"{m.performance.latency_p99:.2f}")
-        table.add_row("QPS", f"{m.performance.qps_single_thread:.1f}")
-        table.add_row("Build Time (s)", f"{m.resource.index_build_time_sec:.2f}")
+        def get_stat(metrics_list, extractor):
+            values = [extractor(m.metrics) for m in metrics_list]
+            if len(values) < 2:
+                return f"{values[0]:.4f}"
+            return f"{statistics.mean(values):.4f} ± {statistics.stdev(values):.4f}"
+
+        # Quality
+        table.add_row("Recall@10", get_stat(result.runs, lambda m: m.quality.recall_at_10))
+        table.add_row("Recall@100", get_stat(result.runs, lambda m: m.quality.recall_at_100))
+        table.add_row("MRR", get_stat(result.runs, lambda m: m.quality.mrr))
+
+        # Performance
+        table.add_row("Latency p50 (ms)", get_stat(result.runs, lambda m: m.performance.latency_p50))
+        table.add_row("Latency p99 (ms)", get_stat(result.runs, lambda m: m.performance.latency_p99))
+        table.add_row("QPS", get_stat(result.runs, lambda m: m.performance.qps_single_thread))
+        table.add_row("Build Time (s)", get_stat(result.runs, lambda m: m.resource.index_build_time_sec))
 
         console.print(table)
 
@@ -434,12 +408,9 @@ class BenchmarkRunner:
         """Save results to JSON file."""
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
-
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = output_path / f"benchmark_results_{timestamp}.json"
-
         results_data = [r.to_dict() for r in self.results]
-
         with open(filename, 'w') as f:
             json.dump({
                 "metadata": {
@@ -448,5 +419,4 @@ class BenchmarkRunner:
                 },
                 "results": results_data
             }, f, indent=2, default=str)
-
         return str(filename)
