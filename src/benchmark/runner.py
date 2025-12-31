@@ -1,6 +1,7 @@
 """
 Main benchmark runner orchestrating all benchmark operations.
 Refactored for "Build Once, Search Many" efficiency.
+Includes Research Guardrails for validity checks.
 """
 
 import uuid
@@ -107,6 +108,10 @@ class BenchmarkRunner:
         console.print(f"Runs per config: {self.config.experiment.runs} (Build Once, Search Many)")
         console.print()
 
+        # --- GUARD: Run Count ---
+        if self.config.experiment.runs < 3:
+            console.print("[yellow]⚠️  Warning: Running fewer than 3 runs. Results may not be statistically significant.[/yellow]")
+
         results = []
 
         for dataset_name in datasets:
@@ -160,6 +165,26 @@ class BenchmarkRunner:
         console.print(f"  Vectors: {vectors.shape}, Queries: {queries.shape}")
         console.print(f"  Metric: {metric.value}")
 
+        # --- GUARD: Ground Truth Integrity ---
+        if len(ground_truth) != len(queries):
+            console.print(f"[bold red]⛔ CRITICAL FAIL: Ground Truth Mismatch! GT has {len(ground_truth)} records, Queries has {len(queries)}.[/bold red]")
+            # We don't raise exception to allow other benchmarks to proceed, but this is serious.
+
+        # --- GUARD: Data Leakage Check ---
+        # Check a small sample (100) to ensure queries are not exact copies of indexed vectors
+        console.print("  [dim]Verifying data integrity (Leakage Check)...[/dim]")
+        sample_size = min(100, len(queries))
+        leakage_detected = False
+        # We only check if dimensions match to avoid errors
+        if vectors.shape[1] == queries.shape[1]:
+            for i in range(sample_size):
+                if np.any(np.all(vectors == queries[i], axis=1)):
+                    leakage_detected = True
+                    break
+
+        if leakage_detected:
+            console.print("[bold red]⛔ WARNING: Potential Data Leakage detected! Some query vectors found exactly in index.[/bold red]")
+
         # === OPTIMIZATION: CONNECT ONCE ===
         # We perform connection/build once, then loop searches.
 
@@ -203,7 +228,6 @@ class BenchmarkRunner:
                     console.print("    [bold]Building Index (Once)...[/bold]")
 
                     with ResourceMonitor() as build_monitor:
-                        # FIX: Used idx_config instead of index_config
                         build_duration_sec = db.create_index(vectors, idx_config, metric)
 
                     # Store build metrics to copy to all runs later
@@ -223,6 +247,9 @@ class BenchmarkRunner:
                         console.print(f"    [dim]Running {len(warmup_queries)} warm-up queries...[/dim]")
                         for q in warmup_queries:
                             db.search_single(q, k=10)
+                    else:
+                         # --- GUARD: Warmup Enforcement ---
+                         console.print("[yellow]⚠️  Warning: No warm-up queries configured. Latency metrics may be unstable.[/yellow]")
 
                     # --- B. SEARCH PHASE (Loop) ---
                     console.print(f"    [bold]Starting {self.config.experiment.runs} Search Runs...[/bold]")
@@ -240,7 +267,6 @@ class BenchmarkRunner:
 
                         # 1. Search
                         k = 100
-                        # FIX: Used idx_config instead of index_config
                         search_params = idx_config.search_params
 
                         # Fix params if list
@@ -273,38 +299,43 @@ class BenchmarkRunner:
                                 if hasattr(db, 'insert_one'):
                                     db.insert_one(dummy_id, dummy_vec)
                                     current_metrics.operational.insert_latency_single_ms = (time.perf_counter() - t0) * 1000
-                            except:
-                                pass
+                            except: pass
 
                             t0 = time.perf_counter()
                             try:
                                 if hasattr(db, 'update_one'):
                                     db.update_one(dummy_id, dummy_vec + 0.01)
                                     current_metrics.operational.update_latency_ms = (time.perf_counter() - t0) * 1000
-                            except:
-                                pass
+                            except: pass
 
                             t0 = time.perf_counter()
                             try:
                                 if hasattr(db, 'delete_one'):
                                     db.delete_one(dummy_id)
                                     current_metrics.operational.delete_latency_ms = (time.perf_counter() - t0) * 1000
-                            except:
-                                pass
+                            except: pass
 
                         # Index Stats
                         stats = db.get_index_stats()
                         current_metrics.resource.index_size_bytes = stats.get("index_size_bytes", 0)
 
-                        # Safety Check
+                        # --- GUARD: Impossible Metrics ---
+                        if current_metrics.resource.index_size_bytes == 0 and db_name not in ["faiss"]:
+                             console.print("\n    [dim yellow]⚠️  Notice: Index size is 0. Check if DB exposes this metric.[/dim yellow]")
+
+                        if current_metrics.performance.latency_p50 == 0:
+                             console.print("\n    [red]❌ Error: Latency is 0.0ms. Timer failure or cached results?[/red]")
+
+                        # --- GUARD: Too Good To Be True ---
+                        if current_metrics.quality.precision_at_1 == 1.0 and dataset.name.lower() in ["glove", "random"]:
+                             console.print("\n    [yellow]⚠️  Suspicious: Precision@1 is 100%. Check for data leakage.[/yellow]")
+
                         if current_metrics.quality.recall_at_10 > 0.99 and vectors.shape[1] > 500:
-                            console.print(
-                                "\n    [bold red]⚠️  WARNING: Suspiciously perfect Recall (>0.99) on high-dim data.[/bold red]")
+                             console.print("\n    [bold red]⚠️  WARNING: Suspiciously perfect Recall (>0.99) on high-dim data.[/bold red]")
 
                         # Create Run Object
                         runs.append(BenchmarkRun(
                             config=RunConfig(
-                                # FIX: Used idx_config instead of index_config
                                 database=db_name, dataset="", index_config=idx_config,
                                 distance_metric=metric, k=100, num_queries=len(queries), run_id=run_id
                             ),
