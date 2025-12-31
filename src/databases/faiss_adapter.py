@@ -129,16 +129,6 @@ class FAISSAdapter(VectorDBInterface):
     ) -> float:
         """
         Create a FAISS index from vectors.
-
-        Args:
-            vectors: Vector data of shape (n, d)
-            index_config: Index configuration
-            distance_metric: Distance metric to use
-            metadata: Not supported by FAISS (ignored)
-            ids: Not directly supported (FAISS uses sequential IDs)
-
-        Returns:
-            Index build time in seconds
         """
         self.validate_vectors(vectors)
 
@@ -297,8 +287,11 @@ class FAISSAdapter(VectorDBInterface):
         self, dimensions: int, metric_type: int, params: Dict[str, Any]
     ) -> faiss.Index:
         """Create an HNSW index."""
-        M = params.get("M", 32)
-        ef_construction = params.get("efConstruction", 200)
+        # === FIX: PARAMETER MAPPING ===
+        # Map generic 'm' -> Faiss 'M'
+        # Map generic 'ef_construct' -> Faiss 'efConstruction'
+        M = params.get("m", params.get("M", 32))
+        ef_construction = params.get("ef_construct", params.get("efConstruction", 200))
 
         # Create HNSW index
         index = faiss.IndexHNSWFlat(dimensions, M, metric_type)
@@ -418,15 +411,6 @@ class FAISSAdapter(VectorDBInterface):
     ) -> Tuple[NDArray[np.int64], NDArray[np.float32], List[float]]:
         """
         Search for k nearest neighbors.
-
-        Args:
-            queries: Query vectors of shape (n_queries, d)
-            k: Number of neighbors to return
-            search_params: Search parameters (nprobe, efSearch, etc.)
-            filters: Not supported by FAISS
-
-        Returns:
-            Tuple of (indices, distances, latencies)
         """
         if self._index is None:
             raise RuntimeError("Index not created. Call create_index first.")
@@ -474,7 +458,8 @@ class FAISSAdapter(VectorDBInterface):
         if "nprobe" in params and hasattr(self._index, "nprobe"):
             self._index.nprobe = params["nprobe"]
 
-        # efSearch for HNSW indices
+        # === FIX: SEARCH PARAM MAPPING ===
+        # Map generic 'ef' to Faiss 'efSearch'
         if "efSearch" in params or "ef" in params:
             ef = params.get("efSearch", params.get("ef"))
             if hasattr(self._index, "hnsw"):
@@ -515,9 +500,6 @@ class FAISSAdapter(VectorDBInterface):
     ) -> float:
         """
         Update vectors by ID.
-
-        Note: FAISS doesn't support true updates, so this removes and re-adds.
-        For IndexFlatL2/IP, this is not directly supported.
         """
         raise NotImplementedError(
             "FAISS does not efficiently support updates. "
@@ -527,8 +509,6 @@ class FAISSAdapter(VectorDBInterface):
     def delete(self, ids: List[int]) -> float:
         """
         Delete vectors by ID.
-
-        Note: Only supported for IndexIDMap wrapped indices.
         """
         if not hasattr(self._index, "remove_ids"):
             raise NotImplementedError(
@@ -590,22 +570,15 @@ class FAISSAdapter(VectorDBInterface):
 
     def insert_one(self, id: str, vector: np.ndarray):
         """Inserts a single vector (converted to batch)."""
-        # Faiss expects shape (1, d)
         vec_reshaped = np.array([vector], dtype=np.float32)
-
-        # If ID mapping is supported, we would pass IDs here,
-        # but standard Faiss add() creates sequential IDs.
-        # For benchmarking valid insert time, we just call add().
         self.insert(vec_reshaped)
 
     def delete_one(self, id: str):
         """Deletes a single vector (if supported)."""
         try:
-            # Try to convert string ID to int if your Faiss index uses int IDs
             int_id = int(id) if id.isdigit() else 0
             self.delete([int_id])
         except Exception:
-            # Faiss often throws errors for delete if not using IndexIDMap
             pass
 
     def update_one(self, id: str, vector: np.ndarray):

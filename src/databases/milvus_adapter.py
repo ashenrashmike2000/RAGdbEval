@@ -62,7 +62,6 @@ class MilvusAdapter(VectorDBInterface):
             language="Go/C++",
             license="Apache-2.0",
             supported_metrics=[DistanceMetric.L2, DistanceMetric.COSINE, DistanceMetric.IP],
-            # FIX: Removed IndexType.IVF_FLAT to prevent AttributeError
             supported_index_types=[IndexType.HNSW],
             supports_filtering=True,
             supports_hybrid_search=False,
@@ -161,10 +160,23 @@ class MilvusAdapter(VectorDBInterface):
         elif "HNSW" in idx_type_str.upper():
             idx_type_str = "HNSW"
 
+        # === FIX: PARAMETER MAPPING ===
+        # Milvus is strict. Map generic benchmark keys to Milvus specific keys.
+        # ef_construct -> efConstruction
+        # m -> M
+        milvus_params = {}
+        for k, v in index_config.params.items():
+            if k == "ef_construct":
+                milvus_params["efConstruction"] = v
+            elif k == "m":
+                milvus_params["M"] = v
+            else:
+                milvus_params[k] = v
+
         idx_params = {
             "metric_type": metric_map.get(distance_metric, "L2"),
             "index_type": idx_type_str,
-            "params": index_config.params
+            "params": milvus_params # Use the mapped params
         }
 
         print(f"🔨 Milvus: Building index ({idx_type_str})...")
@@ -207,7 +219,6 @@ class MilvusAdapter(VectorDBInterface):
         }
         current_metric = metric_map.get(self._distance_metric, "L2")
 
-        # --- FIX START: Detect Index Type & Set Correct Params ---
         if not search_params:
             # Default params based on common Index Types
             # HNSW needs 'ef', IVF needs 'nprobe'
@@ -226,17 +237,12 @@ class MilvusAdapter(VectorDBInterface):
             }
 
             if "HNSW" in str(index_type_guess).upper():
-                # 'ef' controls search accuracy/speed for HNSW
-                # ef should be >= k (top_k)
                 search_params["params"] = {"ef": max(k * 2, 64)}
             else:
-                # Default to IVF params
                 search_params["params"] = {"nprobe": 10}
         else:
-            # Ensure metric_type is set even if user provided other params
             if "metric_type" not in search_params:
                 search_params["metric_type"] = current_metric
-        # --- FIX END ---
 
         latencies = []
         all_indices = []
@@ -297,7 +303,6 @@ class MilvusAdapter(VectorDBInterface):
 
     def insert_one(self, id: str, vector: np.ndarray):
         """Inserts a single vector."""
-        # Milvus expects lists of lists: [[id], [vector]]
         try:
             int_id = int(id) if str(id).isdigit() else 999999
             self._collection.insert([[int_id], [vector]])

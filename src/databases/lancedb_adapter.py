@@ -58,7 +58,7 @@ class LanceDBAdapter(VectorDBInterface):
             language="Rust/Python",
             license="Apache-2.0",
             supported_metrics=[DistanceMetric.L2, DistanceMetric.COSINE],
-            supported_index_types=[],
+            supported_index_types=[IndexType.IVF_PQ], # LanceDB uses IVF-PQ, not HNSW
             supports_filtering=True,
             supports_hybrid_search=True,
             supports_gpu=True,
@@ -99,15 +99,13 @@ class LanceDBAdapter(VectorDBInterface):
         vector_ids = ids if ids is not None else list(range(n_vectors))
 
         # 1. Create ID Array (Converted to STRING to support UUIDs later)
-        # FIX: Converted int IDs to string so the schema matches the CRUD UUIDs
         pa_ids = pa.array([str(i) for i in vector_ids])
 
         # 2. Create Vector Array (FixedSizeList)
         flat_vectors = vectors.reshape(-1)
         pa_vectors = pa.FixedSizeListArray.from_arrays(pa.array(flat_vectors), dimensions)
 
-        # 3. Create Table
-        # FIX: Changed "id" field to pa.string()
+        # 3. Create Table Schema
         schema = pa.schema([
             pa.field("id", pa.string()),
             pa.field("vector", pa.list_(pa.float32(), dimensions))
@@ -115,33 +113,62 @@ class LanceDBAdapter(VectorDBInterface):
 
         data = pa.Table.from_arrays([pa_ids, pa_vectors], schema=schema)
 
-        # Create Table
+        # Drop if exists
         if self._table_name in self._db.table_names():
             self._db.drop_table(self._table_name)
 
         self._table = self._db.create_table(self._table_name, data=data)
 
-        # Create Index
+        # === FIX: PARAMETER MAPPING (Generic -> LanceDB) ===
+        # LanceDB uses 'num_partitions' (IVF) and 'num_sub_vectors' (PQ).
+        # We must map your benchmark's 'ef_construct' and 'm' to these concepts.
+
+        params = index_config.params or {}
+
+        # 1. Map ef_construct -> num_partitions (Search Space Granularity)
+        # Default rule: sqrt(n_vectors)
+        default_partitions = int(np.sqrt(n_vectors))
+        num_partitions = default_partitions
+
+        if "ef_construct" in params:
+            # Scale partitions: Higher ef_construct = More partitions (finer granular search)
+            # Example: ef=100 -> 256 partitions. ef=200 -> 512 partitions.
+            ef = params["ef_construct"]
+            num_partitions = max(256, int(ef * 2.5))
+
+        # 2. Map m -> num_sub_vectors (Quantization Precision)
+        # PQ sub-vectors must divide the dimension size.
+        # We try to target m*4 as a rough heuristic for "good compression vs accuracy".
+        target_m = params.get("m", 16)
+
+        def get_valid_sub_vectors(dim, target_m):
+             # Try to find a divisor close to target_m * 4 (e.g. 16*4 = 64 sub-vectors)
+             # Higher num_sub_vectors = Higher accuracy, Larger index
+             goal = target_m * 4
+
+             # Check exact match first
+             if dim % goal == 0: return goal
+
+             # Find closest divisor
+             best_divisor = 1
+             min_diff = float('inf')
+
+             for i in range(1, dim + 1):
+                 if dim % i == 0:
+                     diff = abs(i - goal)
+                     if diff < min_diff:
+                         min_diff = diff
+                         best_divisor = i
+             return best_divisor
+
+        num_sub_vectors = get_valid_sub_vectors(self._dimensions, target_m)
+
         metric_map = {
             DistanceMetric.L2: "L2",
             DistanceMetric.COSINE: "cosine",
-            DistanceMetric.IP: "dot"
+            DistanceMetric.IP: "cosine" # LanceDB uses cosine for IP usually (normalized)
         }
         metric = metric_map.get(distance_metric, "L2")
-
-        params = index_config.params
-        target_m = params.get("m", 96)
-
-        def get_valid_m(dim, target):
-            if dim % target == 0: return target
-            for i in range(target, 1, -1):
-                if dim % i == 0: return i
-            for i in [16, 12, 8, 4, 2]:
-                if dim % i == 0: return i
-            return 1
-
-        num_sub_vectors = get_valid_m(self._dimensions, target_m)
-        num_partitions = params.get("nlist", 256)
 
         print(f"🔨 LanceDB: Building IVF-PQ (partitions={num_partitions}, sub_vectors={num_sub_vectors})...")
 
@@ -182,7 +209,16 @@ class LanceDBAdapter(VectorDBInterface):
         self.validate_vectors(queries)
 
         params = search_params or {}
-        nprobes = params.get("nprobes", 20)
+
+        # === FIX: SEARCH PARAM MAPPING ===
+        # LanceDB uses 'nprobes'. Map 'ef' or 'nprobe' to it.
+        nprobes = 20 # Default
+        if "nprobe" in params:
+            nprobes = params["nprobe"]
+        elif "ef" in params:
+            # Map ef (HNSW) to nprobes (IVF) roughly.
+            # ef=100 -> nprobes=20 is a safe bet.
+            nprobes = max(1, int(params["ef"] / 5))
 
         latencies = []
         all_indices = []
@@ -199,8 +235,7 @@ class LanceDBAdapter(VectorDBInterface):
 
             latencies.append((time.perf_counter() - start_q) * 1000)
 
-            # FIX: Convert string IDs back to Integers for metrics calculation
-            # If conversion fails (e.g. UUIDs), default to 0
+            # Convert string IDs back to Integers for metrics calculation
             try:
                 indices = [int(i) for i in results["id"].values]
             except ValueError:
@@ -256,7 +291,7 @@ class LanceDBAdapter(VectorDBInterface):
         return {
             "num_vectors": len(self._table),
             "dimensions": self._dimensions,
-            "index_size_bytes": total_size  # <--- This fixes the "0 bytes" error for LanceDB
+            "index_size_bytes": total_size
         }
 
     def set_search_params(self, params: Dict[str, Any]) -> None:
@@ -265,21 +300,14 @@ class LanceDBAdapter(VectorDBInterface):
     def get_search_params(self) -> Dict[str, Any]:
         return self._search_params
 
-    # === FIXED: Single-Item Wrappers for Benchmarking ===
-
+    # Single-Item Wrappers for Benchmarking
     def insert_one(self, id: str, vector: np.ndarray):
-        """Inserts a single vector."""
-        # FIX: Removed 'text' field (it was not in schema)
-        # FIX: Cast id to str
         data = [{"id": str(id), "vector": vector}]
         self._table.add(data)
 
     def delete_one(self, id: str):
-        """Deletes a single vector by ID."""
-        # FIX: Cast id to str. Query works now because schema 'id' is string.
         self._table.delete(f"id = '{str(id)}'")
 
     def update_one(self, id: str, vector: np.ndarray):
-        """Updates a single vector (Delete + Insert)."""
         self.delete_one(id)
         self.insert_one(id, vector)

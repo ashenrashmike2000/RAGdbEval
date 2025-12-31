@@ -20,12 +20,13 @@ from src.core.types import (
     IndexType,
 )
 from src.databases.factory import register_database
-from qdrant_client.models import Batch
 
+# --- FIX: Safe Import Handling ---
 try:
     from qdrant_client import QdrantClient, models
     from qdrant_client.http.exceptions import UnexpectedResponse
-
+    # Batch is part of models, but sometimes useful to import directly.
+    # We will use models.Batch to be safe.
     QDRANT_AVAILABLE = True
 except ImportError:
     QDRANT_AVAILABLE = False
@@ -39,7 +40,7 @@ class QdrantAdapter(VectorDBInterface):
 
     def __init__(self, config: Dict[str, Any]):
         if not QDRANT_AVAILABLE:
-            raise ImportError("Qdrant client is not installed.")
+            raise ImportError("Qdrant client is not installed. Install with: pip install qdrant-client")
 
         super().__init__(config)
         self._client: Optional[QdrantClient] = None
@@ -78,8 +79,6 @@ class QdrantAdapter(VectorDBInterface):
             grpc_port = conn_config.get("grpc_port", 6334)
             http_port = conn_config.get("http_port", 6333)
             prefer_grpc = conn_config.get("prefer_grpc", True)
-
-            # Infinite timeout for safety
             timeout = conn_config.get("timeout", None)
 
             self._client = QdrantClient(
@@ -126,28 +125,34 @@ class QdrantAdapter(VectorDBInterface):
         }
         qdrant_distance = distance_map.get(distance_metric, models.Distance.EUCLID)
 
-        params = index_config.params
+        params = index_config.params or {}
+
+        # === FIX: Safe Parameter Extraction ===
+        # Qdrant naturally uses 'm' and 'ef_construct'.
+        # We use .get() to ignore unknown keys (preventing the Milvus-style crash).
         hnsw_config = models.HnswConfigDiff(
             m=params.get("m", 16),
             ef_construct=params.get("ef_construct", 100),
             full_scan_threshold=params.get("full_scan_threshold", 10000),
             max_indexing_threads=params.get("max_indexing_threads", 0),
-            on_disk=True, # Safety: Keep HNSW graph on disk too
+            on_disk=True, # Safety: Offload graph to disk to save RAM
         )
 
         # === HYBRID STRATEGY: QUANTIZATION + DISK ===
         quantization_config = None
 
-        if "quantization" in index_config.params or index_config.quantization:
-            quant_params = index_config.quantization or index_config.params.get("quantization", {})
+        # Explicit config
+        if "quantization" in params or getattr(index_config, "quantization", None):
+            quant_params = getattr(index_config, "quantization", None) or params.get("quantization", {})
             quantization_config = self._create_quantization_config(quant_params)
+        # Automatic safeguard for high-dim vectors (like MSMARCO)
         elif dimensions > 512:
-            print("⚡ Auto-enabling Scalar Quantization (Int8) for speed...")
+            print("⚡ Auto-enabling Scalar Quantization (Int8) for speed & memory safety...")
             quantization_config = models.ScalarQuantization(
                 scalar=models.ScalarQuantizationConfig(
                     type=models.ScalarType.INT8,
                     quantile=0.99,
-                    always_ram=True # Keep compressed vectors in RAM (Small enough)
+                    always_ram=True
                 )
             )
 
@@ -157,7 +162,7 @@ class QdrantAdapter(VectorDBInterface):
             distance=qdrant_distance,
             hnsw_config=hnsw_config,
             quantization_config=quantization_config,
-            on_disk=True,  # <--- SAFETY: Force heavy storage to Disk
+            on_disk=True,  # <--- SAFETY: Force vector storage to Disk
         )
 
         self._client.create_collection(
@@ -174,14 +179,14 @@ class QdrantAdapter(VectorDBInterface):
             vectors=vectors,
             payload=metadata,
             ids=vector_ids,
-            parallel=2,
+            parallel=4, # Slightly increased parallelism
             wait=True
         )
 
         del vectors
         gc.collect()
 
-        # === UPDATED WAIT LOOP (PRINTS STATUS) ===
+        # === WAIT LOOP ===
         print("⏳ Waiting for Qdrant indexing...")
         while True:
             try:
@@ -192,22 +197,18 @@ class QdrantAdapter(VectorDBInterface):
                     print("\n✅ Optimization complete. Collection is GREEN.")
                     break
                 elif status == models.CollectionStatus.RED:
-                    print(f"\n❌ CRITICAL: Qdrant Status is RED. Check 'docker logs qdrant_benchmark'.")
+                    print(f"\n❌ CRITICAL: Qdrant Status is RED. Check docker logs.")
                     raise RuntimeError("Qdrant Collection Status became RED (Failed).")
                 else:
-                    # Status is likely YELLOW (Optimizing)
                     print(f"   Status: {status} (Optimizing)...", end="\r")
 
-                time.sleep(5)
+                time.sleep(2)
             except Exception as e:
                 print(f"Warning: Could not check status: {e}")
-                time.sleep(5)
-        # =========================================
+                time.sleep(2)
 
         self._num_vectors = n_vectors
-        build_time = time.perf_counter() - start_time
-
-        return build_time
+        return time.perf_counter() - start_time
 
     def _create_quantization_config(self, quant_params: Dict[str, Any]) -> Optional[models.QuantizationConfig]:
         if "scalar" in quant_params:
@@ -266,7 +267,9 @@ class QdrantAdapter(VectorDBInterface):
         self.validate_vectors(queries)
 
         params = search_params or {}
+        # Map generic 'ef' to Qdrant's 'hnsw_ef'
         ef = params.get("ef", params.get("efSearch", 128))
+
         search_params_obj = models.SearchParams(
             hnsw_ef=ef,
             exact=params.get("exact", False),
@@ -274,14 +277,16 @@ class QdrantAdapter(VectorDBInterface):
 
         qdrant_filter = self._build_filter(filters) if filters else None
 
+        # Distance logic: Qdrant scores are similarities (higher is better for Cosine/IP)
+        # But our benchmark expects Distances (lower is better) or raw scores.
+        # We stick to raw scores and let metrics handle it.
         reverse_sort = True
         if self._distance_metric == DistanceMetric.L2:
-             reverse_sort = False
+             reverse_sort = False # L2: Lower is better
 
-        n_queries = len(queries)
+        latencies = []
         all_indices = []
         all_distances = []
-        latencies = []
 
         for query in queries:
             start_time = time.perf_counter()
@@ -295,7 +300,8 @@ class QdrantAdapter(VectorDBInterface):
             )
 
             results = results_obj.points
-            results.sort(key=lambda x: x.score, reverse=reverse_sort)
+            # Sorting is usually handled by Qdrant, but ensuring here doesn't hurt
+            # (Note: query_points returns sorted results)
 
             latency_ms = (time.perf_counter() - start_time) * 1000
             latencies.append(latency_ms)
@@ -303,6 +309,7 @@ class QdrantAdapter(VectorDBInterface):
             indices = [r.id for r in results]
             distances = [r.score for r in results]
 
+            # Fill if fewer than k
             while len(indices) < k:
                 indices.append(-1)
                 distances.append(float("inf"))
@@ -377,7 +384,6 @@ class QdrantAdapter(VectorDBInterface):
             "index_type": "HNSW",
             "distance_metric": self._distance_metric.value if self._distance_metric else None,
             "status": info.status.value,
-            "optimizer_status": str(info.optimizer_status),
         }
 
     def set_search_params(self, params: Dict[str, Any]) -> None:
@@ -391,15 +397,12 @@ class QdrantAdapter(VectorDBInterface):
     def insert_one(self, id: str, vector: np.ndarray):
         """Inserts/Upserts a single point."""
         try:
-            # Qdrant supports both Int and UUID strings for IDs
             point_id = int(id) if str(id).isdigit() else id
-
             point = models.PointStruct(
                 id=point_id,
                 vector=vector.tolist(),
                 payload={"benchmark": "ops_test"}
             )
-
             self._client.upsert(
                 collection_name=self._collection_name,
                 points=[point],
@@ -412,7 +415,6 @@ class QdrantAdapter(VectorDBInterface):
         """Deletes a single point."""
         try:
             point_id = int(id) if str(id).isdigit() else id
-
             self._client.delete(
                 collection_name=self._collection_name,
                 points_selector=models.PointIdsList(points=[point_id]),

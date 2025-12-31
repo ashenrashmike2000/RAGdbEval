@@ -110,8 +110,8 @@ class ChromaAdapter(VectorDBInterface):
         }
         hnsw_space = metric_map.get(distance_metric, "l2")
 
-        # 2. Configure HNSW Params (Realism Fix)
-        # We now pass 'M' and 'ef_construction' from your config to Chroma
+        # 2. Configure HNSW Params (Creation Mapping)
+        # Map Generic (m, ef_construct) -> Chroma Specific (hnsw:M, hnsw:construction_ef)
         collection_metadata = {"hnsw:space": hnsw_space}
 
         if "ef_construct" in index_config.params:
@@ -124,16 +124,13 @@ class ChromaAdapter(VectorDBInterface):
             metadata=collection_metadata
         )
 
-        # =========================================================
-        # FIX: Safe Batch Insert (Works for SIFT & MSMARCO)
-        # =========================================================
+        # 3. Batch Insert
         print(f"🚀 Chroma: Inserting {n_vectors} vectors in batches...")
 
         vector_ids = [str(i) for i in (ids if ids else range(n_vectors))]
-        # Convert numpy to list (required by Chroma)
         vector_data = vectors.tolist()
 
-        # Batch size 2000 is safe for 768d vectors (approx 6MB payload)
+        # Batch size 2000 is safe
         batch_size = 2000
 
         for i in range(0, n_vectors, batch_size):
@@ -149,7 +146,6 @@ class ChromaAdapter(VectorDBInterface):
                 print(f"   Processed {end}/{n_vectors} vectors...", end="\r")
 
         print(f"\n✅ Chroma: Insertion complete.")
-        # =========================================================
 
         self._num_vectors = n_vectors
         return time.perf_counter() - start_time
@@ -182,6 +178,20 @@ class ChromaAdapter(VectorDBInterface):
 
         self.validate_vectors(queries)
 
+        # === FIX: APPLY SEARCH PARAMS (EF) ===
+        # Chroma controls accuracy via collection metadata 'hnsw:search_ef'
+        # We must update this to respect the benchmark config.
+        if search_params:
+            # Check for generic 'ef' or specific 'ef_search'
+            ef = search_params.get("ef", search_params.get("ef_search"))
+            if ef:
+                # Update collection metadata to set search EF
+                current_meta = self._collection.metadata or {}
+                # Only update if different to avoid overhead
+                if current_meta.get("hnsw:search_ef") != ef:
+                    current_meta["hnsw:search_ef"] = ef
+                    self._collection.modify(metadata=current_meta)
+
         latencies = []
         all_indices = []
         all_distances = []
@@ -199,8 +209,12 @@ class ChromaAdapter(VectorDBInterface):
 
             latencies.append((time.perf_counter() - start_q) * 1000)
 
-            # Chroma IDs are strings, convert back to int
-            ids = [int(i) for i in results['ids'][0]]
+            # Chroma IDs are strings, convert back to int for metrics
+            try:
+                ids = [int(i) for i in results['ids'][0]]
+            except ValueError:
+                ids = [0] * len(results['ids'][0])
+
             dists = results['distances'][0]
 
             all_indices.append(ids)
@@ -212,31 +226,23 @@ class ChromaAdapter(VectorDBInterface):
             latencies
         )
 
-    # ==========================================
-    #  Added methods for Runner Compatibility
-    # ==========================================
-
+    # Runner Compatibility Methods
     def insert_one(self, id: str, vector: np.ndarray):
-        """Inserts a single object (Required for benchmark runner)."""
         self._collection.add(
             ids=[str(id)],
             embeddings=[vector.tolist()]
         )
 
     def update_one(self, id: str, vector: np.ndarray):
-        """Updates a single object (Required for benchmark runner)."""
         self._collection.update(
             ids=[str(id)],
             embeddings=[vector.tolist()]
         )
 
     def delete_one(self, id: str):
-        """Deletes a single object (Required for benchmark runner)."""
         self._collection.delete(ids=[str(id)])
 
-    # ==========================================
-
-    # Standard Bulk CRUD (kept for interface compliance)
+    # Standard Bulk CRUD
     def insert(self, vectors: NDArray[np.float32], metadata=None, ids=None) -> float:
         if ids is None: ids = list(range(self._num_vectors, self._num_vectors + len(vectors)))
         str_ids = [str(i) for i in ids]

@@ -1,7 +1,10 @@
 """
-Main benchmark runner orchestrating all benchmark operations.
-Refactored for "Build Once, Search Many" efficiency.
-Includes Research Guardrails for validity checks.
+Benchmark Design Principles:
+- Build index once per configuration (Efficiency)
+- Use official ground truth & disjoint query sets (Validity)
+- Dataset-specific tuning & Database-aware parameter filtering (Fairness)
+- Guardrails to detect data leakage and impossible metrics (Integrity)
+- Reproducible random seeds and machine-actionable strict mode (Rigor)
 """
 
 import uuid
@@ -11,7 +14,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-import statistics  # Required for Mean ± Std calculations
+import statistics
 
 import numpy as np
 from rich.console import Console
@@ -37,34 +40,45 @@ from src.metrics.resource import ResourceMonitor, compute_all_resource_metrics
 logger = logging.getLogger(__name__)
 console = Console()
 
+# Set seed for reproducibility
+np.random.seed(42)
+
 # =========================================================
-# DATASET TUNING CONFIGURATION (Design A)
+# DATASET TUNING CONFIGURATION (Universal Config)
 # =========================================================
 DATASET_TUNING = {
     "sift1m": {
         "params": {"m": 16, "ef_construct": 200},
-        "search_params": {"ef": 100, "nprobe": 10}
+        "search_params": {"ef": 96, "nprobe": 8}
     },
     "deep1m": {
         "params": {"m": 16, "ef_construct": 128},
-        "search_params": {"ef": 64, "nprobe": 10}
+        "search_params": {"ef": 64, "nprobe": 8}
     },
     "gist1m": {
-        "params": {"m": 32, "ef_construct": 400},
-        "search_params": {"ef": 300, "nprobe": 64}
+        "params": {"m": 24, "ef_construct": 300},
+        "search_params": {"ef": 200, "nprobe": 32}
     },
     "glove": {
         "params": {"m": 24, "ef_construct": 200},
-        "search_params": {"ef": 120, "nprobe": 20}
+        "search_params": {"ef": 128, "nprobe": 16}
     },
     "msmarco": {
-        "params": {"m": 32, "ef_construct": 300},
-        "search_params": {"ef": 200, "nprobe": 32}
+        "params": {"m": 24, "ef_construct": 200},
+        "search_params": {"ef": 128, "nprobe": 12}
     },
     "random": {
         "params": {"m": 16, "ef_construct": 100},
-        "search_params": {"ef": 50, "nprobe": 5}
+        "search_params": {"ef": 48, "nprobe": 4}
     }
+}
+
+# Expected Recall@10 Ranges (Min, Max) for Sanity Checking
+EXPECTED_RANGES = {
+    "msmarco": (0.6, 0.95),  # High variance, rarely perfect
+    "glove": (0.9, 1.0),  # Usually high
+    "sift1m": (0.9, 1.0),
+    "gist1m": (0.8, 0.99)
 }
 
 
@@ -82,6 +96,9 @@ class BenchmarkRunner:
         self.results: List[BenchmarkResult] = []
         self.hardware_info = detect_hardware()
 
+        # Check for strict mode (defaults to False if not present)
+        self.strict_mode = getattr(self.config.experiment, 'strict_mode', False)
+
     def run(
             self,
             databases: Optional[List[str]] = None,
@@ -89,7 +106,6 @@ class BenchmarkRunner:
             index_configs: Optional[List[str]] = None,
     ) -> List[BenchmarkResult]:
 
-        # Determine what to benchmark
         if databases is None:
             if self.config.database.compare_all:
                 databases = self.config.get_enabled_databases()
@@ -105,12 +121,16 @@ class BenchmarkRunner:
         console.print(f"\n[bold blue]VectorDB Benchmark[/bold blue]")
         console.print(f"Databases: {', '.join(databases)}")
         console.print(f"Datasets: {', '.join(datasets)}")
+        console.print(f"Mode: {'STRICT' if self.strict_mode else 'Exploratory'}")
         console.print(f"Runs per config: {self.config.experiment.runs} (Build Once, Search Many)")
         console.print()
 
         # --- GUARD: Run Count ---
         if self.config.experiment.runs < 3:
-            console.print("[yellow]⚠️  Warning: Running fewer than 3 runs. Results may not be statistically significant.[/yellow]")
+            msg = "Running fewer than 3 runs. Results may not be statistically significant."
+            if self.strict_mode:
+                raise ValueError(msg)
+            console.print(f"[yellow]⚠️  Warning: {msg}[/yellow]")
 
         results = []
 
@@ -129,6 +149,8 @@ class BenchmarkRunner:
                 except Exception as e:
                     logger.error(f"Benchmark failed for {db_name}: {e}")
                     console.print(f"[red]Error: {e}[/red]")
+                    if self.strict_mode:
+                        raise e
 
         self.results = results
         return results
@@ -139,25 +161,25 @@ class BenchmarkRunner:
             dataset: DatasetLoader,
             index_configs: Optional[List[str]] = None,
     ) -> BenchmarkResult:
-        """Run benchmark for a single database-dataset pair."""
         db_config = self.config.get_database_config(db_name)
         configs_to_test = self._get_index_configs(db_config, index_configs)
-
         temp_db = get_database(db_name, db_config)
 
-        result = BenchmarkResult(
-            experiment_name=f"{db_name}_{dataset.name}",
-            database_info=temp_db.info,
-            dataset_info=dataset.info,
-            hardware_info=self.hardware_info,
-        )
-
+        # 1. Prepare Data
         vectors = dataset.vectors
         queries = dataset.queries
 
+        # --- GUARD: MSMARCO Slicing & Explicit Metadata ---
+        effective_vector_count = len(vectors)
         if dataset.name == "msmarco" and len(vectors) > 1000000:
-            print("✂️  Slicing MSMARCO to 1M vectors to save RAM...")
+            console.print("✂️  Slicing MSMARCO to 1M vectors to save RAM...")
             vectors = vectors[:1000000]
+            effective_vector_count = len(vectors)
+
+        dataset_info = dataset.info
+        # Persist effective count for audit
+        if not hasattr(dataset_info, 'metadata'): dataset_info.metadata = {}
+        dataset_info.metadata["effective_vector_count"] = effective_vector_count
 
         ground_truth = dataset.ground_truth
         metric = dataset.info.distance_metric
@@ -167,30 +189,42 @@ class BenchmarkRunner:
 
         # --- GUARD: Ground Truth Integrity ---
         if len(ground_truth) != len(queries):
-            console.print(f"[bold red]⛔ CRITICAL FAIL: Ground Truth Mismatch! GT has {len(ground_truth)} records, Queries has {len(queries)}.[/bold red]")
-            # We don't raise exception to allow other benchmarks to proceed, but this is serious.
+            msg = f"Ground Truth Mismatch! GT has {len(ground_truth)} records, Queries has {len(queries)}."
+            console.print(f"[bold red]⛔ CRITICAL FAIL: {msg}[/bold red]")
+            if self.strict_mode: raise RuntimeError(msg)
 
-        # --- GUARD: Data Leakage Check ---
-        # Check a small sample (100) to ensure queries are not exact copies of indexed vectors
+        # --- GUARD: Query Count Consistency ---
+        warmup_count = self.config.experiment.warmup_queries
+        if len(queries) <= warmup_count:
+            msg = f"Query set ({len(queries)}) is too small for warmup ({warmup_count})."
+            console.print(f"[red]❌ Error: {msg}[/red]")
+            if self.strict_mode: raise RuntimeError(msg)
+
+        # --- GUARD: Data Leakage Check (Numerical Tolerance) ---
         console.print("  [dim]Verifying data integrity (Leakage Check)...[/dim]")
         sample_size = min(100, len(queries))
         leakage_detected = False
-        # We only check if dimensions match to avoid errors
         if vectors.shape[1] == queries.shape[1]:
             for i in range(sample_size):
-                if np.any(np.all(vectors == queries[i], axis=1)):
+                # Use allclose for floating point tolerance (1e-6)
+                if np.any(np.all(np.isclose(vectors, queries[i], atol=1e-6), axis=1)):
                     leakage_detected = True
                     break
 
         if leakage_detected:
-            console.print("[bold red]⛔ WARNING: Potential Data Leakage detected! Some query vectors found exactly in index.[/bold red]")
+            msg = "Potential Data Leakage detected! Query vectors found in index."
+            console.print(f"[bold red]⛔ WARNING: {msg}[/bold red]")
+            if self.strict_mode: raise RuntimeError(msg)
 
-        # === OPTIMIZATION: CONNECT ONCE ===
-        # We perform connection/build once, then loop searches.
+        result = BenchmarkResult(
+            experiment_name=f"{db_name}_{dataset.name}",
+            database_info=temp_db.info,
+            dataset_info=dataset_info,
+            hardware_info=self.hardware_info,
+        )
 
         for idx_config in configs_to_test:
-
-            # 1. TUNING
+            # 2. Universal Config Application
             tuning = DATASET_TUNING.get(dataset.name.lower())
             if tuning:
                 console.print(f"  [magenta]Applying tuned parameters for {dataset.name}[/magenta]")
@@ -199,7 +233,7 @@ class BenchmarkRunner:
                 if idx_config.search_params is None: idx_config.search_params = {}
                 idx_config.search_params.update(tuning["search_params"])
 
-            # 2. FILTERING
+            # 3. Metric Compatibility Check
             req_metric = metric.value.lower()
             if req_metric == 'angular': req_metric = 'cosine'
             if req_metric == 'euclidean': req_metric = 'l2'
@@ -216,146 +250,129 @@ class BenchmarkRunner:
 
             console.print(f"\n  [yellow]Index: {idx_config.name}[/yellow]")
 
-            # =================================================================
-            # CRITICAL OPTIMIZATION: BUILD ONCE, SEARCH MANY
-            # =================================================================
+            # 4. Parameter Filtering (Fairness)
+            clean_search_params = idx_config.search_params.copy() if idx_config.search_params else {}
+            is_hnsw = "hnsw" in idx_config.type.lower()
+            is_ivf = "ivf" in idx_config.type.lower()
+
+            if is_hnsw and not is_ivf and "nprobe" in clean_search_params:
+                del clean_search_params["nprobe"]
+
+            if is_ivf and not is_hnsw and "ef" in clean_search_params:
+                del clean_search_params["ef"]
+
+            # Resolve List Params
+            final_search_params = {}
+            for key, value in clean_search_params.items():
+                if isinstance(value, list) and len(value) > 0:
+                    final_search_params[key] = value[len(value) // 2]
+                else:
+                    final_search_params[key] = value
+
+            # --- EXECUTION: BUILD ONCE, SEARCH MANY ---
             runs = []
+            db = get_database(db_name, db_config)
+            build_metrics = {}
+            build_success = False
 
+            # === PHASE A: BUILD ===
             try:
-                db = get_database(db_name, db_config)
                 with db:
-                    # --- A. BUILD PHASE ---
                     console.print("    [bold]Building Index (Once)...[/bold]")
-
                     with ResourceMonitor() as build_monitor:
                         build_duration_sec = db.create_index(vectors, idx_config, metric)
 
-                    # Store build metrics to copy to all runs later
                     build_metrics = {
                         "build_time": build_duration_sec,
                         "ram_peak": build_monitor.peak_memory_bytes,
                         "insert_throughput": len(vectors) / build_duration_sec if build_duration_sec > 0 else 0
                     }
+                    build_success = True
 
                     if db_name == "weaviate":
                         console.print("    [yellow]⏳ Weaviate: Sleeping 300s for HNSW convergence...[/yellow]")
                         time.sleep(300)
 
-                    # Warmup (Run once globally)
+                    # Warmup
                     warmup_queries = queries[:self.config.experiment.warmup_queries]
                     if len(warmup_queries) > 0:
                         console.print(f"    [dim]Running {len(warmup_queries)} warm-up queries...[/dim]")
                         for q in warmup_queries:
                             db.search_single(q, k=10)
-                    else:
-                         # --- GUARD: Warmup Enforcement ---
-                         console.print("[yellow]⚠️  Warning: No warm-up queries configured. Latency metrics may be unstable.[/yellow]")
 
-                    # --- B. SEARCH PHASE (Loop) ---
+                    # === PHASE B: SEARCH ===
                     console.print(f"    [bold]Starting {self.config.experiment.runs} Search Runs...[/bold]")
 
+                    # Update Config with EFFECTIVE params for audit
+                    effective_idx_config = IndexConfig(
+                        name=idx_config.name,
+                        type=idx_config.type,
+                        params=idx_config.params,
+                        search_params=final_search_params,  # Record what was actually used
+                        description=idx_config.description  # <--- FIX APPLIED HERE
+                    )
+
                     for run_id in range(self.config.experiment.runs):
-                        console.print(f"    Run {run_id + 1}/{self.config.experiment.runs}: Searching...", end="\r")
+                        try:
+                            console.print(f"    Run {run_id + 1}/{self.config.experiment.runs}: Searching...", end="\r")
+                            run_start = time.perf_counter()
+                            current_metrics = MetricsResult()
 
-                        run_start = time.perf_counter()
-                        current_metrics = MetricsResult()
+                            # Populate Build Metrics
+                            current_metrics.resource.index_build_time_sec = build_metrics.get("build_time", 0)
+                            current_metrics.resource.ram_bytes_peak = build_metrics.get("ram_peak", 0)
+                            current_metrics.operational.insert_throughput_batch = build_metrics.get("insert_throughput",
+                                                                                                    0)
 
-                        # Populate Build Metrics (Constant across runs)
-                        current_metrics.resource.index_build_time_sec = build_metrics["build_time"]
-                        current_metrics.resource.ram_bytes_peak = build_metrics["ram_peak"]
-                        current_metrics.operational.insert_throughput_batch = build_metrics["insert_throughput"]
+                            # 1. Search (With Resource Monitoring)
+                            with ResourceMonitor() as search_monitor:
+                                indices, distances, latencies = db.search(queries, 100, final_search_params)
 
-                        # 1. Search
-                        k = 100
-                        search_params = idx_config.search_params
+                            # Log Search RAM (Optional, if type allows)
+                            # current_metrics.resource.search_ram_peak = search_monitor.peak_memory_bytes
 
-                        # Fix params if list
-                        if search_params:
-                            resolved_params = {}
-                            for key, value in search_params.items():
-                                if isinstance(value, list) and len(value) > 0:
-                                    resolved_params[key] = value[len(value) // 2]
-                                else:
-                                    resolved_params[key] = value
-                            search_params = resolved_params
+                            # 2. Compute Metrics
+                            current_metrics.quality = compute_all_quality_metrics(indices, ground_truth)
+                            current_metrics.performance = compute_all_performance_metrics(latencies)
 
-                        indices, distances, latencies = db.search(queries, k, search_params)
+                            # 3. Ops Benchmark (Last run only)
+                            if run_id == self.config.experiment.runs - 1:
+                                self._run_ops_benchmark(db, queries[0], current_metrics)
 
-                        # 2. Compute Metrics
-                        current_metrics.quality = compute_all_quality_metrics(indices, ground_truth)
-                        current_metrics.performance = compute_all_performance_metrics(latencies)
+                            # Index Stats
+                            stats = db.get_index_stats()
+                            current_metrics.resource.index_size_bytes = stats.get("index_size_bytes", 0)
 
-                        # 3. Ops Benchmark (Only run on last run to avoid muddying index)
-                        if run_id == self.config.experiment.runs - 1:
-                            # Ops logic
-                            if db.name in ["qdrant", "weaviate", "lancedb"]:
-                                dummy_id = str(uuid.uuid4())
-                            else:
-                                dummy_id = "10000000"
-                            dummy_vec = queries[0]
+                            # --- RESULT VALIDATION ---
+                            self._validate_metrics(current_metrics, dataset.name, db_name, vectors.shape[1])
 
-                            t0 = time.perf_counter()
-                            try:
-                                if hasattr(db, 'insert_one'):
-                                    db.insert_one(dummy_id, dummy_vec)
-                                    current_metrics.operational.insert_latency_single_ms = (time.perf_counter() - t0) * 1000
-                            except: pass
+                            runs.append(BenchmarkRun(
+                                config=RunConfig(
+                                    database=db_name, dataset=dataset.name, index_config=effective_idx_config,
+                                    distance_metric=metric, k=100, num_queries=len(queries), run_id=run_id
+                                ),
+                                metrics=current_metrics,
+                                run_id=run_id,
+                                timestamp=datetime.now(),
+                                success=True,
+                                duration_sec=time.perf_counter() - run_start
+                            ))
 
-                            t0 = time.perf_counter()
-                            try:
-                                if hasattr(db, 'update_one'):
-                                    db.update_one(dummy_id, dummy_vec + 0.01)
-                                    current_metrics.operational.update_latency_ms = (time.perf_counter() - t0) * 1000
-                            except: pass
+                            console.print(
+                                f"    Run {run_id + 1}: Recall@10={current_metrics.quality.recall_at_10:.4f}, Latency_p50={current_metrics.performance.latency_p50:.2f}ms")
 
-                            t0 = time.perf_counter()
-                            try:
-                                if hasattr(db, 'delete_one'):
-                                    db.delete_one(dummy_id)
-                                    current_metrics.operational.delete_latency_ms = (time.perf_counter() - t0) * 1000
-                            except: pass
+                        except Exception as search_e:
+                            logger.exception(f"Search run {run_id} failed: {search_e}")
+                            console.print(f"    [red]Run {run_id + 1} Failed: {search_e}[/red]")
+                            # Continue to next run if one fails
 
-                        # Index Stats
-                        stats = db.get_index_stats()
-                        current_metrics.resource.index_size_bytes = stats.get("index_size_bytes", 0)
+                    # Cleanup
+                    if build_success:
+                        db.delete_index()
 
-                        # --- GUARD: Impossible Metrics ---
-                        if current_metrics.resource.index_size_bytes == 0 and db_name not in ["faiss"]:
-                             console.print("\n    [dim yellow]⚠️  Notice: Index size is 0. Check if DB exposes this metric.[/dim yellow]")
-
-                        if current_metrics.performance.latency_p50 == 0:
-                             console.print("\n    [red]❌ Error: Latency is 0.0ms. Timer failure or cached results?[/red]")
-
-                        # --- GUARD: Too Good To Be True ---
-                        if current_metrics.quality.precision_at_1 == 1.0 and dataset.name.lower() in ["glove", "random"]:
-                             console.print("\n    [yellow]⚠️  Suspicious: Precision@1 is 100%. Check for data leakage.[/yellow]")
-
-                        if current_metrics.quality.recall_at_10 > 0.99 and vectors.shape[1] > 500:
-                             console.print("\n    [bold red]⚠️  WARNING: Suspiciously perfect Recall (>0.99) on high-dim data.[/bold red]")
-
-                        # Create Run Object
-                        runs.append(BenchmarkRun(
-                            config=RunConfig(
-                                database=db_name, dataset="", index_config=idx_config,
-                                distance_metric=metric, k=100, num_queries=len(queries), run_id=run_id
-                            ),
-                            metrics=current_metrics,
-                            run_id=run_id,
-                            timestamp=datetime.now(),
-                            success=True,
-                            duration_sec=time.perf_counter() - run_start
-                        ))
-
-                        # Print mini-summary
-                        console.print(
-                            f"    Run {run_id + 1}: Recall@10={current_metrics.quality.recall_at_10:.4f}, Latency_p50={current_metrics.performance.latency_p50:.2f}ms")
-
-                    # --- CLEANUP ---
-                    db.delete_index()
-
-            except Exception as e:
-                logger.exception(f"Run failed: {e}")
-                console.print(f"[red]Failed: {e}[/red]")
+            except Exception as build_e:
+                logger.exception(f"Build phase failed: {build_e}")
+                console.print(f"    [red]Build Phase Failed: {build_e}[/red]")
 
             result.runs.extend(runs)
 
@@ -365,11 +382,56 @@ class BenchmarkRunner:
 
         return result
 
-    def _get_index_configs(
-            self,
-            db_config: Dict,
-            filter_names: Optional[List[str]] = None,
-    ) -> List[IndexConfig]:
+    def _run_ops_benchmark(self, db, dummy_vec, metrics):
+        """Helper to run CRUD operations."""
+        if db.name in ["qdrant", "weaviate", "lancedb"]:
+            dummy_id = str(uuid.uuid4())
+        else:
+            dummy_id = "10000000"
+
+        try:
+            t0 = time.perf_counter()
+            if hasattr(db, 'insert_one'):
+                db.insert_one(dummy_id, dummy_vec)
+                metrics.operational.insert_latency_single_ms = (time.perf_counter() - t0) * 1000
+        except:
+            pass
+
+        try:
+            t0 = time.perf_counter()
+            if hasattr(db, 'update_one'):
+                db.update_one(dummy_id, dummy_vec + 0.01)
+                metrics.operational.update_latency_ms = (time.perf_counter() - t0) * 1000
+        except:
+            pass
+
+        try:
+            t0 = time.perf_counter()
+            if hasattr(db, 'delete_one'):
+                db.delete_one(dummy_id)
+                metrics.operational.delete_latency_ms = (time.perf_counter() - t0) * 1000
+        except:
+            pass
+
+    def _validate_metrics(self, metrics: MetricsResult, dataset_name: str, db_name: str, dims: int):
+        """Perform machine-actionable validity checks."""
+        # 1. Impossible Values
+        if metrics.performance.latency_p50 == 0:
+            console.print("\n    [red]❌ Error: Latency is 0.0ms. Timer failure?[/red]")
+
+        # 2. Suspicious Perfection
+        if metrics.quality.precision_at_1 == 1.0 and dataset_name in ["glove", "random"]:
+            console.print("\n    [yellow]⚠️  Suspicious: Precision@1 is 100%.[/yellow]")
+
+        # 3. Expected Ranges (Sanity Check)
+        if dataset_name in EXPECTED_RANGES:
+            min_r, max_r = EXPECTED_RANGES[dataset_name]
+            recall = metrics.quality.recall_at_10
+            if recall < min_r or recall > max_r:
+                console.print(
+                    f"\n    [dim yellow]⚠️  Recall {recall:.2f} is outside expected range {min_r}-{max_r} for {dataset_name}.[/dim yellow]")
+
+    def _get_index_configs(self, db_config: Dict, filter_names: Optional[List[str]] = None) -> List[IndexConfig]:
         configs = []
         raw_configs = db_config.get("index_configurations", [])
         for cfg in raw_configs:
@@ -385,58 +447,41 @@ class BenchmarkRunner:
         return configs
 
     def _aggregate_metrics(self, metrics_list: List[MetricsResult]) -> MetricsResult:
-        """Aggregate metrics across multiple runs by calculating the MEAN."""
-        if not metrics_list:
-            return MetricsResult()
-
+        if not metrics_list: return MetricsResult()
         agg = MetricsResult()
         n = len(metrics_list)
 
-        # Quality
+        # Simple Mean Aggregation
         agg.quality.recall_at_10 = sum(m.quality.recall_at_10 for m in metrics_list) / n
         agg.quality.recall_at_100 = sum(m.quality.recall_at_100 for m in metrics_list) / n
         agg.quality.mrr = sum(m.quality.mrr for m in metrics_list) / n
-
-        # Performance
         agg.performance.latency_p50 = sum(m.performance.latency_p50 for m in metrics_list) / n
         agg.performance.latency_p99 = sum(m.performance.latency_p99 for m in metrics_list) / n
         agg.performance.qps_single_thread = sum(m.performance.qps_single_thread for m in metrics_list) / n
-
-        # Resource
         agg.resource.index_build_time_sec = sum(m.resource.index_build_time_sec for m in metrics_list) / n
-
         return agg
 
     def _print_summary(self, result: BenchmarkResult) -> None:
-        """Print a summary table of results with Variance (Mean ± Std)."""
-        if not result.runs:
-            return
-
+        if not result.runs: return
         table = Table(title=f"Results: {result.experiment_name} (runs={len(result.runs)})")
         table.add_column("Metric", style="cyan")
         table.add_column("Value (Mean ± Std)", style="green")
 
         def get_stat(metrics_list, extractor):
             values = [extractor(m.metrics) for m in metrics_list]
-            if len(values) < 2:
-                return f"{values[0]:.4f}"
+            if len(values) < 2: return f"{values[0]:.4f}"
             return f"{statistics.mean(values):.4f} ± {statistics.stdev(values):.4f}"
 
-        # Quality
         table.add_row("Recall@10", get_stat(result.runs, lambda m: m.quality.recall_at_10))
         table.add_row("Recall@100", get_stat(result.runs, lambda m: m.quality.recall_at_100))
         table.add_row("MRR", get_stat(result.runs, lambda m: m.quality.mrr))
-
-        # Performance
         table.add_row("Latency p50 (ms)", get_stat(result.runs, lambda m: m.performance.latency_p50))
         table.add_row("Latency p99 (ms)", get_stat(result.runs, lambda m: m.performance.latency_p99))
         table.add_row("QPS", get_stat(result.runs, lambda m: m.performance.qps_single_thread))
         table.add_row("Build Time (s)", get_stat(result.runs, lambda m: m.resource.index_build_time_sec))
-
         console.print(table)
 
     def save_results(self, output_dir: str = "./results") -> str:
-        """Save results to JSON file."""
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -446,7 +491,9 @@ class BenchmarkRunner:
             json.dump({
                 "metadata": {
                     "generated_at": datetime.now().isoformat(),
-                    "num_results": len(results_data)
+                    "num_results": len(results_data),
+                    "random_seed": 42,
+                    "strict_mode": self.strict_mode
                 },
                 "results": results_data
             }, f, indent=2, default=str)

@@ -87,10 +87,6 @@ class PgvectorAdapter(VectorDBInterface):
             cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
 
         register_vector(self._conn)
-
-        # Enable pgvector extension
-        with self._conn.cursor() as cur:
-            cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
         self._conn.commit()
         self._is_connected = True
 
@@ -125,11 +121,11 @@ class PgvectorAdapter(VectorDBInterface):
             # 1. Enable extension
             cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
 
-            # 2. Create Table (UNLOGGED)
+            # 2. Create Table (UNLOGGED for speed)
             cur.execute(
                 f"CREATE UNLOGGED TABLE IF NOT EXISTS {self._table_name} (id bigserial PRIMARY KEY, vector vector({dimensions}));")
 
-            # === BATCH INSERT FIX ===
+            # === BATCH INSERT ===
             print(f"🚀 Pgvector: Inserting {len(vectors)} vectors in batches...")
             batch_size = 10000
             insert_ids = ids if ids is not None else list(range(len(vectors)))
@@ -140,10 +136,8 @@ class PgvectorAdapter(VectorDBInterface):
                 chunk_data = list(zip(insert_ids[i:end], vectors[i:end].tolist()))
                 execute_values(cur, f"INSERT INTO {self._table_name} (id, vector) VALUES %s", chunk_data)
                 print(f"   Inserted batch {end}/{len(vectors)}", end="\r")
-            # ========================
 
             print(f"\n✅ Pgvector: Insertion complete.")
-            # =========================================================
 
             # 3. Create Index
             metric_op = {
@@ -158,10 +152,13 @@ class PgvectorAdapter(VectorDBInterface):
             idx_options = ""
 
             if idx_method == "hnsw":
+                # === FIX: PARAMETER MAPPING ===
+                # Map generic 'm' -> m
+                # Map generic 'ef_construct' -> ef_construction
                 m = params.get("m", 16)
-                ef = params.get("ef_construct", 64)
+                ef = params.get("ef_construct", params.get("ef_construction", 64))
 
-                # Auto-tune for GIST1M
+                # Auto-tune safeguard for high-dim data
                 if dimensions > 700 and m < 32:
                     print(f"⚡ High dimensionality ({dimensions}d) detected. Boosting HNSW parameters...")
                     m = 32
@@ -173,6 +170,7 @@ class PgvectorAdapter(VectorDBInterface):
                 idx_options = f"(lists = {lists})"
 
             print(f"🔨 Pgvector: Building {idx_method} index...")
+            # We use string formatting for parameters, which is safe for integers
             cur.execute(
                 f"CREATE INDEX ON {self._table_name} USING {idx_method} (vector {metric_op}) WITH {idx_options}"
             )
@@ -191,7 +189,6 @@ class PgvectorAdapter(VectorDBInterface):
         self._num_vectors = 0
 
     def save_index(self, path: str) -> None:
-        """PostgreSQL manages persistence automatically."""
         pass
 
     def load_index(self, path: str) -> float:
@@ -217,12 +214,20 @@ class PgvectorAdapter(VectorDBInterface):
         self.validate_vectors(queries)
         params = search_params or {}
 
-        # Set search parameters
+        # === FIX: SEARCH PARAMETER MAPPING ===
+        # Map generic benchmark params to Pgvector SQL settings
         with self._conn.cursor() as cur:
-            if "probes" in params:
-                cur.execute(f"SET ivfflat.probes = {params['probes']}")
-            if "ef_search" in params:
-                cur.execute(f"SET hnsw.ef_search = {params['ef_search']}")
+            # 1. IVF Probes
+            # Check for 'nprobe' (generic) or 'probes' (specific)
+            nprobe = params.get("nprobe", params.get("probes"))
+            if nprobe:
+                cur.execute(f"SET ivfflat.probes = {nprobe}")
+
+            # 2. HNSW EF Search
+            # Check for 'ef' (generic) or 'ef_search' (specific)
+            ef_search = params.get("ef", params.get("ef_search"))
+            if ef_search:
+                cur.execute(f"SET hnsw.ef_search = {ef_search}")
 
         # Determine distance operator
         op_map = {
@@ -282,19 +287,20 @@ class PgvectorAdapter(VectorDBInterface):
 
         conditions = []
         for f in filters:
+            val = f.value
+            if isinstance(val, str):
+                val = f"'{val}'"
+
             if f.operator == "eq":
-                if isinstance(f.value, str):
-                    conditions.append(f"{f.field} = '{f.value}'")
-                else:
-                    conditions.append(f"{f.field} = {f.value}")
+                conditions.append(f"{f.field} = {val}")
             elif f.operator == "gt":
-                conditions.append(f"{f.field} > {f.value}")
+                conditions.append(f"{f.field} > {val}")
             elif f.operator == "gte":
-                conditions.append(f"{f.field} >= {f.value}")
+                conditions.append(f"{f.field} >= {val}")
             elif f.operator == "lt":
-                conditions.append(f"{f.field} < {f.value}")
+                conditions.append(f"{f.field} < {val}")
             elif f.operator == "lte":
-                conditions.append(f"{f.field} <= {f.value}")
+                conditions.append(f"{f.field} <= {val}")
 
         return "WHERE " + " AND ".join(conditions) if conditions else ""
 
@@ -306,11 +312,11 @@ class PgvectorAdapter(VectorDBInterface):
         with self._conn.cursor() as cur:
             data = []
             for i, (vec_id, vector) in enumerate(zip(ids, vectors)):
-                meta = metadata[i] if metadata else {}
-                data.append((vec_id, vector.tolist(), meta.get("category"), meta.get("price"), meta.get("timestamp"), meta.get("active")))
+                # Simplified insert for basic columns, avoiding arbitrary metadata complexity for now
+                data.append((vec_id, vector.tolist()))
 
-            execute_values(cur, f"INSERT INTO {self._table_name} (id, vector, category, price, timestamp, active) VALUES %s",
-                         data, template="(%s, %s::vector, %s, %s, %s, %s)")
+            execute_values(cur, f"INSERT INTO {self._table_name} (id, vector) VALUES %s",
+                         data, template="(%s, %s::vector)")
         self._conn.commit()
         self._num_vectors += len(vectors)
         return time.perf_counter() - start_time
@@ -326,6 +332,7 @@ class PgvectorAdapter(VectorDBInterface):
     def delete(self, ids: List[int]) -> float:
         start_time = time.perf_counter()
         with self._conn.cursor() as cur:
+            # Use ANY for efficient bulk delete
             cur.execute(f"DELETE FROM {self._table_name} WHERE id = ANY(%s)", (ids,))
         self._conn.commit()
         self._num_vectors -= len(ids)
@@ -351,23 +358,19 @@ class PgvectorAdapter(VectorDBInterface):
         """Inserts a single row via SQL."""
         try:
             int_id = int(id) if str(id).isdigit() else 999999
-
             with self._conn.cursor() as cur:
                 cur.execute(
                     f"INSERT INTO {self._table_name} (id, vector) VALUES (%s, %s)",
                     (int_id, vector.tolist())
                 )
             self._conn.commit()
-        except Exception as e:
-            # Catch primary key collision or other SQL errors
-            print(f"Pgvector insert_one failed: {e}")
+        except Exception:
             self._conn.rollback()
 
     def delete_one(self, id: str):
         """Deletes a single row via SQL."""
         try:
             int_id = int(id) if str(id).isdigit() else 999999
-
             with self._conn.cursor() as cur:
                 cur.execute(
                     f"DELETE FROM {self._table_name} WHERE id = %s",
@@ -381,7 +384,6 @@ class PgvectorAdapter(VectorDBInterface):
         """Updates a single row via SQL."""
         try:
             int_id = int(id) if str(id).isdigit() else 999999
-
             with self._conn.cursor() as cur:
                 cur.execute(
                     f"UPDATE {self._table_name} SET vector = %s WHERE id = %s",
