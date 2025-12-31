@@ -21,7 +21,6 @@ from src.core.types import (
 )
 from src.databases.factory import register_database
 
-# --- FIX: Safe Import Handling ---
 try:
     from qdrant_client import QdrantClient, models
     from qdrant_client.http.exceptions import UnexpectedResponse
@@ -127,25 +126,25 @@ class QdrantAdapter(VectorDBInterface):
 
         params = index_config.params or {}
 
-        # === FIX: Safe Parameter Extraction ===
-        # Qdrant naturally uses 'm' and 'ef_construct'.
-        # We use .get() to ignore unknown keys (preventing the Milvus-style crash).
+        # === FIX: THROTTLE INDEXING RESOURCES ===
+        # Default '0' uses all Cores. For MSMARCO (768d) + HNSW, this kills RAM.
+        # We limit to 2 threads to ensure stability on standard machines.
+        indexing_threads = params.get("max_indexing_threads", 2)
+
         hnsw_config = models.HnswConfigDiff(
             m=params.get("m", 16),
             ef_construct=params.get("ef_construct", 100),
             full_scan_threshold=params.get("full_scan_threshold", 10000),
-            max_indexing_threads=params.get("max_indexing_threads", 0),
-            on_disk=True, # Safety: Offload graph to disk to save RAM
+            max_indexing_threads=indexing_threads,
+            on_disk=True, # Safety: Keep HNSW graph on disk
         )
 
         # === HYBRID STRATEGY: QUANTIZATION + DISK ===
         quantization_config = None
 
-        # Explicit config
         if "quantization" in params or getattr(index_config, "quantization", None):
             quant_params = getattr(index_config, "quantization", None) or params.get("quantization", {})
             quantization_config = self._create_quantization_config(quant_params)
-        # Automatic safeguard for high-dim vectors (like MSMARCO)
         elif dimensions > 512:
             print("⚡ Auto-enabling Scalar Quantization (Int8) for speed & memory safety...")
             quantization_config = models.ScalarQuantization(
@@ -170,8 +169,8 @@ class QdrantAdapter(VectorDBInterface):
             vectors_config=vectors_config,
         )
 
-        # Optimized Parallel Upload
-        print(f"🚀 Using Optimized Parallel Upload for {n_vectors} vectors...")
+        # Optimized Parallel Upload (Reduced for Stability)
+        print(f"🚀 Using Safe Upload for {n_vectors} vectors...")
         vector_ids = ids if ids is not None else list(range(n_vectors))
 
         self._client.upload_collection(
@@ -179,7 +178,7 @@ class QdrantAdapter(VectorDBInterface):
             vectors=vectors,
             payload=metadata,
             ids=vector_ids,
-            parallel=4, # Slightly increased parallelism
+            parallel=1, # Reduced from 4 to 1 to prevent ingestion congestion
             wait=True
         )
 
@@ -197,7 +196,8 @@ class QdrantAdapter(VectorDBInterface):
                     print("\n✅ Optimization complete. Collection is GREEN.")
                     break
                 elif status == models.CollectionStatus.RED:
-                    print(f"\n❌ CRITICAL: Qdrant Status is RED. Check docker logs.")
+                    print(f"\n❌ CRITICAL: Qdrant Status is RED. It likely ran out of RAM.")
+                    # Attempt recovery or fail
                     raise RuntimeError("Qdrant Collection Status became RED (Failed).")
                 else:
                     print(f"   Status: {status} (Optimizing)...", end="\r")
@@ -277,12 +277,9 @@ class QdrantAdapter(VectorDBInterface):
 
         qdrant_filter = self._build_filter(filters) if filters else None
 
-        # Distance logic: Qdrant scores are similarities (higher is better for Cosine/IP)
-        # But our benchmark expects Distances (lower is better) or raw scores.
-        # We stick to raw scores and let metrics handle it.
         reverse_sort = True
         if self._distance_metric == DistanceMetric.L2:
-             reverse_sort = False # L2: Lower is better
+             reverse_sort = False
 
         latencies = []
         all_indices = []
@@ -300,8 +297,6 @@ class QdrantAdapter(VectorDBInterface):
             )
 
             results = results_obj.points
-            # Sorting is usually handled by Qdrant, but ensuring here doesn't hurt
-            # (Note: query_points returns sorted results)
 
             latency_ms = (time.perf_counter() - start_time) * 1000
             latencies.append(latency_ms)
@@ -309,7 +304,6 @@ class QdrantAdapter(VectorDBInterface):
             indices = [r.id for r in results]
             distances = [r.score for r in results]
 
-            # Fill if fewer than k
             while len(indices) < k:
                 indices.append(-1)
                 distances.append(float("inf"))
@@ -424,5 +418,5 @@ class QdrantAdapter(VectorDBInterface):
             pass
 
     def update_one(self, id: str, vector: np.ndarray):
-        """Updates a single point (Qdrant upsert handles this)."""
+        """Updates a single point."""
         self.insert_one(id, vector)
