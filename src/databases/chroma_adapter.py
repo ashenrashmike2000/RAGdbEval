@@ -182,15 +182,19 @@ class ChromaAdapter(VectorDBInterface):
         # Chroma controls accuracy via collection metadata 'hnsw:search_ef'
         # We must update this to respect the benchmark config.
         if search_params:
-            # Check for generic 'ef' or specific 'ef_search'
             ef = search_params.get("ef", search_params.get("ef_search"))
             if ef:
-                # Update collection metadata to set search EF
                 current_meta = self._collection.metadata or {}
-                # Only update if different to avoid overhead
+
+                # Check if we need update
                 if current_meta.get("hnsw:search_ef") != ef:
-                    current_meta["hnsw:search_ef"] = ef
-                    self._collection.modify(metadata=current_meta)
+                    # Filter out immutable keys
+                    safe_meta = {
+                        key: val for key, val in current_meta.items()
+                        if key not in ["hnsw:space"]
+                    }
+                    safe_meta["hnsw:search_ef"] = ef
+                    self._collection.modify(metadata=safe_meta)
 
         latencies = []
         all_indices = []
