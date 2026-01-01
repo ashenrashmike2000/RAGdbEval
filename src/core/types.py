@@ -36,6 +36,9 @@ class IndexType(str, Enum):
     """Common index types across vector databases."""
 
     FLAT = "flat"  # Exact brute-force search
+    IVF_FLAT = "IVF_FLAT"
+    IVF_PQ = "IVF_PQ"  # <--- Added missing type
+    IVF_SQ = "IVF_SQ"
     IVF = "ivf"  # Inverted file index
     IVFPQ = "ivfpq"  # IVF with product quantization
     IVFSQ = "ivfsq"  # IVF with scalar quantization
