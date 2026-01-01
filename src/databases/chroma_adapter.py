@@ -178,22 +178,28 @@ class ChromaAdapter(VectorDBInterface):
 
         self.validate_vectors(queries)
 
-        # === FIX: APPLY SEARCH PARAMS (EF) ===
-        # Chroma controls accuracy via collection metadata 'hnsw:search_ef'
-        # We must update this to respect the benchmark config.
+        # === FIX: SAFE METADATA UPDATE ===
+        # Chroma fails if we try to "update" immutable keys like hnsw:space.
+        # We must filter them out before applying search-time parameters (hnsw:search_ef).
         if search_params:
             ef = search_params.get("ef", search_params.get("ef_search"))
             if ef:
                 current_meta = self._collection.metadata or {}
 
-                # Check if we need update
+                # Check if we actually need to update
                 if current_meta.get("hnsw:search_ef") != ef:
-                    # Filter out immutable keys
+                    # Filter out ALL immutable HNSW construction keys
+                    immutable_keys = ["hnsw:space", "hnsw:construction_ef", "hnsw:M"]
+
                     safe_meta = {
                         key: val for key, val in current_meta.items()
-                        if key not in ["hnsw:space"]
+                        if key not in immutable_keys
                     }
+
+                    # Set the search-time parameter
                     safe_meta["hnsw:search_ef"] = ef
+
+                    # Apply update
                     self._collection.modify(metadata=safe_meta)
 
         latencies = []
