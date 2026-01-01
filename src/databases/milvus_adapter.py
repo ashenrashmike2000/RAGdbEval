@@ -244,6 +244,11 @@ class MilvusAdapter(VectorDBInterface):
             if "metric_type" not in search_params:
                 search_params["metric_type"] = current_metric
 
+            if "params" in search_params and "ef" in search_params["params"]:
+                ef_val = search_params["params"]["ef"]
+                if ef_val < k:
+                    search_params["params"]["ef"] = k
+
         latencies = []
         all_indices = []
         all_distances = []
