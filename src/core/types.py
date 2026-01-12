@@ -5,7 +5,7 @@ This module defines all data structures used throughout the benchmarking framewo
 following best practices from ANN-Benchmarks and VectorDBBench.
 """
 
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -448,28 +448,19 @@ class BenchmarkResult:
     success: bool = True
     error_message: Optional[str] = None
 
-    def to_dict(self):
-        # === FIX: Export ALL metrics using asdict ===
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for serialization."""
         return {
             "experiment_name": self.experiment_name,
-            "database": self.database_info.name,
-            "dataset": self.dataset_info.name if hasattr(self.dataset_info, 'name') else str(self.dataset_info),
-            "runs": [
-                {
-                    # Flatten metrics for CSV friendliness
-                    "metrics": {
-                        **asdict(r.metrics.quality),
-                        **asdict(r.metrics.performance),
-                        **asdict(r.metrics.resource),
-                        **asdict(r.metrics.operational)
-                    }
-                } for r in self.runs
-            ],
-            # Helper for summary aggregation (optional)
-            "mean_metrics": {
-                "recall_at_10": self.mean_metrics.quality.recall_at_10 if self.mean_metrics else 0,
-                "qps": self.mean_metrics.performance.qps_single_thread if self.mean_metrics else 0
-            } if self.mean_metrics else None
+            "timestamp": self.timestamp.isoformat(),
+            "database": self.database_info.name if self.database_info else None,
+            "dataset": self.dataset_info.name if self.dataset_info else None,
+            "index_config": self.index_config.name if self.index_config else None,
+            "num_runs": self.num_runs,
+            "mean_metrics": self.mean_metrics.to_dict() if self.mean_metrics else None,
+            "hardware_info": self.hardware_info,
+            "success": self.success,
+            "error_message": self.error_message,
         }
 
 
