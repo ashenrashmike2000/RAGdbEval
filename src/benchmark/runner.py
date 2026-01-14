@@ -442,7 +442,7 @@ class BenchmarkRunner:
             # Warmup for CRUD
             try:
                 if hasattr(db, 'insert_one') and hasattr(db, 'delete_one'):
-                    warmup_id = "99999999" # Distinct from test ID
+                    warmup_id = "warmup-99999999"  # Distinct from numeric test IDs
                     db.insert_one(warmup_id, dummy_vec)
                     db.delete_one(warmup_id)
             except Exception:
