@@ -129,9 +129,19 @@ class ChromaAdapter(VectorDBInterface):
 
         vector_ids = [str(i) for i in (ids if ids else range(n_vectors))]
         
-        # Batch size 2000 is safe for 768d vectors (approx 6MB payload)
-        batch_size = 2000
+        # Dynamically choose batch size based on vector dimensionality and dtype
+        # Target approximately 6MB of embeddings per batch (similar to 2000 x 768d float32)
+        if isinstance(vectors, np.ndarray):
+            dim = vectors.shape[1] if vectors.ndim > 1 else 1
+            item_size = vectors.dtype.itemsize
+        else:
+            first_vec = vectors[0] if n_vectors > 0 else []
+            dim = len(first_vec) if hasattr(first_vec, "__len__") else 1
+            item_size = np.dtype("float32").itemsize
 
+        target_batch_bytes = 6 * 1024 * 1024  # ~6MB
+        batch_size = max(1, int(target_batch_bytes / (dim * item_size))) if dim > 0 else 1
+        batch_size = min(batch_size, n_vectors) if n_vectors > 0 else 1
         for i in range(0, n_vectors, batch_size):
             end = min(i + batch_size, n_vectors)
 
