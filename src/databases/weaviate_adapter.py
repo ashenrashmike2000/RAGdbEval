@@ -143,10 +143,12 @@ class WeaviateAdapter(VectorDBInterface):
             except Exception:
                 pass
             time.sleep(5)
-        
-        # Stabilization wait (heuristic)
-        time.sleep(60)
 
+        # Additional stabilization wait (heuristic, now configurable)
+        stabilization_wait = self.config.get("stabilization_wait_seconds", 60)
+        if stabilization_wait and stabilization_wait > 0:
+            print(f"⏳ Weaviate: Extra stabilization wait of {stabilization_wait} seconds...")
+            time.sleep(stabilization_wait)
         self._num_vectors = len(vectors)
         return time.perf_counter() - start_time
 
