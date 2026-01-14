@@ -37,7 +37,13 @@ class WeaviateAdapter(VectorDBInterface):
         self._client = None
         self._collection = None
         self._collection_name: str = ""
-        # Reverted named vector to ensure stability with current client version
+        # NOTE: This adapter previously used Weaviate's "named vector" feature to manage
+        # multiple explicitly named embedding vectors per object. In practice, this caused
+        # intermittent instability with the v4 Python client and mixed server versions
+        # (e.g., schema sync issues and occasional query failures when the named-vector
+        # schema diverged from the default vector configuration). To keep behavior stable
+        # and compatible across environments, we reverted to using the default single,
+        # unnamed vector configuration for all collections.
 
     @property
     def name(self) -> str: return "weaviate"
