@@ -237,7 +237,8 @@ class WeaviateAdapter(VectorDBInterface):
             # Use aggregation to get total count
             agg = self._collection.aggregate.over_all(total_count=True)
             stats["num_vectors"] = agg.total_count
-        except Exception:
+        except Exception as e:
+            warnings.warn(f"WeaviateAdapter.get_index_stats aggregation failed, setting num_vectors to 0: {e}")
             stats["num_vectors"] = 0
             
         return stats
