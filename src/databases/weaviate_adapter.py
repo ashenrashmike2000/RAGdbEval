@@ -65,8 +65,7 @@ class WeaviateAdapter(VectorDBInterface):
         port = c.get("http_port", 8080)
         grpc_port = c.get("grpc_port", 50051)
 
-        # === FIX: Use AdditionalConfig for Timeouts in v4 ===
-        # We set long timeouts (1 hour) to prevent benchmark crashes during heavy loads
+        # Set long timeouts to prevent benchmark crashes
         self._client = weaviate.connect_to_local(
             host=host,
             port=port,
@@ -92,7 +91,7 @@ class WeaviateAdapter(VectorDBInterface):
 
         start_time = time.perf_counter()
 
-        # Map metrics to Weaviate v4 enums
+        # Map metrics
         dist_map = {
             DistanceMetric.L2: wvc.VectorDistances.L2_SQUARED,
             DistanceMetric.COSINE: wvc.VectorDistances.COSINE,
@@ -109,7 +108,6 @@ class WeaviateAdapter(VectorDBInterface):
                 max_connections=index_config.params.get("m", 16),
                 cleanup_interval_seconds=300
             ),
-            # Explicitly define 'vec_id' property
             properties=[wvc.Property(name="vec_id", data_type=wvc.DataType.INT)]
         )
 
@@ -117,15 +115,11 @@ class WeaviateAdapter(VectorDBInterface):
 
         print(f"🚀 Weaviate: Inserting {len(vectors)} vectors (Fixed Batch Mode)...")
 
-        # === FIXED BATCHING STRATEGY ===
-        # We use a conservative fixed batch size to avoid overwhelming the local Docker network
-        # and causing DNS/gRPC timeouts.
+        # Fixed Batching
         batch_size = 1000
-
         with self._collection.batch.fixed_size(batch_size=batch_size, concurrent_requests=2) as batch:
             for i, vector in enumerate(vectors):
                 vec_id_int = ids[i] if ids else i
-                # Create a deterministic UUID from the integer ID
                 uid = str(uuid.uuid5(uuid.NAMESPACE_DNS, str(vec_id_int)))
 
                 batch.add_object(
@@ -133,18 +127,13 @@ class WeaviateAdapter(VectorDBInterface):
                     vector=vector.tolist(), # Reverted to simple vector
                     uuid=uid
                 )
-
                 if i > 0 and i % 10000 == 0:
                     print(f"   Processed {i} vectors...", end="\r")
 
-        # Check for failures
         if len(self._collection.batch.failed_objects) > 0:
             print(f"⚠️ Warning: {len(self._collection.batch.failed_objects)} objects failed to upload.")
-            # Optional: Print first error to debug
-            print(f"   First error: {self._collection.batch.failed_objects[0]}")
 
         print("\n⏳ Weaviate: Waiting for indexing (Shards READY)...")
-        # Wait for shards to report "READY" status
         for _ in range(30):
             try:
                 shards = self._collection.config.get_shards()
@@ -174,16 +163,30 @@ class WeaviateAdapter(VectorDBInterface):
     def search(self, queries, k, search_params=None, filters=None):
         if not self._collection: raise RuntimeError("No collection connected")
 
+        # === FIX: APPLY SEARCH PARAMS (EF) ===
+        # Weaviate controls search accuracy via the 'ef' parameter on the index config.
+        # We must update this dynamically if provided.
+        if search_params and "ef" in search_params:
+            try:
+                new_ef = search_params["ef"]
+                # print(f"   Weaviate: Updating HNSW ef to {new_ef}...")
+                self._collection.config.update(
+                    vector_index_config=wvc.Reconfigure.VectorIndex.hnsw(
+                        ef=new_ef
+                    )
+                )
+            except Exception as e:
+                print(f"⚠️ Failed to update ef: {e}")
+
         latencies = []
         all_indices = []
         all_distances = []
 
         for query in queries:
             start = time.perf_counter()
-
             try:
-                # Retry logic for transient gRPC errors
                 res = None
+                # Retry logic for transient gRPC errors
                 for attempt in range(3):
                     try:
                         res = self._collection.query.near_vector(
@@ -195,20 +198,16 @@ class WeaviateAdapter(VectorDBInterface):
                         )
                         break
                     except Exception as e:
-                        if attempt == 2:
-                            # If final attempt fails, log it
-                            print(f"   Search attempt failed: {e}")
+                        if attempt == 2: print(f"   Search attempt failed: {e}")
                         time.sleep(0.1)
 
                 if res:
                     latencies.append((time.perf_counter() - start) * 1000)
-
                     indices = []
                     dists = []
                     for obj in res.objects:
                         indices.append(obj.properties["vec_id"])
                         dists.append(obj.metadata.distance)
-
                     all_indices.append(indices)
                     all_distances.append(dists)
                 else:
@@ -244,11 +243,7 @@ class WeaviateAdapter(VectorDBInterface):
     def set_search_params(self, params): pass
     def get_search_params(self): return {}
 
-    # === NEW: Single-Item Wrappers for Benchmarking ===
-
     def insert_one(self, id: str, vector: np.ndarray):
-        """Inserts a single object."""
-        # Replicate the UUID generation logic from create_index
         try:
             vec_id_int = int(id) if str(id).isdigit() else 0
             # FIX: Use deterministic UUID to match delete_one
@@ -263,11 +258,9 @@ class WeaviateAdapter(VectorDBInterface):
             print(f"Weaviate insert_one failed: {e}")
 
     def delete_one(self, id: str):
-        """Deletes a single object by UUID."""
         try:
             vec_id_int = int(id) if str(id).isdigit() else 0
             uid = str(uuid.uuid5(uuid.NAMESPACE_DNS, str(vec_id_int)))
-
             self._collection.data.delete_by_id(uid)
         except Exception:
             pass

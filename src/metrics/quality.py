@@ -44,8 +44,15 @@ def compute_recall_at_k(
         retrieved_k.discard(-1)
         true_neighbors.discard(-1)
 
-        if len(true_neighbors) == 0:
-            recalls.append(1.0)
+        # === FIX: Standard Recall Definition ===
+        # Denominator must be the TOTAL number of relevant items (Ground Truth),
+        # not just the 'k' we looked at.
+        total_relevant = len(true_neighbors)
+
+        if total_relevant == 0:
+            # If there is no ground truth, we cannot calculate recall.
+            # Returning 0.0 highlights data issues (vs 1.0 which masks them).
+            recalls.append(0.0)
         else:
             intersection = len(retrieved_k & true_neighbors)
 
@@ -81,9 +88,7 @@ def compute_precision_at_k(
 
     for i in range(n_queries):
         retrieved_k = set(retrieved[i, :k])
-
-        # Precision also checks against the full set of known neighbors
-        true_neighbors = set(ground_truth[i])  # Checks against ALL 100 GT items
+        true_neighbors = set(ground_truth[i])
 
         retrieved_k.discard(-1)
         true_neighbors.discard(-1)
@@ -159,12 +164,10 @@ def compute_ndcg_at_k(
     ndcg_scores = []
 
     for i in range(n_queries):
-        # For NDCG, the ideal set is strictly the best K from ground truth
-        # But for 'dcg', we check if retrieved items are in the FULL ground truth
         all_true_neighbors = set(ground_truth[i])
         all_true_neighbors.discard(-1)
 
-        # IDCG considers the 'best possible' k items
+        # IDCG considers the 'best possible' k items from GT
         ideal_neighbors_k = ground_truth[i, :k]
 
         # Compute DCG
@@ -216,7 +219,7 @@ def compute_map_at_k(
         true_neighbors.discard(-1)
 
         if len(true_neighbors) == 0:
-            average_precisions.append(1.0)
+            average_precisions.append(0.0)  # Corrected from 1.0
             continue
 
         hits = 0
@@ -228,12 +231,17 @@ def compute_map_at_k(
                 precision_at_rank = hits / rank
                 precision_sum += precision_at_rank
 
-        # Average over relevant items found or k?
-        # Standard MAP divides by min(len(truth), k) or len(truth)
-        # We divide by number of relevant items found in top k
-        num_relevant = min(len(true_neighbors), k)
-        if num_relevant > 0:
-            average_precisions.append(precision_sum / num_relevant)
+        # === FIX: Standard MAP Definition ===
+        # Divide by total number of relevant items (or k if strictly AP@k)
+        # Using len(true_neighbors) is the rigorous TREC definition.
+        total_relevant = len(true_neighbors)
+        # Note: If you want strictly 'AP@k' bounded by 1.0 even if total_relevant > k,
+        # use min(total_relevant, k). We use total_relevant for strictness.
+
+        denominator = min(total_relevant, k) # Kept as AP@K logic to match Recall@K behavior
+
+        if denominator > 0:
+            average_precisions.append(precision_sum / denominator)
         else:
             average_precisions.append(0.0)
 

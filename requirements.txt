@@ -1,6 +1,10 @@
 numpy
 pandas
 qdrant-client
+requests
+h5py
+pyyaml
+rich
 pymilvus
 weaviate-client
 psycopg2-binary
