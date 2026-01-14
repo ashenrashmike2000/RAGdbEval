@@ -434,6 +434,10 @@ class BenchmarkRunner:
             # Use the same dimension as queries
             dim = queries.shape[1]
             dummy_vec = np.random.rand(dim).astype(np.float32)
+            # Normalize dummy vector to match expected normalization of query vectors
+            norm = np.linalg.norm(dummy_vec)
+            if norm > 0:
+                dummy_vec /= norm
 
             # Warmup for CRUD
             try:
