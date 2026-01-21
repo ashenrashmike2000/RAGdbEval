@@ -1,0 +1,2967 @@
+time="2026-01-20T11:56:44Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/chroma-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-01-20T11:56:44Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/weaviate-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-01-20T11:56:44Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/pgvector-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-01-20T11:56:44Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/qdrant-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-01-20T11:56:44Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/milvus-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-01-20T11:56:44Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/chroma-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container chroma-server  Creating
+ Container chroma-server  Created
+ Container chroma-server  Starting
+ Container chroma-server  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: chroma
+Datasets: gist1m
+Runs per config: 3
+
+
+Loading dataset: gist1m
+
+Benchmarking: chroma on gist1m
+  Vectors: (1000000, 960), Queries: (1000, 960)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Chroma: Inserting 1000000 vectors in batches...
+   Processed 2000/1000000 vectors...   Processed 12000/1000000 vectors...   Processed 22000/1000000 vectors...   Processed 32000/1000000 vectors...   Processed 42000/1000000 vectors...   Processed 52000/1000000 vectors...   Processed 62000/1000000 vectors...   Processed 72000/1000000 vectors...   Processed 82000/1000000 vectors...   Processed 92000/1000000 vectors...   Processed 102000/1000000 vectors...   Processed 112000/1000000 vectors...   Processed 122000/1000000 vectors...   Processed 132000/1000000 vectors...   Processed 142000/1000000 vectors...   Processed 152000/1000000 vectors...   Processed 162000/1000000 vectors...   Processed 172000/1000000 vectors...   Processed 182000/1000000 vectors...   Processed 192000/1000000 vectors...   Processed 202000/1000000 vectors...   Processed 212000/1000000 vectors...   Processed 222000/1000000 vectors...   Processed 232000/1000000 vectors...   Processed 242000/1000000 vectors...   Processed 252000/1000000 vectors...   Processed 262000/1000000 vectors...   Processed 272000/1000000 vectors...   Processed 282000/1000000 vectors...   Processed 292000/1000000 vectors...   Processed 302000/1000000 vectors...   Processed 312000/1000000 vectors...   Processed 322000/1000000 vectors...   Processed 332000/1000000 vectors...   Processed 342000/1000000 vectors...   Processed 352000/1000000 vectors...   Processed 362000/1000000 vectors...   Processed 372000/1000000 vectors...   Processed 382000/1000000 vectors...   Processed 392000/1000000 vectors...   Processed 402000/1000000 vectors...   Processed 412000/1000000 vectors...   Processed 422000/1000000 vectors...   Processed 432000/1000000 vectors...   Processed 442000/1000000 vectors...   Processed 452000/1000000 vectors...   Processed 462000/1000000 vectors...   Processed 472000/1000000 vectors...   Processed 482000/1000000 vectors...   Processed 492000/1000000 vectors...   Processed 502000/1000000 vectors...   Processed 512000/1000000 vectors...   Processed 522000/1000000 vectors...   Processed 532000/1000000 vectors...   Processed 542000/1000000 vectors...   Processed 552000/1000000 vectors...   Processed 562000/1000000 vectors...   Processed 572000/1000000 vectors...   Processed 582000/1000000 vectors...   Processed 592000/1000000 vectors...   Processed 602000/1000000 vectors...   Processed 612000/1000000 vectors...   Processed 622000/1000000 vectors...   Processed 632000/1000000 vectors...   Processed 642000/1000000 vectors...   Processed 652000/1000000 vectors...   Processed 662000/1000000 vectors...   Processed 672000/1000000 vectors...   Processed 682000/1000000 vectors...   Processed 692000/1000000 vectors...   Processed 702000/1000000 vectors...   Processed 712000/1000000 vectors...   Processed 722000/1000000 vectors...   Processed 732000/1000000 vectors...   Processed 742000/1000000 vectors...   Processed 752000/1000000 vectors...   Processed 762000/1000000 vectors...   Processed 772000/1000000 vectors...   Processed 782000/1000000 vectors...   Processed 792000/1000000 vectors...   Processed 802000/1000000 vectors...   Processed 812000/1000000 vectors...   Processed 822000/1000000 vectors...   Processed 832000/1000000 vectors...   Processed 842000/1000000 vectors...   Processed 852000/1000000 vectors...   Processed 862000/1000000 vectors...   Processed 872000/1000000 vectors...   Processed 882000/1000000 vectors...   Processed 892000/1000000 vectors...   Processed 902000/1000000 vectors...   Processed 912000/1000000 vectors...   Processed 922000/1000000 vectors...   Processed 932000/1000000 vectors...   Processed 942000/1000000 vectors...   Processed 952000/1000000 vectors...   Processed 962000/1000000 vectors...   Processed 972000/1000000 vectors...   Processed 982000/1000000 vectors...   Processed 992000/1000000 vectors...
+✅ Chroma: Insertion complete.
+    Measuring cold start and warmup...
+      Cold Start Latency: 68.45ms
+      Warmup Time: 167.43ms (22 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=7.32ms
+    Run 2: Recall@10=0.1000, Latency_p50=6.80ms
+    Run 3: Recall@10=0.1000, Latency_p50=6.55ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+    Results: chroma_gist1m    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┓
+┃ Metric           ┃ Value   ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━━┩
+│ Recall@10        │ 0.1000  │
+│ Precision@10     │ 1.0000  │
+│ Recall@100       │ 0.6650  │
+│ MRR              │ 1.0000  │
+│ Latency p50 (ms) │ 6.55    │
+│ Latency p99 (ms) │ 11.13   │
+│ QPS              │ 147.8   │
+│ Build Time (s)   │ 1257.30 │
+└──────────────────┴─────────┘
+Recall is normalized by total 
+ ground truth size (typically 
+100). Precision is # Relevant 
+             / K.             
+Exported JSON to results/chroma/gist1m_chroma_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T12:19:11Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/chroma-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container chroma-server  Stopping
+ Container chroma-server  Stopped
+ Container chroma-server  Removing
+ Container chroma-server  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T12:19:18Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/chroma-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container chroma-server  Creating
+ Container chroma-server  Created
+ Container chroma-server  Starting
+ Container chroma-server  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: chroma
+Datasets: deep1m
+Runs per config: 3
+
+
+Loading dataset: deep1m
+
+Benchmarking: chroma on deep1m
+  Vectors: (1000000, 96), Queries: (10000, 96)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Chroma: Inserting 1000000 vectors in batches...
+   Processed 2000/1000000 vectors...   Processed 12000/1000000 vectors...   Processed 22000/1000000 vectors...   Processed 32000/1000000 vectors...   Processed 42000/1000000 vectors...   Processed 52000/1000000 vectors...   Processed 62000/1000000 vectors...   Processed 72000/1000000 vectors...   Processed 82000/1000000 vectors...   Processed 92000/1000000 vectors...   Processed 102000/1000000 vectors...   Processed 112000/1000000 vectors...   Processed 122000/1000000 vectors...   Processed 132000/1000000 vectors...   Processed 142000/1000000 vectors...   Processed 152000/1000000 vectors...   Processed 162000/1000000 vectors...   Processed 172000/1000000 vectors...   Processed 182000/1000000 vectors...   Processed 192000/1000000 vectors...   Processed 202000/1000000 vectors...   Processed 212000/1000000 vectors...   Processed 222000/1000000 vectors...   Processed 232000/1000000 vectors...   Processed 242000/1000000 vectors...   Processed 252000/1000000 vectors...   Processed 262000/1000000 vectors...   Processed 272000/1000000 vectors...   Processed 282000/1000000 vectors...   Processed 292000/1000000 vectors...   Processed 302000/1000000 vectors...   Processed 312000/1000000 vectors...   Processed 322000/1000000 vectors...   Processed 332000/1000000 vectors...   Processed 342000/1000000 vectors...   Processed 352000/1000000 vectors...   Processed 362000/1000000 vectors...   Processed 372000/1000000 vectors...   Processed 382000/1000000 vectors...   Processed 392000/1000000 vectors...   Processed 402000/1000000 vectors...   Processed 412000/1000000 vectors...   Processed 422000/1000000 vectors...   Processed 432000/1000000 vectors...   Processed 442000/1000000 vectors...   Processed 452000/1000000 vectors...   Processed 462000/1000000 vectors...   Processed 472000/1000000 vectors...   Processed 482000/1000000 vectors...   Processed 492000/1000000 vectors...   Processed 502000/1000000 vectors...   Processed 512000/1000000 vectors...   Processed 522000/1000000 vectors...   Processed 532000/1000000 vectors...   Processed 542000/1000000 vectors...   Processed 552000/1000000 vectors...   Processed 562000/1000000 vectors...   Processed 572000/1000000 vectors...   Processed 582000/1000000 vectors...   Processed 592000/1000000 vectors...   Processed 602000/1000000 vectors...   Processed 612000/1000000 vectors...   Processed 622000/1000000 vectors...   Processed 632000/1000000 vectors...   Processed 642000/1000000 vectors...   Processed 652000/1000000 vectors...   Processed 662000/1000000 vectors...   Processed 672000/1000000 vectors...   Processed 682000/1000000 vectors...   Processed 692000/1000000 vectors...   Processed 702000/1000000 vectors...   Processed 712000/1000000 vectors...   Processed 722000/1000000 vectors...   Processed 732000/1000000 vectors...   Processed 742000/1000000 vectors...   Processed 752000/1000000 vectors...   Processed 762000/1000000 vectors...   Processed 772000/1000000 vectors...   Processed 782000/1000000 vectors...   Processed 792000/1000000 vectors...   Processed 802000/1000000 vectors...   Processed 812000/1000000 vectors...   Processed 822000/1000000 vectors...   Processed 832000/1000000 vectors...   Processed 842000/1000000 vectors...   Processed 852000/1000000 vectors...   Processed 862000/1000000 vectors...   Processed 872000/1000000 vectors...   Processed 882000/1000000 vectors...   Processed 892000/1000000 vectors...   Processed 902000/1000000 vectors...   Processed 912000/1000000 vectors...   Processed 922000/1000000 vectors...   Processed 932000/1000000 vectors...   Processed 942000/1000000 vectors...   Processed 952000/1000000 vectors...   Processed 962000/1000000 vectors...   Processed 972000/1000000 vectors...   Processed 982000/1000000 vectors...   Processed 992000/1000000 vectors...
+✅ Chroma: Insertion complete.
+    Measuring cold start and warmup...
+      Cold Start Latency: 6.24ms
+      Warmup Time: 156.67ms (30 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=5.41ms
+    Run 2: Recall@10=0.1000, Latency_p50=5.45ms
+    Run 3: Recall@10=0.1000, Latency_p50=5.55ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+   Results: chroma_deep1m    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 0.9999 │
+│ Recall@100       │ 0.9052 │
+│ MRR              │ 0.9999 │
+│ Latency p50 (ms) │ 5.55   │
+│ Latency p99 (ms) │ 11.14  │
+│ QPS              │ 163.8  │
+│ Build Time (s)   │ 587.06 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/chroma/deep1m_chroma_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T12:33:11Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/chroma-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container chroma-server  Stopping
+ Container chroma-server  Stopped
+ Container chroma-server  Removing
+ Container chroma-server  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T12:33:17Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/chroma-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container chroma-server  Creating
+ Container chroma-server  Created
+ Container chroma-server  Starting
+ Container chroma-server  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: chroma
+Datasets: sift1m
+Runs per config: 3
+
+
+Loading dataset: sift1m
+
+Benchmarking: chroma on sift1m
+  Vectors: (1000000, 128), Queries: (10000, 128)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Chroma: Inserting 1000000 vectors in batches...
+   Processed 2000/1000000 vectors...   Processed 12000/1000000 vectors...   Processed 22000/1000000 vectors...   Processed 32000/1000000 vectors...   Processed 42000/1000000 vectors...   Processed 52000/1000000 vectors...   Processed 62000/1000000 vectors...   Processed 72000/1000000 vectors...   Processed 82000/1000000 vectors...   Processed 92000/1000000 vectors...   Processed 102000/1000000 vectors...   Processed 112000/1000000 vectors...   Processed 122000/1000000 vectors...   Processed 132000/1000000 vectors...   Processed 142000/1000000 vectors...   Processed 152000/1000000 vectors...   Processed 162000/1000000 vectors...   Processed 172000/1000000 vectors...   Processed 182000/1000000 vectors...   Processed 192000/1000000 vectors...   Processed 202000/1000000 vectors...   Processed 212000/1000000 vectors...   Processed 222000/1000000 vectors...   Processed 232000/1000000 vectors...   Processed 242000/1000000 vectors...   Processed 252000/1000000 vectors...   Processed 262000/1000000 vectors...   Processed 272000/1000000 vectors...   Processed 282000/1000000 vectors...   Processed 292000/1000000 vectors...   Processed 302000/1000000 vectors...   Processed 312000/1000000 vectors...   Processed 322000/1000000 vectors...   Processed 332000/1000000 vectors...   Processed 342000/1000000 vectors...   Processed 352000/1000000 vectors...   Processed 362000/1000000 vectors...   Processed 372000/1000000 vectors...   Processed 382000/1000000 vectors...   Processed 392000/1000000 vectors...   Processed 402000/1000000 vectors...   Processed 412000/1000000 vectors...   Processed 422000/1000000 vectors...   Processed 432000/1000000 vectors...   Processed 442000/1000000 vectors...   Processed 452000/1000000 vectors...   Processed 462000/1000000 vectors...   Processed 472000/1000000 vectors...   Processed 482000/1000000 vectors...   Processed 492000/1000000 vectors...   Processed 502000/1000000 vectors...   Processed 512000/1000000 vectors...   Processed 522000/1000000 vectors...   Processed 532000/1000000 vectors...   Processed 542000/1000000 vectors...   Processed 552000/1000000 vectors...   Processed 562000/1000000 vectors...   Processed 572000/1000000 vectors...   Processed 582000/1000000 vectors...   Processed 592000/1000000 vectors...   Processed 602000/1000000 vectors...   Processed 612000/1000000 vectors...   Processed 622000/1000000 vectors...   Processed 632000/1000000 vectors...   Processed 642000/1000000 vectors...   Processed 652000/1000000 vectors...   Processed 662000/1000000 vectors...   Processed 672000/1000000 vectors...   Processed 682000/1000000 vectors...   Processed 692000/1000000 vectors...   Processed 702000/1000000 vectors...   Processed 712000/1000000 vectors...   Processed 722000/1000000 vectors...   Processed 732000/1000000 vectors...   Processed 742000/1000000 vectors...   Processed 752000/1000000 vectors...   Processed 762000/1000000 vectors...   Processed 772000/1000000 vectors...   Processed 782000/1000000 vectors...   Processed 792000/1000000 vectors...   Processed 802000/1000000 vectors...   Processed 812000/1000000 vectors...   Processed 822000/1000000 vectors...   Processed 832000/1000000 vectors...   Processed 842000/1000000 vectors...   Processed 852000/1000000 vectors...   Processed 862000/1000000 vectors...   Processed 872000/1000000 vectors...   Processed 882000/1000000 vectors...   Processed 892000/1000000 vectors...   Processed 902000/1000000 vectors...   Processed 912000/1000000 vectors...   Processed 922000/1000000 vectors...   Processed 932000/1000000 vectors...   Processed 942000/1000000 vectors...   Processed 952000/1000000 vectors...   Processed 962000/1000000 vectors...   Processed 972000/1000000 vectors...   Processed 982000/1000000 vectors...   Processed 992000/1000000 vectors...
+✅ Chroma: Insertion complete.
+    Measuring cold start and warmup...
+      Cold Start Latency: 7.66ms
+      Warmup Time: 150.24ms (21 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=7.48ms
+    Run 2: Recall@10=0.1000, Latency_p50=7.01ms
+    Run 3: Recall@10=0.1000, Latency_p50=7.44ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+   Results: chroma_sift1m    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.9123 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 7.44   │
+│ Latency p99 (ms) │ 11.09  │
+│ QPS              │ 133.0  │
+│ Build Time (s)   │ 595.22 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/chroma/sift1m_chroma_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T12:47:56Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/chroma-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container chroma-server  Stopping
+ Container chroma-server  Stopped
+ Container chroma-server  Removing
+ Container chroma-server  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T12:48:02Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/chroma-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container chroma-server  Creating
+ Container chroma-server  Created
+ Container chroma-server  Starting
+ Container chroma-server  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: chroma
+Datasets: random
+Runs per config: 3
+
+
+Loading dataset: random
+
+Benchmarking: chroma on random
+  Vectors: (1000000, 128), Queries: (10000, 128)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Chroma: Inserting 1000000 vectors in batches...
+   Processed 2000/1000000 vectors...   Processed 12000/1000000 vectors...   Processed 22000/1000000 vectors...   Processed 32000/1000000 vectors...   Processed 42000/1000000 vectors...   Processed 52000/1000000 vectors...   Processed 62000/1000000 vectors...   Processed 72000/1000000 vectors...   Processed 82000/1000000 vectors...   Processed 92000/1000000 vectors...   Processed 102000/1000000 vectors...   Processed 112000/1000000 vectors...   Processed 122000/1000000 vectors...   Processed 132000/1000000 vectors...   Processed 142000/1000000 vectors...   Processed 152000/1000000 vectors...   Processed 162000/1000000 vectors...   Processed 172000/1000000 vectors...   Processed 182000/1000000 vectors...   Processed 192000/1000000 vectors...   Processed 202000/1000000 vectors...   Processed 212000/1000000 vectors...   Processed 222000/1000000 vectors...   Processed 232000/1000000 vectors...   Processed 242000/1000000 vectors...   Processed 252000/1000000 vectors...   Processed 262000/1000000 vectors...   Processed 272000/1000000 vectors...   Processed 282000/1000000 vectors...   Processed 292000/1000000 vectors...   Processed 302000/1000000 vectors...   Processed 312000/1000000 vectors...   Processed 322000/1000000 vectors...   Processed 332000/1000000 vectors...   Processed 342000/1000000 vectors...   Processed 352000/1000000 vectors...   Processed 362000/1000000 vectors...   Processed 372000/1000000 vectors...   Processed 382000/1000000 vectors...   Processed 392000/1000000 vectors...   Processed 402000/1000000 vectors...   Processed 412000/1000000 vectors...   Processed 422000/1000000 vectors...   Processed 432000/1000000 vectors...   Processed 442000/1000000 vectors...   Processed 452000/1000000 vectors...   Processed 462000/1000000 vectors...   Processed 472000/1000000 vectors...   Processed 482000/1000000 vectors...   Processed 492000/1000000 vectors...   Processed 502000/1000000 vectors...   Processed 512000/1000000 vectors...   Processed 522000/1000000 vectors...   Processed 532000/1000000 vectors...   Processed 542000/1000000 vectors...   Processed 552000/1000000 vectors...   Processed 562000/1000000 vectors...   Processed 572000/1000000 vectors...   Processed 582000/1000000 vectors...   Processed 592000/1000000 vectors...   Processed 602000/1000000 vectors...   Processed 612000/1000000 vectors...   Processed 622000/1000000 vectors...   Processed 632000/1000000 vectors...   Processed 642000/1000000 vectors...   Processed 652000/1000000 vectors...   Processed 662000/1000000 vectors...   Processed 672000/1000000 vectors...   Processed 682000/1000000 vectors...   Processed 692000/1000000 vectors...   Processed 702000/1000000 vectors...   Processed 712000/1000000 vectors...   Processed 722000/1000000 vectors...   Processed 732000/1000000 vectors...   Processed 742000/1000000 vectors...   Processed 752000/1000000 vectors...   Processed 762000/1000000 vectors...   Processed 772000/1000000 vectors...   Processed 782000/1000000 vectors...   Processed 792000/1000000 vectors...   Processed 802000/1000000 vectors...   Processed 812000/1000000 vectors...   Processed 822000/1000000 vectors...   Processed 832000/1000000 vectors...   Processed 842000/1000000 vectors...   Processed 852000/1000000 vectors...   Processed 862000/1000000 vectors...   Processed 872000/1000000 vectors...   Processed 882000/1000000 vectors...   Processed 892000/1000000 vectors...   Processed 902000/1000000 vectors...   Processed 912000/1000000 vectors...   Processed 922000/1000000 vectors...   Processed 932000/1000000 vectors...   Processed 942000/1000000 vectors...   Processed 952000/1000000 vectors...   Processed 962000/1000000 vectors...   Processed 972000/1000000 vectors...   Processed 982000/1000000 vectors...   Processed 992000/1000000 vectors...
+✅ Chroma: Insertion complete.
+    Measuring cold start and warmup...
+      Cold Start Latency: 9.91ms
+      Warmup Time: 251.22ms (29 queries)
+    Run 1: Recall@10=0.0998, Latency_p50=7.45ms
+    Run 2: Recall@10=0.0998, Latency_p50=7.37ms
+    Run 3: Recall@10=0.0998, Latency_p50=7.73ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+   Results: chroma_random    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.0998 │
+│ Precision@10     │ 0.9978 │
+│ Recall@100       │ 0.1974 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 7.73   │
+│ Latency p99 (ms) │ 12.48  │
+│ QPS              │ 126.4  │
+│ Build Time (s)   │ 861.57 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/chroma/random_chroma_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T13:07:19Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/chroma-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container chroma-server  Stopping
+ Container chroma-server  Stopped
+ Container chroma-server  Removing
+ Container chroma-server  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T13:07:25Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/chroma-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container chroma-server  Creating
+ Container chroma-server  Created
+ Container chroma-server  Starting
+ Container chroma-server  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: chroma
+Datasets: msmarco
+Runs per config: 3
+
+
+Loading dataset: msmarco
+
+Benchmarking: chroma on msmarco
+Loading pre-computed embeddings (subset: 100000)...
+  Vectors: (100000, 768), Queries: (1000, 768)
+  Metric: cosine
+  Skipping HNSW_L2: Dataset requires 'cosine', Config is 'l2'
+
+  Index: HNSW_Cosine
+    Building index...
+🚀 Chroma: Inserting 100000 vectors in batches...
+   Processed 2000/100000 vectors...   Processed 12000/100000 vectors...   Processed 22000/100000 vectors...   Processed 32000/100000 vectors...   Processed 42000/100000 vectors...   Processed 52000/100000 vectors...   Processed 62000/100000 vectors...   Processed 72000/100000 vectors...   Processed 82000/100000 vectors...   Processed 92000/100000 vectors...
+✅ Chroma: Insertion complete.
+    Measuring cold start and warmup...
+      Cold Start Latency: 9.27ms
+      Warmup Time: 172.71ms (21 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=8.09ms
+    Run 2: Recall@10=0.1000, Latency_p50=8.00ms
+    Run 3: Recall@10=0.1000, Latency_p50=8.48ms
+   Results: chroma_msmarco   
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.8997 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 8.48   │
+│ Latency p99 (ms) │ 14.02  │
+│ QPS              │ 116.5  │
+│ Build Time (s)   │ 62.29  │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/chroma/msmarco_chroma_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T13:09:32Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/chroma-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container chroma-server  Stopping
+ Container chroma-server  Stopped
+ Container chroma-server  Removing
+ Container chroma-server  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T13:09:37Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/chroma-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container chroma-server  Creating
+ Container chroma-server  Created
+ Container chroma-server  Starting
+ Container chroma-server  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: chroma
+Datasets: glove
+Runs per config: 3
+
+
+Loading dataset: glove
+
+Benchmarking: chroma on glove
+  Vectors: (400000, 100), Queries: (10000, 100)
+  Metric: cosine
+  Skipping HNSW_L2: Dataset requires 'cosine', Config is 'l2'
+
+  Index: HNSW_Cosine
+    Building index...
+🚀 Chroma: Inserting 400000 vectors in batches...
+   Processed 2000/400000 vectors...   Processed 12000/400000 vectors...   Processed 22000/400000 vectors...   Processed 32000/400000 vectors...   Processed 42000/400000 vectors...   Processed 52000/400000 vectors...   Processed 62000/400000 vectors...   Processed 72000/400000 vectors...   Processed 82000/400000 vectors...   Processed 92000/400000 vectors...   Processed 102000/400000 vectors...   Processed 112000/400000 vectors...   Processed 122000/400000 vectors...   Processed 132000/400000 vectors...   Processed 142000/400000 vectors...   Processed 152000/400000 vectors...   Processed 162000/400000 vectors...   Processed 172000/400000 vectors...   Processed 182000/400000 vectors...   Processed 192000/400000 vectors...   Processed 202000/400000 vectors...   Processed 212000/400000 vectors...   Processed 222000/400000 vectors...   Processed 232000/400000 vectors...   Processed 242000/400000 vectors...   Processed 252000/400000 vectors...   Processed 262000/400000 vectors...   Processed 272000/400000 vectors...   Processed 282000/400000 vectors...   Processed 292000/400000 vectors...   Processed 302000/400000 vectors...   Processed 312000/400000 vectors...   Processed 322000/400000 vectors...   Processed 332000/400000 vectors...   Processed 342000/400000 vectors...   Processed 352000/400000 vectors...   Processed 362000/400000 vectors...   Processed 372000/400000 vectors...   Processed 382000/400000 vectors...   Processed 392000/400000 vectors...
+✅ Chroma: Insertion complete.
+    Measuring cold start and warmup...
+      Cold Start Latency: 10.98ms
+      Warmup Time: 195.15ms (28 queries)
+    Run 1: Recall@10=0.0999, Latency_p50=6.61ms
+    Run 2: Recall@10=0.0999, Latency_p50=6.68ms
+    Run 3: Recall@10=0.0999, Latency_p50=5.56ms
+    Results: chroma_glove    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.0999 │
+│ Precision@10     │ 0.9993 │
+│ Recall@100       │ 0.8402 │
+│ MRR              │ 0.9997 │
+│ Latency p50 (ms) │ 5.56   │
+│ Latency p99 (ms) │ 9.78   │
+│ QPS              │ 176.5  │
+│ Build Time (s)   │ 163.18 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/chroma/glove_chroma_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T13:21:40Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/chroma-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container chroma-server  Stopping
+ Container chroma-server  Stopped
+ Container chroma-server  Removing
+ Container chroma-server  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T13:21:40Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/weaviate-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container ragdbeval-weaviate-1  Creating
+ Container ragdbeval-weaviate-1  Created
+ Container ragdbeval-weaviate-1  Starting
+ Container ragdbeval-weaviate-1  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: weaviate
+Datasets: gist1m
+Runs per config: 3
+
+
+Loading dataset: gist1m
+
+Benchmarking: weaviate on gist1m
+  Vectors: (1000000, 960), Queries: (1000, 960)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Weaviate: Inserting 1000000 vectors (Fixed Batch Mode)...
+   Processed 10000 vectors...   Processed 20000 vectors...   Processed 30000 vectors...   Processed 40000 vectors...   Processed 50000 vectors...   Processed 60000 vectors...   Processed 70000 vectors...   Processed 80000 vectors...   Processed 90000 vectors...   Processed 100000 vectors...   Processed 110000 vectors...   Processed 120000 vectors...   Processed 130000 vectors...   Processed 140000 vectors...   Processed 150000 vectors...   Processed 160000 vectors...   Processed 170000 vectors...   Processed 180000 vectors...   Processed 190000 vectors...   Processed 200000 vectors...   Processed 210000 vectors...   Processed 220000 vectors...   Processed 230000 vectors...   Processed 240000 vectors...   Processed 250000 vectors...   Processed 260000 vectors...   Processed 270000 vectors...   Processed 280000 vectors...   Processed 290000 vectors...   Processed 300000 vectors...   Processed 310000 vectors...   Processed 320000 vectors...   Processed 330000 vectors...   Processed 340000 vectors...   Processed 350000 vectors...   Processed 360000 vectors...   Processed 370000 vectors...   Processed 380000 vectors...   Processed 390000 vectors...   Processed 400000 vectors...   Processed 410000 vectors...   Processed 420000 vectors...   Processed 430000 vectors...   Processed 440000 vectors...   Processed 450000 vectors...   Processed 460000 vectors...   Processed 470000 vectors...   Processed 480000 vectors...   Processed 490000 vectors...   Processed 500000 vectors...   Processed 510000 vectors...   Processed 520000 vectors...   Processed 530000 vectors...   Processed 540000 vectors...   Processed 550000 vectors...   Processed 560000 vectors...   Processed 570000 vectors...   Processed 580000 vectors...   Processed 590000 vectors...   Processed 600000 vectors...   Processed 610000 vectors...   Processed 620000 vectors...   Processed 630000 vectors...   Processed 640000 vectors...   Processed 650000 vectors...   Processed 660000 vectors...   Processed 670000 vectors...   Processed 680000 vectors...   Processed 690000 vectors...   Processed 700000 vectors...   Processed 710000 vectors...   Processed 720000 vectors...   Processed 730000 vectors...   Processed 740000 vectors...   Processed 750000 vectors...   Processed 760000 vectors...   Processed 770000 vectors...   Processed 780000 vectors...   Processed 790000 vectors...   Processed 800000 vectors...   Processed 810000 vectors...   Processed 820000 vectors...   Processed 830000 vectors...   Processed 840000 vectors...   Processed 850000 vectors...   Processed 860000 vectors...   Processed 870000 vectors...   Processed 880000 vectors...   Processed 890000 vectors...   Processed 900000 vectors...   Processed 910000 vectors...   Processed 920000 vectors...   Processed 930000 vectors...   Processed 940000 vectors...   Processed 950000 vectors...   Processed 960000 vectors...   Processed 970000 vectors...   Processed 980000 vectors...   Processed 990000 vectors...
+⏳ Weaviate: Waiting for indexing (Shards READY)...
+✅ All shards READY.
+    Measuring cold start and warmup...
+      Cold Start Latency: 106.50ms
+      Warmup Time: 362.17ms (27 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=27.33ms
+    Run 2: Recall@10=0.1000, Latency_p50=24.42ms
+    Run 3: Recall@10=0.1000, Latency_p50=24.46ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+  Results: weaviate_gist1m   
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.9092 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 24.46  │
+│ Latency p99 (ms) │ 36.89  │
+│ QPS              │ 40.6   │
+│ Build Time (s)   │ 786.54 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/weaviate/gist1m_weaviate_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T13:37:14Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/weaviate-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container ragdbeval-weaviate-1  Stopping
+ Container ragdbeval-weaviate-1  Stopped
+ Container ragdbeval-weaviate-1  Removing
+ Container ragdbeval-weaviate-1  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T13:37:22Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/weaviate-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container ragdbeval-weaviate-1  Creating
+ Container ragdbeval-weaviate-1  Created
+ Container ragdbeval-weaviate-1  Starting
+ Container ragdbeval-weaviate-1  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: weaviate
+Datasets: deep1m
+Runs per config: 3
+
+
+Loading dataset: deep1m
+
+Benchmarking: weaviate on deep1m
+  Vectors: (1000000, 96), Queries: (10000, 96)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Weaviate: Inserting 1000000 vectors (Fixed Batch Mode)...
+   Processed 10000 vectors...   Processed 20000 vectors...   Processed 30000 vectors...   Processed 40000 vectors...   Processed 50000 vectors...   Processed 60000 vectors...   Processed 70000 vectors...   Processed 80000 vectors...   Processed 90000 vectors...   Processed 100000 vectors...   Processed 110000 vectors...   Processed 120000 vectors...   Processed 130000 vectors...   Processed 140000 vectors...   Processed 150000 vectors...   Processed 160000 vectors...   Processed 170000 vectors...   Processed 180000 vectors...   Processed 190000 vectors...   Processed 200000 vectors...   Processed 210000 vectors...   Processed 220000 vectors...   Processed 230000 vectors...   Processed 240000 vectors...   Processed 250000 vectors...   Processed 260000 vectors...   Processed 270000 vectors...   Processed 280000 vectors...   Processed 290000 vectors...   Processed 300000 vectors...   Processed 310000 vectors...   Processed 320000 vectors...   Processed 330000 vectors...   Processed 340000 vectors...   Processed 350000 vectors...   Processed 360000 vectors...   Processed 370000 vectors...   Processed 380000 vectors...   Processed 390000 vectors...   Processed 400000 vectors...   Processed 410000 vectors...   Processed 420000 vectors...   Processed 430000 vectors...   Processed 440000 vectors...   Processed 450000 vectors...   Processed 460000 vectors...   Processed 470000 vectors...   Processed 480000 vectors...   Processed 490000 vectors...   Processed 500000 vectors...   Processed 510000 vectors...   Processed 520000 vectors...   Processed 530000 vectors...   Processed 540000 vectors...   Processed 550000 vectors...   Processed 560000 vectors...   Processed 570000 vectors...   Processed 580000 vectors...   Processed 590000 vectors...   Processed 600000 vectors...   Processed 610000 vectors...   Processed 620000 vectors...   Processed 630000 vectors...   Processed 640000 vectors...   Processed 650000 vectors...   Processed 660000 vectors...   Processed 670000 vectors...   Processed 680000 vectors...   Processed 690000 vectors...   Processed 700000 vectors...   Processed 710000 vectors...   Processed 720000 vectors...   Processed 730000 vectors...   Processed 740000 vectors...   Processed 750000 vectors...   Processed 760000 vectors...   Processed 770000 vectors...   Processed 780000 vectors...   Processed 790000 vectors...   Processed 800000 vectors...   Processed 810000 vectors...   Processed 820000 vectors...   Processed 830000 vectors...   Processed 840000 vectors...   Processed 850000 vectors...   Processed 860000 vectors...   Processed 870000 vectors...   Processed 880000 vectors...   Processed 890000 vectors...   Processed 900000 vectors...   Processed 910000 vectors...   Processed 920000 vectors...   Processed 930000 vectors...   Processed 940000 vectors...   Processed 950000 vectors...   Processed 960000 vectors...   Processed 970000 vectors...   Processed 980000 vectors...   Processed 990000 vectors...
+⏳ Weaviate: Waiting for indexing (Shards READY)...
+✅ All shards READY.
+    Measuring cold start and warmup...
+      Cold Start Latency: 7.63ms
+      Warmup Time: 117.26ms (21 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=12.80ms
+    Run 2: Recall@10=0.1000, Latency_p50=13.23ms
+    Run 3: Recall@10=0.1000, Latency_p50=11.52ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+  Results: weaviate_deep1m   
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.9917 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 11.52  │
+│ Latency p99 (ms) │ 18.64  │
+│ QPS              │ 84.3   │
+│ Build Time (s)   │ 432.28 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/weaviate/deep1m_weaviate_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T13:52:02Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/weaviate-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container ragdbeval-weaviate-1  Stopping
+ Container ragdbeval-weaviate-1  Stopped
+ Container ragdbeval-weaviate-1  Removing
+ Container ragdbeval-weaviate-1  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T13:52:08Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/weaviate-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container ragdbeval-weaviate-1  Creating
+ Container ragdbeval-weaviate-1  Created
+ Container ragdbeval-weaviate-1  Starting
+ Container ragdbeval-weaviate-1  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: weaviate
+Datasets: sift1m
+Runs per config: 3
+
+
+Loading dataset: sift1m
+
+Benchmarking: weaviate on sift1m
+  Vectors: (1000000, 128), Queries: (10000, 128)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Weaviate: Inserting 1000000 vectors (Fixed Batch Mode)...
+   Processed 10000 vectors...   Processed 20000 vectors...   Processed 30000 vectors...   Processed 40000 vectors...   Processed 50000 vectors...   Processed 60000 vectors...   Processed 70000 vectors...   Processed 80000 vectors...   Processed 90000 vectors...   Processed 100000 vectors...   Processed 110000 vectors...   Processed 120000 vectors...   Processed 130000 vectors...   Processed 140000 vectors...   Processed 150000 vectors...   Processed 160000 vectors...   Processed 170000 vectors...   Processed 180000 vectors...   Processed 190000 vectors...   Processed 200000 vectors...   Processed 210000 vectors...   Processed 220000 vectors...   Processed 230000 vectors...   Processed 240000 vectors...   Processed 250000 vectors...   Processed 260000 vectors...   Processed 270000 vectors...   Processed 280000 vectors...   Processed 290000 vectors...   Processed 300000 vectors...   Processed 310000 vectors...   Processed 320000 vectors...   Processed 330000 vectors...   Processed 340000 vectors...   Processed 350000 vectors...   Processed 360000 vectors...   Processed 370000 vectors...   Processed 380000 vectors...   Processed 390000 vectors...   Processed 400000 vectors...   Processed 410000 vectors...   Processed 420000 vectors...   Processed 430000 vectors...   Processed 440000 vectors...   Processed 450000 vectors...   Processed 460000 vectors...   Processed 470000 vectors...   Processed 480000 vectors...   Processed 490000 vectors...   Processed 500000 vectors...   Processed 510000 vectors...   Processed 520000 vectors...   Processed 530000 vectors...   Processed 540000 vectors...   Processed 550000 vectors...   Processed 560000 vectors...   Processed 570000 vectors...   Processed 580000 vectors...   Processed 590000 vectors...   Processed 600000 vectors...   Processed 610000 vectors...   Processed 620000 vectors...   Processed 630000 vectors...   Processed 640000 vectors...   Processed 650000 vectors...   Processed 660000 vectors...   Processed 670000 vectors...   Processed 680000 vectors...   Processed 690000 vectors...   Processed 700000 vectors...   Processed 710000 vectors...   Processed 720000 vectors...   Processed 730000 vectors...   Processed 740000 vectors...   Processed 750000 vectors...   Processed 760000 vectors...   Processed 770000 vectors...   Processed 780000 vectors...   Processed 790000 vectors...   Processed 800000 vectors...   Processed 810000 vectors...   Processed 820000 vectors...   Processed 830000 vectors...   Processed 840000 vectors...   Processed 850000 vectors...   Processed 860000 vectors...   Processed 870000 vectors...   Processed 880000 vectors...   Processed 890000 vectors...   Processed 900000 vectors...   Processed 910000 vectors...   Processed 920000 vectors...   Processed 930000 vectors...   Processed 940000 vectors...   Processed 950000 vectors...   Processed 960000 vectors...   Processed 970000 vectors...   Processed 980000 vectors...   Processed 990000 vectors...
+⏳ Weaviate: Waiting for indexing (Shards READY)...
+✅ All shards READY.
+    Measuring cold start and warmup...
+      Cold Start Latency: 11.15ms
+      Warmup Time: 176.15ms (21 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=10.35ms
+    Run 2: Recall@10=0.1000, Latency_p50=10.46ms
+    Run 3: Recall@10=0.1000, Latency_p50=10.74ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+  Results: weaviate_sift1m   
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.9962 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 10.74  │
+│ Latency p99 (ms) │ 20.83  │
+│ QPS              │ 86.8   │
+│ Build Time (s)   │ 474.93 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/weaviate/sift1m_weaviate_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T14:06:28Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/weaviate-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container ragdbeval-weaviate-1  Stopping
+ Container ragdbeval-weaviate-1  Stopped
+ Container ragdbeval-weaviate-1  Removing
+ Container ragdbeval-weaviate-1  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T14:06:35Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/weaviate-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container ragdbeval-weaviate-1  Creating
+ Container ragdbeval-weaviate-1  Created
+ Container ragdbeval-weaviate-1  Starting
+ Container ragdbeval-weaviate-1  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: weaviate
+Datasets: random
+Runs per config: 3
+
+
+Loading dataset: random
+
+Benchmarking: weaviate on random
+  Vectors: (1000000, 128), Queries: (10000, 128)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Weaviate: Inserting 1000000 vectors (Fixed Batch Mode)...
+   Processed 10000 vectors...   Processed 20000 vectors...   Processed 30000 vectors...   Processed 40000 vectors...   Processed 50000 vectors...   Processed 60000 vectors...   Processed 70000 vectors...   Processed 80000 vectors...   Processed 90000 vectors...   Processed 100000 vectors...   Processed 110000 vectors...   Processed 120000 vectors...   Processed 130000 vectors...   Processed 140000 vectors...   Processed 150000 vectors...   Processed 160000 vectors...   Processed 170000 vectors...   Processed 180000 vectors...   Processed 190000 vectors...   Processed 200000 vectors...   Processed 210000 vectors...   Processed 220000 vectors...   Processed 230000 vectors...   Processed 240000 vectors...   Processed 250000 vectors...   Processed 260000 vectors...   Processed 270000 vectors...   Processed 280000 vectors...   Processed 290000 vectors...   Processed 300000 vectors...   Processed 310000 vectors...   Processed 320000 vectors...   Processed 330000 vectors...   Processed 340000 vectors...   Processed 350000 vectors...   Processed 360000 vectors...   Processed 370000 vectors...   Processed 380000 vectors...   Processed 390000 vectors...   Processed 400000 vectors...   Processed 410000 vectors...   Processed 420000 vectors...   Processed 430000 vectors...   Processed 440000 vectors...   Processed 450000 vectors...   Processed 460000 vectors...   Processed 470000 vectors...   Processed 480000 vectors...   Processed 490000 vectors...   Processed 500000 vectors...   Processed 510000 vectors...   Processed 520000 vectors...   Processed 530000 vectors...   Processed 540000 vectors...   Processed 550000 vectors...   Processed 560000 vectors...   Processed 570000 vectors...   Processed 580000 vectors...   Processed 590000 vectors...   Processed 600000 vectors...   Processed 610000 vectors...   Processed 620000 vectors...   Processed 630000 vectors...   Processed 640000 vectors...   Processed 650000 vectors...   Processed 660000 vectors...   Processed 670000 vectors...   Processed 680000 vectors...   Processed 690000 vectors...   Processed 700000 vectors...   Processed 710000 vectors...   Processed 720000 vectors...   Processed 730000 vectors...   Processed 740000 vectors...   Processed 750000 vectors...   Processed 760000 vectors...   Processed 770000 vectors...   Processed 780000 vectors...   Processed 790000 vectors...   Processed 800000 vectors...   Processed 810000 vectors...   Processed 820000 vectors...   Processed 830000 vectors...   Processed 840000 vectors...   Processed 850000 vectors...   Processed 860000 vectors...   Processed 870000 vectors...   Processed 880000 vectors...   Processed 890000 vectors...   Processed 900000 vectors...   Processed 910000 vectors...   Processed 920000 vectors...   Processed 930000 vectors...   Processed 940000 vectors...   Processed 950000 vectors...   Processed 960000 vectors...   Processed 970000 vectors...   Processed 980000 vectors...   Processed 990000 vectors...
+⏳ Weaviate: Waiting for indexing (Shards READY)...
+✅ All shards READY.
+    Measuring cold start and warmup...
+      Cold Start Latency: 11.47ms
+      Warmup Time: 252.76ms (23 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=15.29ms
+    Run 2: Recall@10=0.1000, Latency_p50=15.28ms
+    Run 3: Recall@10=0.1000, Latency_p50=15.16ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+  Results: weaviate_random   
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.4529 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 15.16  │
+│ Latency p99 (ms) │ 22.84  │
+│ QPS              │ 63.9   │
+│ Build Time (s)   │ 813.71 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/weaviate/random_weaviate_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T14:28:55Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/weaviate-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container ragdbeval-weaviate-1  Stopping
+ Container ragdbeval-weaviate-1  Stopped
+ Container ragdbeval-weaviate-1  Removing
+ Container ragdbeval-weaviate-1  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T14:29:01Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/weaviate-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container ragdbeval-weaviate-1  Creating
+ Container ragdbeval-weaviate-1  Created
+ Container ragdbeval-weaviate-1  Starting
+ Container ragdbeval-weaviate-1  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: weaviate
+Datasets: msmarco
+Runs per config: 3
+
+
+Loading dataset: msmarco
+
+Benchmarking: weaviate on msmarco
+Loading pre-computed embeddings (subset: 100000)...
+  Vectors: (100000, 768), Queries: (1000, 768)
+  Metric: cosine
+  Skipping HNSW_L2: Dataset requires 'cosine', Config is 'l2'
+
+  Index: HNSW_Cosine
+    Building index...
+🚀 Weaviate: Inserting 100000 vectors (Fixed Batch Mode)...
+   Processed 10000 vectors...   Processed 20000 vectors...   Processed 30000 vectors...   Processed 40000 vectors...   Processed 50000 vectors...   Processed 60000 vectors...   Processed 70000 vectors...   Processed 80000 vectors...   Processed 90000 vectors...
+⏳ Weaviate: Waiting for indexing (Shards READY)...
+✅ All shards READY.
+    Measuring cold start and warmup...
+      Cold Start Latency: 10.88ms
+      Warmup Time: 172.20ms (21 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=11.27ms
+    Run 2: Recall@10=0.1000, Latency_p50=11.28ms
+    Run 3: Recall@10=0.1000, Latency_p50=11.21ms
+  Results: weaviate_msmarco  
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.9862 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 11.21  │
+│ Latency p99 (ms) │ 18.22  │
+│ QPS              │ 87.4   │
+│ Build Time (s)   │ 124.43 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/weaviate/msmarco_weaviate_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T14:32:18Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/weaviate-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container ragdbeval-weaviate-1  Stopping
+ Container ragdbeval-weaviate-1  Stopped
+ Container ragdbeval-weaviate-1  Removing
+ Container ragdbeval-weaviate-1  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T14:32:24Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/weaviate-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container ragdbeval-weaviate-1  Creating
+ Container ragdbeval-weaviate-1  Created
+ Container ragdbeval-weaviate-1  Starting
+ Container ragdbeval-weaviate-1  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: weaviate
+Datasets: glove
+Runs per config: 3
+
+
+Loading dataset: glove
+
+Benchmarking: weaviate on glove
+  Vectors: (400000, 100), Queries: (10000, 100)
+  Metric: cosine
+  Skipping HNSW_L2: Dataset requires 'cosine', Config is 'l2'
+
+  Index: HNSW_Cosine
+    Building index...
+🚀 Weaviate: Inserting 400000 vectors (Fixed Batch Mode)...
+   Processed 10000 vectors...   Processed 20000 vectors...   Processed 30000 vectors...   Processed 40000 vectors...   Processed 50000 vectors...   Processed 60000 vectors...   Processed 70000 vectors...   Processed 80000 vectors...   Processed 90000 vectors...   Processed 100000 vectors...   Processed 110000 vectors...   Processed 120000 vectors...   Processed 130000 vectors...   Processed 140000 vectors...   Processed 150000 vectors...   Processed 160000 vectors...   Processed 170000 vectors...   Processed 180000 vectors...   Processed 190000 vectors...   Processed 200000 vectors...   Processed 210000 vectors...   Processed 220000 vectors...   Processed 230000 vectors...   Processed 240000 vectors...   Processed 250000 vectors...   Processed 260000 vectors...   Processed 270000 vectors...   Processed 280000 vectors...   Processed 290000 vectors...   Processed 300000 vectors...   Processed 310000 vectors...   Processed 320000 vectors...   Processed 330000 vectors...   Processed 340000 vectors...   Processed 350000 vectors...   Processed 360000 vectors...   Processed 370000 vectors...   Processed 380000 vectors...   Processed 390000 vectors...
+⏳ Weaviate: Waiting for indexing (Shards READY)...
+✅ All shards READY.
+    Measuring cold start and warmup...
+      Cold Start Latency: 16.56ms
+      Warmup Time: 203.70ms (23 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=11.29ms
+    Run 2: Recall@10=0.1000, Latency_p50=11.20ms
+    Run 3: Recall@10=0.1000, Latency_p50=10.42ms
+   Results: weaviate_glove   
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 0.9999 │
+│ Recall@100       │ 0.9652 │
+│ MRR              │ 0.9999 │
+│ Latency p50 (ms) │ 10.42  │
+│ Latency p99 (ms) │ 17.89  │
+│ QPS              │ 93.3   │
+│ Build Time (s)   │ 200.34 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/weaviate/glove_weaviate_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T14:47:04Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/weaviate-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container ragdbeval-weaviate-1  Stopping
+ Container ragdbeval-weaviate-1  Stopped
+ Container ragdbeval-weaviate-1  Removing
+ Container ragdbeval-weaviate-1  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T14:47:06Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/pgvector-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container pgvector_benchmark  Creating
+ Container pgvector_benchmark  Created
+ Container pgvector_benchmark  Starting
+ Container pgvector_benchmark  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: pgvector
+Datasets: gist1m
+Runs per config: 3
+
+
+Loading dataset: gist1m
+
+Benchmarking: pgvector on gist1m
+  Vectors: (1000000, 960), Queries: (1000, 960)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Pgvector: Inserting 1000000 vectors in batches...
+   Inserted batch 10000/1000000   Inserted batch 20000/1000000   Inserted batch 30000/1000000   Inserted batch 40000/1000000   Inserted batch 50000/1000000   Inserted batch 60000/1000000   Inserted batch 70000/1000000   Inserted batch 80000/1000000   Inserted batch 90000/1000000   Inserted batch 100000/1000000   Inserted batch 110000/1000000   Inserted batch 120000/1000000   Inserted batch 130000/1000000   Inserted batch 140000/1000000   Inserted batch 150000/1000000   Inserted batch 160000/1000000   Inserted batch 170000/1000000   Inserted batch 180000/1000000   Inserted batch 190000/1000000   Inserted batch 200000/1000000   Inserted batch 210000/1000000   Inserted batch 220000/1000000   Inserted batch 230000/1000000   Inserted batch 240000/1000000   Inserted batch 250000/1000000   Inserted batch 260000/1000000   Inserted batch 270000/1000000   Inserted batch 280000/1000000   Inserted batch 290000/1000000   Inserted batch 300000/1000000   Inserted batch 310000/1000000   Inserted batch 320000/1000000   Inserted batch 330000/1000000   Inserted batch 340000/1000000   Inserted batch 350000/1000000   Inserted batch 360000/1000000   Inserted batch 370000/1000000   Inserted batch 380000/1000000   Inserted batch 390000/1000000   Inserted batch 400000/1000000   Inserted batch 410000/1000000   Inserted batch 420000/1000000   Inserted batch 430000/1000000   Inserted batch 440000/1000000   Inserted batch 450000/1000000   Inserted batch 460000/1000000   Inserted batch 470000/1000000   Inserted batch 480000/1000000   Inserted batch 490000/1000000   Inserted batch 500000/1000000   Inserted batch 510000/1000000   Inserted batch 520000/1000000   Inserted batch 530000/1000000   Inserted batch 540000/1000000   Inserted batch 550000/1000000   Inserted batch 560000/1000000   Inserted batch 570000/1000000   Inserted batch 580000/1000000   Inserted batch 590000/1000000   Inserted batch 600000/1000000   Inserted batch 610000/1000000   Inserted batch 620000/1000000   Inserted batch 630000/1000000   Inserted batch 640000/1000000   Inserted batch 650000/1000000   Inserted batch 660000/1000000   Inserted batch 670000/1000000   Inserted batch 680000/1000000   Inserted batch 690000/1000000   Inserted batch 700000/1000000   Inserted batch 710000/1000000   Inserted batch 720000/1000000   Inserted batch 730000/1000000   Inserted batch 740000/1000000   Inserted batch 750000/1000000   Inserted batch 760000/1000000   Inserted batch 770000/1000000   Inserted batch 780000/1000000   Inserted batch 790000/1000000   Inserted batch 800000/1000000   Inserted batch 810000/1000000   Inserted batch 820000/1000000   Inserted batch 830000/1000000   Inserted batch 840000/1000000   Inserted batch 850000/1000000   Inserted batch 860000/1000000   Inserted batch 870000/1000000   Inserted batch 880000/1000000   Inserted batch 890000/1000000   Inserted batch 900000/1000000   Inserted batch 910000/1000000   Inserted batch 920000/1000000   Inserted batch 930000/1000000   Inserted batch 940000/1000000   Inserted batch 950000/1000000   Inserted batch 960000/1000000   Inserted batch 970000/1000000   Inserted batch 980000/1000000   Inserted batch 990000/1000000   Inserted batch 1000000/1000000
+✅ Pgvector: Insertion complete.
+⚡ High dimensionality (960d) detected. Boosting HNSW parameters...
+🔨 Pgvector: Building hnsw index...
+    Measuring cold start and warmup...
+      Cold Start Latency: 242.27ms
+      Warmup Time: 4129.00ms (28 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=216.27ms
+    Run 2: Recall@10=0.1000, Latency_p50=107.45ms
+    Run 3: Recall@10=0.1000, Latency_p50=27.26ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+   Results: pgvector_gist1m    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┓
+┃ Metric           ┃ Value    ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━┩
+│ Recall@10        │ 0.1000   │
+│ Precision@10     │ 1.0000   │
+│ Recall@100       │ 0.8738   │
+│ MRR              │ 1.0000   │
+│ Latency p50 (ms) │ 27.26    │
+│ Latency p99 (ms) │ 77.88    │
+│ QPS              │ 33.0     │
+│ Build Time (s)   │ 20220.47 │
+└──────────────────┴──────────┘
+ Recall is normalized by total 
+ ground truth size (typically  
+100). Precision is # Relevant /
+              K.               
+Exported JSON to results/pgvector/gist1m_pgvector_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T20:31:52Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/pgvector-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container pgvector_benchmark  Stopping
+ Container pgvector_benchmark  Stopped
+ Container pgvector_benchmark  Removing
+ Container pgvector_benchmark  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T20:31:59Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/pgvector-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container pgvector_benchmark  Creating
+ Container pgvector_benchmark  Created
+ Container pgvector_benchmark  Starting
+ Container pgvector_benchmark  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: pgvector
+Datasets: deep1m
+Runs per config: 3
+
+
+Loading dataset: deep1m
+
+Benchmarking: pgvector on deep1m
+  Vectors: (1000000, 96), Queries: (10000, 96)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Pgvector: Inserting 1000000 vectors in batches...
+   Inserted batch 10000/1000000   Inserted batch 20000/1000000   Inserted batch 30000/1000000   Inserted batch 40000/1000000   Inserted batch 50000/1000000   Inserted batch 60000/1000000   Inserted batch 70000/1000000   Inserted batch 80000/1000000   Inserted batch 90000/1000000   Inserted batch 100000/1000000   Inserted batch 110000/1000000   Inserted batch 120000/1000000   Inserted batch 130000/1000000   Inserted batch 140000/1000000   Inserted batch 150000/1000000   Inserted batch 160000/1000000   Inserted batch 170000/1000000   Inserted batch 180000/1000000   Inserted batch 190000/1000000   Inserted batch 200000/1000000   Inserted batch 210000/1000000   Inserted batch 220000/1000000   Inserted batch 230000/1000000   Inserted batch 240000/1000000   Inserted batch 250000/1000000   Inserted batch 260000/1000000   Inserted batch 270000/1000000   Inserted batch 280000/1000000   Inserted batch 290000/1000000   Inserted batch 300000/1000000   Inserted batch 310000/1000000   Inserted batch 320000/1000000   Inserted batch 330000/1000000   Inserted batch 340000/1000000   Inserted batch 350000/1000000   Inserted batch 360000/1000000   Inserted batch 370000/1000000   Inserted batch 380000/1000000   Inserted batch 390000/1000000   Inserted batch 400000/1000000   Inserted batch 410000/1000000   Inserted batch 420000/1000000   Inserted batch 430000/1000000   Inserted batch 440000/1000000   Inserted batch 450000/1000000   Inserted batch 460000/1000000   Inserted batch 470000/1000000   Inserted batch 480000/1000000   Inserted batch 490000/1000000   Inserted batch 500000/1000000   Inserted batch 510000/1000000   Inserted batch 520000/1000000   Inserted batch 530000/1000000   Inserted batch 540000/1000000   Inserted batch 550000/1000000   Inserted batch 560000/1000000   Inserted batch 570000/1000000   Inserted batch 580000/1000000   Inserted batch 590000/1000000   Inserted batch 600000/1000000   Inserted batch 610000/1000000   Inserted batch 620000/1000000   Inserted batch 630000/1000000   Inserted batch 640000/1000000   Inserted batch 650000/1000000   Inserted batch 660000/1000000   Inserted batch 670000/1000000   Inserted batch 680000/1000000   Inserted batch 690000/1000000   Inserted batch 700000/1000000   Inserted batch 710000/1000000   Inserted batch 720000/1000000   Inserted batch 730000/1000000   Inserted batch 740000/1000000   Inserted batch 750000/1000000   Inserted batch 760000/1000000   Inserted batch 770000/1000000   Inserted batch 780000/1000000   Inserted batch 790000/1000000   Inserted batch 800000/1000000   Inserted batch 810000/1000000   Inserted batch 820000/1000000   Inserted batch 830000/1000000   Inserted batch 840000/1000000   Inserted batch 850000/1000000   Inserted batch 860000/1000000   Inserted batch 870000/1000000   Inserted batch 880000/1000000   Inserted batch 890000/1000000   Inserted batch 900000/1000000   Inserted batch 910000/1000000   Inserted batch 920000/1000000   Inserted batch 930000/1000000   Inserted batch 940000/1000000   Inserted batch 950000/1000000   Inserted batch 960000/1000000   Inserted batch 970000/1000000   Inserted batch 980000/1000000   Inserted batch 990000/1000000   Inserted batch 1000000/1000000
+✅ Pgvector: Insertion complete.
+🔨 Pgvector: Building hnsw index...
+    Measuring cold start and warmup...
+      Cold Start Latency: 4.92ms
+      Warmup Time: 78.37ms (21 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=5.34ms
+    Run 2: Recall@10=0.1000, Latency_p50=5.36ms
+    Run 3: Recall@10=0.1000, Latency_p50=6.13ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+  Results: pgvector_deep1m   
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.9294 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 6.13   │
+│ Latency p99 (ms) │ 13.78  │
+│ QPS              │ 150.1  │
+│ Build Time (s)   │ 493.32 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/pgvector/deep1m_pgvector_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T20:44:07Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/pgvector-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container pgvector_benchmark  Stopping
+ Container pgvector_benchmark  Stopped
+ Container pgvector_benchmark  Removing
+ Container pgvector_benchmark  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T20:44:13Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/pgvector-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container pgvector_benchmark  Creating
+ Container pgvector_benchmark  Created
+ Container pgvector_benchmark  Starting
+ Container pgvector_benchmark  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: pgvector
+Datasets: sift1m
+Runs per config: 3
+
+
+Loading dataset: sift1m
+
+Benchmarking: pgvector on sift1m
+  Vectors: (1000000, 128), Queries: (10000, 128)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Pgvector: Inserting 1000000 vectors in batches...
+   Inserted batch 10000/1000000   Inserted batch 20000/1000000   Inserted batch 30000/1000000   Inserted batch 40000/1000000   Inserted batch 50000/1000000   Inserted batch 60000/1000000   Inserted batch 70000/1000000   Inserted batch 80000/1000000   Inserted batch 90000/1000000   Inserted batch 100000/1000000   Inserted batch 110000/1000000   Inserted batch 120000/1000000   Inserted batch 130000/1000000   Inserted batch 140000/1000000   Inserted batch 150000/1000000   Inserted batch 160000/1000000   Inserted batch 170000/1000000   Inserted batch 180000/1000000   Inserted batch 190000/1000000   Inserted batch 200000/1000000   Inserted batch 210000/1000000   Inserted batch 220000/1000000   Inserted batch 230000/1000000   Inserted batch 240000/1000000   Inserted batch 250000/1000000   Inserted batch 260000/1000000   Inserted batch 270000/1000000   Inserted batch 280000/1000000   Inserted batch 290000/1000000   Inserted batch 300000/1000000   Inserted batch 310000/1000000   Inserted batch 320000/1000000   Inserted batch 330000/1000000   Inserted batch 340000/1000000   Inserted batch 350000/1000000   Inserted batch 360000/1000000   Inserted batch 370000/1000000   Inserted batch 380000/1000000   Inserted batch 390000/1000000   Inserted batch 400000/1000000   Inserted batch 410000/1000000   Inserted batch 420000/1000000   Inserted batch 430000/1000000   Inserted batch 440000/1000000   Inserted batch 450000/1000000   Inserted batch 460000/1000000   Inserted batch 470000/1000000   Inserted batch 480000/1000000   Inserted batch 490000/1000000   Inserted batch 500000/1000000   Inserted batch 510000/1000000   Inserted batch 520000/1000000   Inserted batch 530000/1000000   Inserted batch 540000/1000000   Inserted batch 550000/1000000   Inserted batch 560000/1000000   Inserted batch 570000/1000000   Inserted batch 580000/1000000   Inserted batch 590000/1000000   Inserted batch 600000/1000000   Inserted batch 610000/1000000   Inserted batch 620000/1000000   Inserted batch 630000/1000000   Inserted batch 640000/1000000   Inserted batch 650000/1000000   Inserted batch 660000/1000000   Inserted batch 670000/1000000   Inserted batch 680000/1000000   Inserted batch 690000/1000000   Inserted batch 700000/1000000   Inserted batch 710000/1000000   Inserted batch 720000/1000000   Inserted batch 730000/1000000   Inserted batch 740000/1000000   Inserted batch 750000/1000000   Inserted batch 760000/1000000   Inserted batch 770000/1000000   Inserted batch 780000/1000000   Inserted batch 790000/1000000   Inserted batch 800000/1000000   Inserted batch 810000/1000000   Inserted batch 820000/1000000   Inserted batch 830000/1000000   Inserted batch 840000/1000000   Inserted batch 850000/1000000   Inserted batch 860000/1000000   Inserted batch 870000/1000000   Inserted batch 880000/1000000   Inserted batch 890000/1000000   Inserted batch 900000/1000000   Inserted batch 910000/1000000   Inserted batch 920000/1000000   Inserted batch 930000/1000000   Inserted batch 940000/1000000   Inserted batch 950000/1000000   Inserted batch 960000/1000000   Inserted batch 970000/1000000   Inserted batch 980000/1000000   Inserted batch 990000/1000000   Inserted batch 1000000/1000000
+✅ Pgvector: Insertion complete.
+🔨 Pgvector: Building hnsw index...
+    Measuring cold start and warmup...
+      Cold Start Latency: 4.29ms
+      Warmup Time: 99.42ms (30 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=4.94ms
+    Run 2: Recall@10=0.1000, Latency_p50=5.10ms
+    Run 3: Recall@10=0.1000, Latency_p50=5.95ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+  Results: pgvector_sift1m   
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.9366 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 5.95   │
+│ Latency p99 (ms) │ 13.14  │
+│ QPS              │ 154.2  │
+│ Build Time (s)   │ 414.89 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/pgvector/sift1m_pgvector_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T20:54:50Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/pgvector-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container pgvector_benchmark  Stopping
+ Container pgvector_benchmark  Stopped
+ Container pgvector_benchmark  Removing
+ Container pgvector_benchmark  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T20:54:56Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/pgvector-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container pgvector_benchmark  Creating
+ Container pgvector_benchmark  Created
+ Container pgvector_benchmark  Starting
+ Container pgvector_benchmark  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: pgvector
+Datasets: random
+Runs per config: 3
+
+
+Loading dataset: random
+
+Benchmarking: pgvector on random
+  Vectors: (1000000, 128), Queries: (10000, 128)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Pgvector: Inserting 1000000 vectors in batches...
+   Inserted batch 10000/1000000   Inserted batch 20000/1000000   Inserted batch 30000/1000000   Inserted batch 40000/1000000   Inserted batch 50000/1000000   Inserted batch 60000/1000000   Inserted batch 70000/1000000   Inserted batch 80000/1000000   Inserted batch 90000/1000000   Inserted batch 100000/1000000   Inserted batch 110000/1000000   Inserted batch 120000/1000000   Inserted batch 130000/1000000   Inserted batch 140000/1000000   Inserted batch 150000/1000000   Inserted batch 160000/1000000   Inserted batch 170000/1000000   Inserted batch 180000/1000000   Inserted batch 190000/1000000   Inserted batch 200000/1000000   Inserted batch 210000/1000000   Inserted batch 220000/1000000   Inserted batch 230000/1000000   Inserted batch 240000/1000000   Inserted batch 250000/1000000   Inserted batch 260000/1000000   Inserted batch 270000/1000000   Inserted batch 280000/1000000   Inserted batch 290000/1000000   Inserted batch 300000/1000000   Inserted batch 310000/1000000   Inserted batch 320000/1000000   Inserted batch 330000/1000000   Inserted batch 340000/1000000   Inserted batch 350000/1000000   Inserted batch 360000/1000000   Inserted batch 370000/1000000   Inserted batch 380000/1000000   Inserted batch 390000/1000000   Inserted batch 400000/1000000   Inserted batch 410000/1000000   Inserted batch 420000/1000000   Inserted batch 430000/1000000   Inserted batch 440000/1000000   Inserted batch 450000/1000000   Inserted batch 460000/1000000   Inserted batch 470000/1000000   Inserted batch 480000/1000000   Inserted batch 490000/1000000   Inserted batch 500000/1000000   Inserted batch 510000/1000000   Inserted batch 520000/1000000   Inserted batch 530000/1000000   Inserted batch 540000/1000000   Inserted batch 550000/1000000   Inserted batch 560000/1000000   Inserted batch 570000/1000000   Inserted batch 580000/1000000   Inserted batch 590000/1000000   Inserted batch 600000/1000000   Inserted batch 610000/1000000   Inserted batch 620000/1000000   Inserted batch 630000/1000000   Inserted batch 640000/1000000   Inserted batch 650000/1000000   Inserted batch 660000/1000000   Inserted batch 670000/1000000   Inserted batch 680000/1000000   Inserted batch 690000/1000000   Inserted batch 700000/1000000   Inserted batch 710000/1000000   Inserted batch 720000/1000000   Inserted batch 730000/1000000   Inserted batch 740000/1000000   Inserted batch 750000/1000000   Inserted batch 760000/1000000   Inserted batch 770000/1000000   Inserted batch 780000/1000000   Inserted batch 790000/1000000   Inserted batch 800000/1000000   Inserted batch 810000/1000000   Inserted batch 820000/1000000   Inserted batch 830000/1000000   Inserted batch 840000/1000000   Inserted batch 850000/1000000   Inserted batch 860000/1000000   Inserted batch 870000/1000000   Inserted batch 880000/1000000   Inserted batch 890000/1000000   Inserted batch 900000/1000000   Inserted batch 910000/1000000   Inserted batch 920000/1000000   Inserted batch 930000/1000000   Inserted batch 940000/1000000   Inserted batch 950000/1000000   Inserted batch 960000/1000000   Inserted batch 970000/1000000   Inserted batch 980000/1000000   Inserted batch 990000/1000000   Inserted batch 1000000/1000000
+✅ Pgvector: Insertion complete.
+🔨 Pgvector: Building hnsw index...
+    Measuring cold start and warmup...
+      Cold Start Latency: 9.98ms
+      Warmup Time: 148.50ms (30 queries)
+    Run 1: Recall@10=0.0999, Latency_p50=7.17ms
+    Run 2: Recall@10=0.0999, Latency_p50=7.56ms
+    Run 3: Recall@10=0.0999, Latency_p50=7.07ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+  Results: pgvector_random   
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.0999 │
+│ Precision@10     │ 0.9989 │
+│ Recall@100       │ 0.2034 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 7.07   │
+│ Latency p99 (ms) │ 12.00  │
+│ QPS              │ 138.5  │
+│ Build Time (s)   │ 635.28 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/pgvector/random_pgvector_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T21:10:05Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/pgvector-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container pgvector_benchmark  Stopping
+ Container pgvector_benchmark  Stopped
+ Container pgvector_benchmark  Removing
+ Container pgvector_benchmark  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T21:10:11Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/pgvector-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container pgvector_benchmark  Creating
+ Container pgvector_benchmark  Created
+ Container pgvector_benchmark  Starting
+ Container pgvector_benchmark  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: pgvector
+Datasets: msmarco
+Runs per config: 3
+
+
+Loading dataset: msmarco
+
+Benchmarking: pgvector on msmarco
+Loading pre-computed embeddings (subset: 100000)...
+  Vectors: (100000, 768), Queries: (1000, 768)
+  Metric: cosine
+  Skipping HNSW_L2: Dataset requires 'cosine', Config is 'l2'
+
+  Index: HNSW_Cosine
+    Building index...
+🚀 Pgvector: Inserting 100000 vectors in batches...
+   Inserted batch 10000/100000   Inserted batch 20000/100000   Inserted batch 30000/100000   Inserted batch 40000/100000   Inserted batch 50000/100000   Inserted batch 60000/100000   Inserted batch 70000/100000   Inserted batch 80000/100000   Inserted batch 90000/100000   Inserted batch 100000/100000
+✅ Pgvector: Insertion complete.
+⚡ High dimensionality (768d) detected. Boosting HNSW parameters...
+🔨 Pgvector: Building hnsw index...
+    Measuring cold start and warmup...
+      Cold Start Latency: 5.96ms
+      Warmup Time: 105.35ms (21 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=8.68ms
+    Run 2: Recall@10=0.1000, Latency_p50=8.54ms
+    Run 3: Recall@10=0.1000, Latency_p50=8.55ms
+  Results: pgvector_msmarco  
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.9572 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 8.55   │
+│ Latency p99 (ms) │ 15.67  │
+│ QPS              │ 114.0  │
+│ Build Time (s)   │ 513.34 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/pgvector/msmarco_pgvector_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T21:19:49Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/pgvector-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container pgvector_benchmark  Stopping
+ Container pgvector_benchmark  Stopped
+ Container pgvector_benchmark  Removing
+ Container pgvector_benchmark  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T21:19:55Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/pgvector-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container pgvector_benchmark  Creating
+ Container pgvector_benchmark  Created
+ Container pgvector_benchmark  Starting
+ Container pgvector_benchmark  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: pgvector
+Datasets: glove
+Runs per config: 3
+
+
+Loading dataset: glove
+
+Benchmarking: pgvector on glove
+  Vectors: (400000, 100), Queries: (10000, 100)
+  Metric: cosine
+  Skipping HNSW_L2: Dataset requires 'cosine', Config is 'l2'
+
+  Index: HNSW_Cosine
+    Building index...
+🚀 Pgvector: Inserting 400000 vectors in batches...
+   Inserted batch 10000/400000   Inserted batch 20000/400000   Inserted batch 30000/400000   Inserted batch 40000/400000   Inserted batch 50000/400000   Inserted batch 60000/400000   Inserted batch 70000/400000   Inserted batch 80000/400000   Inserted batch 90000/400000   Inserted batch 100000/400000   Inserted batch 110000/400000   Inserted batch 120000/400000   Inserted batch 130000/400000   Inserted batch 140000/400000   Inserted batch 150000/400000   Inserted batch 160000/400000   Inserted batch 170000/400000   Inserted batch 180000/400000   Inserted batch 190000/400000   Inserted batch 200000/400000   Inserted batch 210000/400000   Inserted batch 220000/400000   Inserted batch 230000/400000   Inserted batch 240000/400000   Inserted batch 250000/400000   Inserted batch 260000/400000   Inserted batch 270000/400000   Inserted batch 280000/400000   Inserted batch 290000/400000   Inserted batch 300000/400000   Inserted batch 310000/400000   Inserted batch 320000/400000   Inserted batch 330000/400000   Inserted batch 340000/400000   Inserted batch 350000/400000   Inserted batch 360000/400000   Inserted batch 370000/400000   Inserted batch 380000/400000   Inserted batch 390000/400000   Inserted batch 400000/400000
+✅ Pgvector: Insertion complete.
+🔨 Pgvector: Building hnsw index...
+    Measuring cold start and warmup...
+      Cold Start Latency: 7.71ms
+      Warmup Time: 59.14ms (21 queries)
+    Run 1: Recall@10=0.0999, Latency_p50=3.94ms
+    Run 2: Recall@10=0.0999, Latency_p50=4.30ms
+    Run 3: Recall@10=0.0999, Latency_p50=4.48ms
+   Results: pgvector_glove   
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.0999 │
+│ Precision@10     │ 0.9994 │
+│ Recall@100       │ 0.8644 │
+│ MRR              │ 0.9997 │
+│ Latency p50 (ms) │ 4.48   │
+│ Latency p99 (ms) │ 8.72   │
+│ QPS              │ 218.4  │
+│ Build Time (s)   │ 194.02 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/pgvector/glove_pgvector_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T21:31:01Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/pgvector-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container pgvector_benchmark  Stopping
+ Container pgvector_benchmark  Stopped
+ Container pgvector_benchmark  Removing
+ Container pgvector_benchmark  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T21:31:02Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/qdrant-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container qdrant_benchmark  Creating
+ Container qdrant_benchmark  Created
+ Container qdrant_benchmark  Starting
+ Container qdrant_benchmark  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: qdrant
+Datasets: gist1m
+Runs per config: 3
+
+
+Loading dataset: gist1m
+
+Benchmarking: qdrant on gist1m
+  Vectors: (1000000, 960), Queries: (1000, 960)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+⚡ Auto-enabling Scalar Quantization (Int8) for speed...
+🚀 Using Optimized Parallel Upload for 1000000 vectors...
+⏳ Waiting for Qdrant indexing...
+   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...
+✅ Optimization complete. Collection is GREEN.
+    Measuring cold start and warmup...
+      Cold Start Latency: 268.11ms
+      Warmup Time: 1611.09ms (64 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=6.85ms
+    Run 2: Recall@10=0.1000, Latency_p50=6.58ms
+    Run 3: Recall@10=0.1000, Latency_p50=6.42ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+   Results: qdrant_gist1m    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.8338 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 6.42   │
+│ Latency p99 (ms) │ 11.58  │
+│ QPS              │ 152.5  │
+│ Build Time (s)   │ 381.13 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/qdrant/gist1m_qdrant_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T21:38:52Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/qdrant-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container qdrant_benchmark  Stopping
+ Container qdrant_benchmark  Stopped
+ Container qdrant_benchmark  Removing
+ Container qdrant_benchmark  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T21:38:57Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/qdrant-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container qdrant_benchmark  Creating
+ Container qdrant_benchmark  Created
+ Container qdrant_benchmark  Starting
+ Container qdrant_benchmark  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: qdrant
+Datasets: deep1m
+Runs per config: 3
+
+
+Loading dataset: deep1m
+
+Benchmarking: qdrant on deep1m
+  Vectors: (1000000, 96), Queries: (10000, 96)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Using Optimized Parallel Upload for 1000000 vectors...
+⏳ Waiting for Qdrant indexing...
+   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...
+✅ Optimization complete. Collection is GREEN.
+    Measuring cold start and warmup...
+      Cold Start Latency: 182.33ms
+      Warmup Time: 3440.15ms (61 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=5.19ms
+    Run 2: Recall@10=0.1000, Latency_p50=4.68ms
+    Run 3: Recall@10=0.1000, Latency_p50=4.99ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+   Results: qdrant_deep1m    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.9461 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 4.99   │
+│ Latency p99 (ms) │ 8.62   │
+│ QPS              │ 199.7  │
+│ Build Time (s)   │ 173.66 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/qdrant/deep1m_qdrant_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+🧹 Cleaning up workspace...
+🧹 Deleting old results directory: /home/ashenrashmike2000/RAGdbEval/results...
+
+============================================================
+ PREPARING BENCHMARK FOR: CHROMA
+============================================================
+🚀 Starting chroma...
+⏳ Waiting 30s for chroma...
+
+▶️  Running: chroma on gist1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database chroma --dataset gist1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting chroma...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for chroma...
+
+▶️  Running: chroma on deep1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database chroma --dataset deep1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting chroma...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for chroma...
+
+▶️  Running: chroma on sift1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database chroma --dataset sift1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting chroma...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for chroma...
+
+▶️  Running: chroma on random...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database chroma --dataset random --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting chroma...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for chroma...
+
+▶️  Running: chroma on msmarco...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database chroma --dataset msmarco --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting chroma...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for chroma...
+
+▶️  Running: chroma on glove...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database chroma --dataset glove --runs 3 --export json latex
+✅ Benchmark Run Successful.
+🛑 Stopping chroma...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+
+============================================================
+ PREPARING BENCHMARK FOR: WEAVIATE
+============================================================
+🚀 Starting weaviate...
+⏳ Waiting 30s for weaviate...
+
+▶️  Running: weaviate on gist1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database weaviate --dataset gist1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting weaviate...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for weaviate...
+
+▶️  Running: weaviate on deep1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database weaviate --dataset deep1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting weaviate...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for weaviate...
+
+▶️  Running: weaviate on sift1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database weaviate --dataset sift1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting weaviate...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for weaviate...
+
+▶️  Running: weaviate on random...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database weaviate --dataset random --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting weaviate...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for weaviate...
+
+▶️  Running: weaviate on msmarco...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database weaviate --dataset msmarco --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting weaviate...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for weaviate...
+
+▶️  Running: weaviate on glove...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database weaviate --dataset glove --runs 3 --export json latex
+✅ Benchmark Run Successful.
+🛑 Stopping weaviate...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+
+============================================================
+ PREPARING BENCHMARK FOR: PGVECTOR
+============================================================
+🚀 Starting pgvector...
+⏳ Waiting 30s for pgvector...
+
+▶️  Running: pgvector on gist1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database pgvector --dataset gist1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting pgvector...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for pgvector...
+
+▶️  Running: pgvector on deep1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database pgvector --dataset deep1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting pgvector...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for pgvector...
+
+▶️  Running: pgvector on sift1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database pgvector --dataset sift1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting pgvector...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for pgvector...
+
+▶️  Running: pgvector on random...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database pgvector --dataset random --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting pgvector...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for pgvector...
+
+▶️  Running: pgvector on msmarco...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database pgvector --dataset msmarco --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting pgvector...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for pgvector...
+
+▶️  Running: pgvector on glove...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database pgvector --dataset glove --runs 3 --export json latex
+✅ Benchmark Run Successful.
+🛑 Stopping pgvector...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+
+============================================================
+ PREPARING BENCHMARK FOR: QDRANT
+============================================================
+🚀 Starting qdrant...
+⏳ Waiting 30s for qdrant...
+
+▶️  Running: qdrant on gist1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database qdrant --dataset gist1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting qdrant...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for qdrant...
+
+▶️  Running: qdrant on deep1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database qdrant --dataset deep1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+time="2026-01-20T21:45:23Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/qdrant-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container qdrant_benchmark  Stopping
+ Container qdrant_benchmark  Stopped
+ Container qdrant_benchmark  Removing
+ Container qdrant_benchmark  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T21:45:29Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/qdrant-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container qdrant_benchmark  Creating
+ Container qdrant_benchmark  Created
+ Container qdrant_benchmark  Starting
+ Container qdrant_benchmark  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: qdrant
+Datasets: sift1m
+Runs per config: 3
+
+
+Loading dataset: sift1m
+
+Benchmarking: qdrant on sift1m
+  Vectors: (1000000, 128), Queries: (10000, 128)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Using Optimized Parallel Upload for 1000000 vectors...
+⏳ Waiting for Qdrant indexing...
+   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...
+✅ Optimization complete. Collection is GREEN.
+    Measuring cold start and warmup...
+      Cold Start Latency: 241.11ms
+      Warmup Time: 2663.95ms (41 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=4.80ms
+    Run 2: Recall@10=0.1000, Latency_p50=4.39ms
+    Run 3: Recall@10=0.1000, Latency_p50=4.55ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+   Results: qdrant_sift1m    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.9589 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 4.55   │
+│ Latency p99 (ms) │ 8.41   │
+│ QPS              │ 216.0  │
+│ Build Time (s)   │ 194.69 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/qdrant/sift1m_qdrant_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T21:52:05Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/qdrant-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container qdrant_benchmark  Stopping
+ Container qdrant_benchmark  Stopped
+ Container qdrant_benchmark  Removing
+ Container qdrant_benchmark  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T21:52:10Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/qdrant-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container qdrant_benchmark  Creating
+ Container qdrant_benchmark  Created
+ Container qdrant_benchmark  Starting
+ Container qdrant_benchmark  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: qdrant
+Datasets: random
+Runs per config: 3
+
+
+Loading dataset: random
+
+Benchmarking: qdrant on random
+  Vectors: (1000000, 128), Queries: (10000, 128)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Using Optimized Parallel Upload for 1000000 vectors...
+⏳ Waiting for Qdrant indexing...
+   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...
+✅ Optimization complete. Collection is GREEN.
+    Measuring cold start and warmup...
+      Cold Start Latency: 258.87ms
+      Warmup Time: 2709.27ms (45 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=5.38ms
+    Run 2: Recall@10=0.1000, Latency_p50=5.95ms
+    Run 3: Recall@10=0.1000, Latency_p50=5.94ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+   Results: qdrant_random    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.2949 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 5.94   │
+│ Latency p99 (ms) │ 12.74  │
+│ QPS              │ 157.4  │
+│ Build Time (s)   │ 248.30 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/qdrant/random_qdrant_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T22:00:22Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/qdrant-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container qdrant_benchmark  Stopping
+ Container qdrant_benchmark  Stopped
+ Container qdrant_benchmark  Removing
+ Container qdrant_benchmark  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T22:00:28Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/qdrant-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container qdrant_benchmark  Creating
+ Container qdrant_benchmark  Created
+ Container qdrant_benchmark  Starting
+ Container qdrant_benchmark  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: qdrant
+Datasets: msmarco
+Runs per config: 3
+
+
+Loading dataset: msmarco
+
+Benchmarking: qdrant on msmarco
+Loading pre-computed embeddings (subset: 100000)...
+  Vectors: (100000, 768), Queries: (1000, 768)
+  Metric: cosine
+  Skipping HNSW_L2: Dataset requires 'cosine', Config is 'l2'
+
+  Index: HNSW_Cosine
+    Building index...
+⚡ Auto-enabling Scalar Quantization (Int8) for speed...
+🚀 Using Optimized Parallel Upload for 100000 vectors...
+⏳ Waiting for Qdrant indexing...
+   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...
+✅ Optimization complete. Collection is GREEN.
+    Measuring cold start and warmup...
+      Cold Start Latency: 92.05ms
+      Warmup Time: 630.84ms (48 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=5.98ms
+    Run 2: Recall@10=0.1000, Latency_p50=6.21ms
+    Run 3: Recall@10=0.1000, Latency_p50=6.20ms
+   Results: qdrant_msmarco   
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.9464 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 6.20   │
+│ Latency p99 (ms) │ 11.22  │
+│ QPS              │ 158.9  │
+│ Build Time (s)   │ 37.15  │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/qdrant/msmarco_qdrant_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T22:02:03Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/qdrant-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container qdrant_benchmark  Stopping
+ Container qdrant_benchmark  Stopped
+ Container qdrant_benchmark  Removing
+ Container qdrant_benchmark  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T22:02:08Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/qdrant-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container qdrant_benchmark  Creating
+ Container qdrant_benchmark  Created
+ Container qdrant_benchmark  Starting
+ Container qdrant_benchmark  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: qdrant
+Datasets: glove
+Runs per config: 3
+
+
+Loading dataset: glove
+
+Benchmarking: qdrant on glove
+  Vectors: (400000, 100), Queries: (10000, 100)
+  Metric: cosine
+  Skipping HNSW_L2: Dataset requires 'cosine', Config is 'l2'
+
+  Index: HNSW_Cosine
+    Building index...
+🚀 Using Optimized Parallel Upload for 400000 vectors...
+⏳ Waiting for Qdrant indexing...
+   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...   Status: yellow (Optimizing)...
+✅ Optimization complete. Collection is GREEN.
+    Measuring cold start and warmup...
+      Cold Start Latency: 125.04ms
+      Warmup Time: 1670.09ms (46 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=4.97ms
+    Run 2: Recall@10=0.1000, Latency_p50=5.73ms
+    Run 3: Recall@10=0.1000, Latency_p50=4.83ms
+    Results: qdrant_glove    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.8911 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 4.83   │
+│ Latency p99 (ms) │ 8.38   │
+│ QPS              │ 206.4  │
+│ Build Time (s)   │ 63.96  │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/qdrant/glove_qdrant_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T22:11:40Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/qdrant-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container qdrant_benchmark  Stopping
+ Container qdrant_benchmark  Stopped
+ Container qdrant_benchmark  Removing
+ Container qdrant_benchmark  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T22:11:40Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/milvus-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container milvus-minio  Creating
+ Container milvus-etcd  Creating
+ Container milvus-etcd  Created
+ Container milvus-minio  Created
+ Container milvus-standalone  Creating
+ Container milvus-standalone  Created
+ Container attu  Creating
+ Container attu  Created
+ Container milvus-minio  Starting
+ Container milvus-etcd  Starting
+ Container milvus-minio  Started
+ Container milvus-etcd  Started
+ Container milvus-standalone  Starting
+ Container milvus-standalone  Started
+ Container attu  Starting
+ Container attu  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: milvus
+Datasets: gist1m
+Runs per config: 3
+
+
+Loading dataset: gist1m
+
+Benchmarking: milvus on gist1m
+  Vectors: (1000000, 960), Queries: (1000, 960)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Milvus: Inserting 1000000 vectors in batches...
+   Inserted batch 0 to 10000   Inserted batch 10000 to 20000   Inserted batch 20000 to 30000   Inserted batch 30000 to 40000   Inserted batch 40000 to 50000   Inserted batch 50000 to 60000   Inserted batch 60000 to 70000   Inserted batch 70000 to 80000   Inserted batch 80000 to 90000   Inserted batch 90000 to 100000   Inserted batch 100000 to 110000   Inserted batch 110000 to 120000   Inserted batch 120000 to 130000   Inserted batch 130000 to 140000   Inserted batch 140000 to 150000   Inserted batch 150000 to 160000   Inserted batch 160000 to 170000   Inserted batch 170000 to 180000   Inserted batch 180000 to 190000   Inserted batch 190000 to 200000   Inserted batch 200000 to 210000   Inserted batch 210000 to 220000   Inserted batch 220000 to 230000   Inserted batch 230000 to 240000   Inserted batch 240000 to 250000   Inserted batch 250000 to 260000   Inserted batch 260000 to 270000   Inserted batch 270000 to 280000   Inserted batch 280000 to 290000   Inserted batch 290000 to 300000   Inserted batch 300000 to 310000   Inserted batch 310000 to 320000   Inserted batch 320000 to 330000   Inserted batch 330000 to 340000   Inserted batch 340000 to 350000   Inserted batch 350000 to 360000   Inserted batch 360000 to 370000   Inserted batch 370000 to 380000   Inserted batch 380000 to 390000   Inserted batch 390000 to 400000   Inserted batch 400000 to 410000   Inserted batch 410000 to 420000   Inserted batch 420000 to 430000   Inserted batch 430000 to 440000   Inserted batch 440000 to 450000   Inserted batch 450000 to 460000   Inserted batch 460000 to 470000   Inserted batch 470000 to 480000   Inserted batch 480000 to 490000   Inserted batch 490000 to 500000   Inserted batch 500000 to 510000   Inserted batch 510000 to 520000   Inserted batch 520000 to 530000   Inserted batch 530000 to 540000   Inserted batch 540000 to 550000   Inserted batch 550000 to 560000   Inserted batch 560000 to 570000   Inserted batch 570000 to 580000   Inserted batch 580000 to 590000   Inserted batch 590000 to 600000   Inserted batch 600000 to 610000   Inserted batch 610000 to 620000   Inserted batch 620000 to 630000   Inserted batch 630000 to 640000   Inserted batch 640000 to 650000   Inserted batch 650000 to 660000   Inserted batch 660000 to 670000   Inserted batch 670000 to 680000   Inserted batch 680000 to 690000   Inserted batch 690000 to 700000   Inserted batch 700000 to 710000   Inserted batch 710000 to 720000   Inserted batch 720000 to 730000   Inserted batch 730000 to 740000   Inserted batch 740000 to 750000   Inserted batch 750000 to 760000   Inserted batch 760000 to 770000   Inserted batch 770000 to 780000   Inserted batch 780000 to 790000   Inserted batch 790000 to 800000   Inserted batch 800000 to 810000   Inserted batch 810000 to 820000   Inserted batch 820000 to 830000   Inserted batch 830000 to 840000   Inserted batch 840000 to 850000   Inserted batch 850000 to 860000   Inserted batch 860000 to 870000   Inserted batch 870000 to 880000   Inserted batch 880000 to 890000   Inserted batch 890000 to 900000   Inserted batch 900000 to 910000   Inserted batch 910000 to 920000   Inserted batch 920000 to 930000   Inserted batch 930000 to 940000   Inserted batch 940000 to 950000   Inserted batch 950000 to 960000   Inserted batch 960000 to 970000   Inserted batch 970000 to 980000   Inserted batch 980000 to 990000   Inserted batch 990000 to 1000000
+✅ Insertion complete.
+🔨 Milvus: Building index (HNSW)...
+⚠️ Milvus: Could not get detailed stats via API. Falling back to estimation.
+    Measuring cold start and warmup...
+      Cold Start Latency: 68.74ms
+      Warmup Time: 686.57ms (24 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=33.69ms
+    Run 2: Recall@10=0.1000, Latency_p50=30.90ms
+    Run 3: Recall@10=0.1000, Latency_p50=36.95ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+   Results: milvus_gist1m    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.9713 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 36.95  │
+│ Latency p99 (ms) │ 75.08  │
+│ QPS              │ 25.9   │
+│ Build Time (s)   │ 656.48 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/milvus/gist1m_milvus_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T22:25:38Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/milvus-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container attu  Stopping
+ Container attu  Stopped
+ Container attu  Removing
+ Container attu  Removed
+ Container milvus-standalone  Stopping
+ Container milvus-standalone  Stopped
+ Container milvus-standalone  Removing
+ Container milvus-standalone  Removed
+ Container milvus-etcd  Stopping
+ Container milvus-minio  Stopping
+ Container milvus-etcd  Stopped
+ Container milvus-etcd  Removing
+ Container milvus-etcd  Removed
+ Container milvus-minio  Stopped
+ Container milvus-minio  Removing
+ Container milvus-minio  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T22:25:56Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/milvus-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container milvus-minio  Creating
+ Container milvus-etcd  Creating
+ Container milvus-etcd  Created
+ Container milvus-minio  Created
+ Container milvus-standalone  Creating
+ Container milvus-standalone  Created
+ Container attu  Creating
+ Container attu  Created
+ Container milvus-minio  Starting
+ Container milvus-etcd  Starting
+ Container milvus-minio  Started
+ Container milvus-etcd  Started
+ Container milvus-standalone  Starting
+ Container milvus-standalone  Started
+ Container attu  Starting
+ Container attu  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: milvus
+Datasets: deep1m
+Runs per config: 3
+
+
+Loading dataset: deep1m
+
+Benchmarking: milvus on deep1m
+  Vectors: (1000000, 96), Queries: (10000, 96)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Milvus: Inserting 1000000 vectors in batches...
+   Inserted batch 0 to 10000   Inserted batch 10000 to 20000   Inserted batch 20000 to 30000   Inserted batch 30000 to 40000   Inserted batch 40000 to 50000   Inserted batch 50000 to 60000   Inserted batch 60000 to 70000   Inserted batch 70000 to 80000   Inserted batch 80000 to 90000   Inserted batch 90000 to 100000   Inserted batch 100000 to 110000   Inserted batch 110000 to 120000   Inserted batch 120000 to 130000   Inserted batch 130000 to 140000   Inserted batch 140000 to 150000   Inserted batch 150000 to 160000   Inserted batch 160000 to 170000   Inserted batch 170000 to 180000   Inserted batch 180000 to 190000   Inserted batch 190000 to 200000   Inserted batch 200000 to 210000   Inserted batch 210000 to 220000   Inserted batch 220000 to 230000   Inserted batch 230000 to 240000   Inserted batch 240000 to 250000   Inserted batch 250000 to 260000   Inserted batch 260000 to 270000   Inserted batch 270000 to 280000   Inserted batch 280000 to 290000   Inserted batch 290000 to 300000   Inserted batch 300000 to 310000   Inserted batch 310000 to 320000   Inserted batch 320000 to 330000   Inserted batch 330000 to 340000   Inserted batch 340000 to 350000   Inserted batch 350000 to 360000   Inserted batch 360000 to 370000   Inserted batch 370000 to 380000   Inserted batch 380000 to 390000   Inserted batch 390000 to 400000   Inserted batch 400000 to 410000   Inserted batch 410000 to 420000   Inserted batch 420000 to 430000   Inserted batch 430000 to 440000   Inserted batch 440000 to 450000   Inserted batch 450000 to 460000   Inserted batch 460000 to 470000   Inserted batch 470000 to 480000   Inserted batch 480000 to 490000   Inserted batch 490000 to 500000   Inserted batch 500000 to 510000   Inserted batch 510000 to 520000   Inserted batch 520000 to 530000   Inserted batch 530000 to 540000   Inserted batch 540000 to 550000   Inserted batch 550000 to 560000   Inserted batch 560000 to 570000   Inserted batch 570000 to 580000   Inserted batch 580000 to 590000   Inserted batch 590000 to 600000   Inserted batch 600000 to 610000   Inserted batch 610000 to 620000   Inserted batch 620000 to 630000   Inserted batch 630000 to 640000   Inserted batch 640000 to 650000   Inserted batch 650000 to 660000   Inserted batch 660000 to 670000   Inserted batch 670000 to 680000   Inserted batch 680000 to 690000   Inserted batch 690000 to 700000   Inserted batch 700000 to 710000   Inserted batch 710000 to 720000   Inserted batch 720000 to 730000   Inserted batch 730000 to 740000   Inserted batch 740000 to 750000   Inserted batch 750000 to 760000   Inserted batch 760000 to 770000   Inserted batch 770000 to 780000   Inserted batch 780000 to 790000   Inserted batch 790000 to 800000   Inserted batch 800000 to 810000   Inserted batch 810000 to 820000   Inserted batch 820000 to 830000   Inserted batch 830000 to 840000   Inserted batch 840000 to 850000   Inserted batch 850000 to 860000   Inserted batch 860000 to 870000   Inserted batch 870000 to 880000   Inserted batch 880000 to 890000   Inserted batch 890000 to 900000   Inserted batch 900000 to 910000   Inserted batch 910000 to 920000   Inserted batch 920000 to 930000   Inserted batch 930000 to 940000   Inserted batch 940000 to 950000   Inserted batch 950000 to 960000   Inserted batch 960000 to 970000   Inserted batch 970000 to 980000   Inserted batch 980000 to 990000   Inserted batch 990000 to 1000000
+✅ Insertion complete.
+🔨 Milvus: Building index (HNSW)...
+⚠️ Milvus: Could not get detailed stats via API. Falling back to estimation.
+    Measuring cold start and warmup...
+      Cold Start Latency: 21.84ms
+      Warmup Time: 151.46ms (21 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=7.66ms
+    Run 2: Recall@10=0.1000, Latency_p50=11.12ms
+    Run 3: Recall@10=0.1000, Latency_p50=8.30ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+   Results: milvus_deep1m    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.9535 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 8.30   │
+│ Latency p99 (ms) │ 19.64  │
+│ QPS              │ 106.4  │
+│ Build Time (s)   │ 180.43 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/milvus/deep1m_milvus_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T22:35:08Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/milvus-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container attu  Stopping
+ Container attu  Stopped
+ Container attu  Removing
+ Container attu  Removed
+ Container milvus-standalone  Stopping
+ Container milvus-standalone  Stopped
+ Container milvus-standalone  Removing
+ Container milvus-standalone  Removed
+ Container milvus-etcd  Stopping
+ Container milvus-minio  Stopping
+ Container milvus-etcd  Stopped
+ Container milvus-etcd  Removing
+ Container milvus-etcd  Removed
+ Container milvus-minio  Stopped
+ Container milvus-minio  Removing
+ Container milvus-minio  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T22:35:16Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/milvus-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container milvus-minio  Creating
+ Container milvus-etcd  Creating
+ Container milvus-etcd  Created
+ Container milvus-minio  Created
+ Container milvus-standalone  Creating
+ Container milvus-standalone  Created
+ Container attu  Creating
+ Container attu  Created
+ Container milvus-etcd  Starting
+ Container milvus-minio  Starting
+ Container milvus-etcd  Started
+ Container milvus-minio  Started
+ Container milvus-standalone  Starting
+ Container milvus-standalone  Started
+ Container attu  Starting
+ Container attu  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: milvus
+Datasets: sift1m
+Runs per config: 3
+
+
+Loading dataset: sift1m
+
+Benchmarking: milvus on sift1m
+  Vectors: (1000000, 128), Queries: (10000, 128)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Milvus: Inserting 1000000 vectors in batches...
+   Inserted batch 0 to 10000   Inserted batch 10000 to 20000   Inserted batch 20000 to 30000   Inserted batch 30000 to 40000   Inserted batch 40000 to 50000   Inserted batch 50000 to 60000   Inserted batch 60000 to 70000   Inserted batch 70000 to 80000   Inserted batch 80000 to 90000   Inserted batch 90000 to 100000   Inserted batch 100000 to 110000   Inserted batch 110000 to 120000   Inserted batch 120000 to 130000   Inserted batch 130000 to 140000   Inserted batch 140000 to 150000   Inserted batch 150000 to 160000   Inserted batch 160000 to 170000   Inserted batch 170000 to 180000   Inserted batch 180000 to 190000   Inserted batch 190000 to 200000   Inserted batch 200000 to 210000   Inserted batch 210000 to 220000   Inserted batch 220000 to 230000   Inserted batch 230000 to 240000   Inserted batch 240000 to 250000   Inserted batch 250000 to 260000   Inserted batch 260000 to 270000   Inserted batch 270000 to 280000   Inserted batch 280000 to 290000   Inserted batch 290000 to 300000   Inserted batch 300000 to 310000   Inserted batch 310000 to 320000   Inserted batch 320000 to 330000   Inserted batch 330000 to 340000   Inserted batch 340000 to 350000   Inserted batch 350000 to 360000   Inserted batch 360000 to 370000   Inserted batch 370000 to 380000   Inserted batch 380000 to 390000   Inserted batch 390000 to 400000   Inserted batch 400000 to 410000   Inserted batch 410000 to 420000   Inserted batch 420000 to 430000   Inserted batch 430000 to 440000   Inserted batch 440000 to 450000   Inserted batch 450000 to 460000   Inserted batch 460000 to 470000   Inserted batch 470000 to 480000   Inserted batch 480000 to 490000   Inserted batch 490000 to 500000   Inserted batch 500000 to 510000   Inserted batch 510000 to 520000   Inserted batch 520000 to 530000   Inserted batch 530000 to 540000   Inserted batch 540000 to 550000   Inserted batch 550000 to 560000   Inserted batch 560000 to 570000   Inserted batch 570000 to 580000   Inserted batch 580000 to 590000   Inserted batch 590000 to 600000   Inserted batch 600000 to 610000   Inserted batch 610000 to 620000   Inserted batch 620000 to 630000   Inserted batch 630000 to 640000   Inserted batch 640000 to 650000   Inserted batch 650000 to 660000   Inserted batch 660000 to 670000   Inserted batch 670000 to 680000   Inserted batch 680000 to 690000   Inserted batch 690000 to 700000   Inserted batch 700000 to 710000   Inserted batch 710000 to 720000   Inserted batch 720000 to 730000   Inserted batch 730000 to 740000   Inserted batch 740000 to 750000   Inserted batch 750000 to 760000   Inserted batch 760000 to 770000   Inserted batch 770000 to 780000   Inserted batch 780000 to 790000   Inserted batch 790000 to 800000   Inserted batch 800000 to 810000   Inserted batch 810000 to 820000   Inserted batch 820000 to 830000   Inserted batch 830000 to 840000   Inserted batch 840000 to 850000   Inserted batch 850000 to 860000   Inserted batch 860000 to 870000   Inserted batch 870000 to 880000   Inserted batch 880000 to 890000   Inserted batch 890000 to 900000   Inserted batch 900000 to 910000   Inserted batch 910000 to 920000   Inserted batch 920000 to 930000   Inserted batch 930000 to 940000   Inserted batch 940000 to 950000   Inserted batch 950000 to 960000   Inserted batch 960000 to 970000   Inserted batch 970000 to 980000   Inserted batch 980000 to 990000   Inserted batch 990000 to 1000000
+✅ Insertion complete.
+🔨 Milvus: Building index (HNSW)...
+⚠️ Milvus: Could not get detailed stats via API. Falling back to estimation.
+    Measuring cold start and warmup...
+      Cold Start Latency: 25.64ms
+      Warmup Time: 239.89ms (21 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=11.89ms
+    Run 2: Recall@10=0.1000, Latency_p50=10.12ms
+    Run 3: Recall@10=0.1000, Latency_p50=10.86ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+   Results: milvus_sift1m    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.9537 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 10.86  │
+│ Latency p99 (ms) │ 22.12  │
+│ QPS              │ 87.7   │
+│ Build Time (s)   │ 198.11 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/milvus/sift1m_milvus_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T22:45:48Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/milvus-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container attu  Stopping
+ Container attu  Stopped
+ Container attu  Removing
+ Container attu  Removed
+ Container milvus-standalone  Stopping
+ Container milvus-standalone  Stopped
+ Container milvus-standalone  Removing
+ Container milvus-standalone  Removed
+ Container milvus-minio  Stopping
+ Container milvus-etcd  Stopping
+ Container milvus-etcd  Stopped
+ Container milvus-etcd  Removing
+ Container milvus-etcd  Removed
+ Container milvus-minio  Stopped
+ Container milvus-minio  Removing
+ Container milvus-minio  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T22:46:05Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/milvus-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container milvus-etcd  Creating
+ Container milvus-minio  Creating
+ Container milvus-etcd  Created
+ Container milvus-minio  Created
+ Container milvus-standalone  Creating
+ Container milvus-standalone  Created
+ Container attu  Creating
+ Container attu  Created
+ Container milvus-etcd  Starting
+ Container milvus-minio  Starting
+ Container milvus-etcd  Started
+ Container milvus-minio  Started
+ Container milvus-standalone  Starting
+ Container milvus-standalone  Started
+ Container attu  Starting
+ Container attu  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: milvus
+Datasets: random
+Runs per config: 3
+
+
+Loading dataset: random
+
+Benchmarking: milvus on random
+  Vectors: (1000000, 128), Queries: (10000, 128)
+  Metric: l2
+
+  Index: HNSW_L2
+    Building index...
+🚀 Milvus: Inserting 1000000 vectors in batches...
+   Inserted batch 0 to 10000   Inserted batch 10000 to 20000   Inserted batch 20000 to 30000   Inserted batch 30000 to 40000   Inserted batch 40000 to 50000   Inserted batch 50000 to 60000   Inserted batch 60000 to 70000   Inserted batch 70000 to 80000   Inserted batch 80000 to 90000   Inserted batch 90000 to 100000   Inserted batch 100000 to 110000   Inserted batch 110000 to 120000   Inserted batch 120000 to 130000   Inserted batch 130000 to 140000   Inserted batch 140000 to 150000   Inserted batch 150000 to 160000   Inserted batch 160000 to 170000   Inserted batch 170000 to 180000   Inserted batch 180000 to 190000   Inserted batch 190000 to 200000   Inserted batch 200000 to 210000   Inserted batch 210000 to 220000   Inserted batch 220000 to 230000   Inserted batch 230000 to 240000   Inserted batch 240000 to 250000   Inserted batch 250000 to 260000   Inserted batch 260000 to 270000   Inserted batch 270000 to 280000   Inserted batch 280000 to 290000   Inserted batch 290000 to 300000   Inserted batch 300000 to 310000   Inserted batch 310000 to 320000   Inserted batch 320000 to 330000   Inserted batch 330000 to 340000   Inserted batch 340000 to 350000   Inserted batch 350000 to 360000   Inserted batch 360000 to 370000   Inserted batch 370000 to 380000   Inserted batch 380000 to 390000   Inserted batch 390000 to 400000   Inserted batch 400000 to 410000   Inserted batch 410000 to 420000   Inserted batch 420000 to 430000   Inserted batch 430000 to 440000   Inserted batch 440000 to 450000   Inserted batch 450000 to 460000   Inserted batch 460000 to 470000   Inserted batch 470000 to 480000   Inserted batch 480000 to 490000   Inserted batch 490000 to 500000   Inserted batch 500000 to 510000   Inserted batch 510000 to 520000   Inserted batch 520000 to 530000   Inserted batch 530000 to 540000   Inserted batch 540000 to 550000   Inserted batch 550000 to 560000   Inserted batch 560000 to 570000   Inserted batch 570000 to 580000   Inserted batch 580000 to 590000   Inserted batch 590000 to 600000   Inserted batch 600000 to 610000   Inserted batch 610000 to 620000   Inserted batch 620000 to 630000   Inserted batch 630000 to 640000   Inserted batch 640000 to 650000   Inserted batch 650000 to 660000   Inserted batch 660000 to 670000   Inserted batch 670000 to 680000   Inserted batch 680000 to 690000   Inserted batch 690000 to 700000   Inserted batch 700000 to 710000   Inserted batch 710000 to 720000   Inserted batch 720000 to 730000   Inserted batch 730000 to 740000   Inserted batch 740000 to 750000   Inserted batch 750000 to 760000   Inserted batch 760000 to 770000   Inserted batch 770000 to 780000   Inserted batch 780000 to 790000   Inserted batch 790000 to 800000   Inserted batch 800000 to 810000   Inserted batch 810000 to 820000   Inserted batch 820000 to 830000   Inserted batch 830000 to 840000   Inserted batch 840000 to 850000   Inserted batch 850000 to 860000   Inserted batch 860000 to 870000   Inserted batch 870000 to 880000   Inserted batch 880000 to 890000   Inserted batch 890000 to 900000   Inserted batch 900000 to 910000   Inserted batch 910000 to 920000   Inserted batch 920000 to 930000   Inserted batch 930000 to 940000   Inserted batch 940000 to 950000   Inserted batch 950000 to 960000   Inserted batch 960000 to 970000   Inserted batch 970000 to 980000   Inserted batch 980000 to 990000   Inserted batch 990000 to 1000000
+✅ Insertion complete.
+🔨 Milvus: Building index (HNSW)...
+⚠️ Milvus: Could not get detailed stats via API. Falling back to estimation.
+    Measuring cold start and warmup...
+      Cold Start Latency: 46.86ms
+      Warmup Time: 354.76ms (23 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=12.29ms
+    Run 2: Recall@10=0.1000, Latency_p50=12.13ms
+    Run 3: Recall@10=0.1000, Latency_p50=11.73ms
+  Skipping HNSW_Cosine: Dataset requires 'l2', Config is 'cosine'
+   Results: milvus_random    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 0.9999 │
+│ Recall@100       │ 0.3904 │
+│ MRR              │ 0.9999 │
+│ Latency p50 (ms) │ 11.73  │
+│ Latency p99 (ms) │ 22.97  │
+│ QPS              │ 82.5   │
+│ Build Time (s)   │ 333.21 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/milvus/random_milvus_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T22:59:09Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/milvus-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container attu  Stopping
+ Container attu  Stopped
+ Container attu  Removing
+ Container attu  Removed
+ Container milvus-standalone  Stopping
+ Container milvus-standalone  Stopped
+ Container milvus-standalone  Removing
+ Container milvus-standalone  Removed
+ Container milvus-minio  Stopping
+ Container milvus-etcd  Stopping
+ Container milvus-etcd  Stopped
+ Container milvus-etcd  Removing
+ Container milvus-etcd  Removed
+ Container milvus-minio  Stopped
+ Container milvus-minio  Removing
+ Container milvus-minio  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T22:59:23Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/milvus-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container milvus-minio  Creating
+ Container milvus-etcd  Creating
+ Container milvus-etcd  Created
+ Container milvus-minio  Created
+ Container milvus-standalone  Creating
+ Container milvus-standalone  Created
+ Container attu  Creating
+ Container attu  Created
+ Container milvus-minio  Starting
+ Container milvus-etcd  Starting
+ Container milvus-etcd  Started
+ Container milvus-minio  Started
+ Container milvus-standalone  Starting
+ Container milvus-standalone  Started
+ Container attu  Starting
+ Container attu  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: milvus
+Datasets: msmarco
+Runs per config: 3
+
+
+Loading dataset: msmarco
+
+Benchmarking: milvus on msmarco
+Loading pre-computed embeddings (subset: 100000)...
+  Vectors: (100000, 768), Queries: (1000, 768)
+  Metric: cosine
+  Skipping HNSW_L2: Dataset requires 'cosine', Config is 'l2'
+
+  Index: HNSW_Cosine
+    Building index...
+🚀 Milvus: Inserting 100000 vectors in batches...
+   Inserted batch 0 to 10000   Inserted batch 10000 to 20000   Inserted batch 20000 to 30000   Inserted batch 30000 to 40000   Inserted batch 40000 to 50000   Inserted batch 50000 to 60000   Inserted batch 60000 to 70000   Inserted batch 70000 to 80000   Inserted batch 80000 to 90000   Inserted batch 90000 to 100000
+✅ Insertion complete.
+🔨 Milvus: Building index (HNSW)...
+⚠️ Milvus: Could not get detailed stats via API. Falling back to estimation.
+    Measuring cold start and warmup...
+      Cold Start Latency: 18.90ms
+      Warmup Time: 162.07ms (22 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=7.86ms
+    Run 2: Recall@10=0.1000, Latency_p50=11.38ms
+    Run 3: Recall@10=0.1000, Latency_p50=13.73ms
+   Results: milvus_msmarco   
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.9619 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 13.73  │
+│ Latency p99 (ms) │ 26.22  │
+│ QPS              │ 69.4   │
+│ Build Time (s)   │ 67.60  │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/milvus/msmarco_milvus_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T23:01:51Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/milvus-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container attu  Stopping
+ Container attu  Stopped
+ Container attu  Removing
+ Container attu  Removed
+ Container milvus-standalone  Stopping
+ Container milvus-standalone  Stopped
+ Container milvus-standalone  Removing
+ Container milvus-standalone  Removed
+ Container milvus-etcd  Stopping
+ Container milvus-minio  Stopping
+ Container milvus-etcd  Stopped
+ Container milvus-etcd  Removing
+ Container milvus-etcd  Removed
+ Container milvus-minio  Stopped
+ Container milvus-minio  Removing
+ Container milvus-minio  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+time="2026-01-20T23:02:08Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/milvus-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Network ragdbeval_default  Creating
+ Network ragdbeval_default  Created
+ Container milvus-minio  Creating
+ Container milvus-etcd  Creating
+ Container milvus-etcd  Created
+ Container milvus-minio  Created
+ Container milvus-standalone  Creating
+ Container milvus-standalone  Created
+ Container attu  Creating
+ Container attu  Created
+ Container milvus-etcd  Starting
+ Container milvus-minio  Starting
+ Container milvus-etcd  Started
+ Container milvus-minio  Started
+ Container milvus-standalone  Starting
+ Container milvus-standalone  Started
+ Container attu  Starting
+ Container attu  Started
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: milvus
+Datasets: glove
+Runs per config: 3
+
+
+Loading dataset: glove
+
+Benchmarking: milvus on glove
+  Vectors: (400000, 100), Queries: (10000, 100)
+  Metric: cosine
+  Skipping HNSW_L2: Dataset requires 'cosine', Config is 'l2'
+
+  Index: HNSW_Cosine
+    Building index...
+🚀 Milvus: Inserting 400000 vectors in batches...
+   Inserted batch 0 to 10000   Inserted batch 10000 to 20000   Inserted batch 20000 to 30000   Inserted batch 30000 to 40000   Inserted batch 40000 to 50000   Inserted batch 50000 to 60000   Inserted batch 60000 to 70000   Inserted batch 70000 to 80000   Inserted batch 80000 to 90000   Inserted batch 90000 to 100000   Inserted batch 100000 to 110000   Inserted batch 110000 to 120000   Inserted batch 120000 to 130000   Inserted batch 130000 to 140000   Inserted batch 140000 to 150000   Inserted batch 150000 to 160000   Inserted batch 160000 to 170000   Inserted batch 170000 to 180000   Inserted batch 180000 to 190000   Inserted batch 190000 to 200000   Inserted batch 200000 to 210000   Inserted batch 210000 to 220000   Inserted batch 220000 to 230000   Inserted batch 230000 to 240000   Inserted batch 240000 to 250000   Inserted batch 250000 to 260000   Inserted batch 260000 to 270000   Inserted batch 270000 to 280000   Inserted batch 280000 to 290000   Inserted batch 290000 to 300000   Inserted batch 300000 to 310000   Inserted batch 310000 to 320000   Inserted batch 320000 to 330000   Inserted batch 330000 to 340000   Inserted batch 340000 to 350000   Inserted batch 350000 to 360000   Inserted batch 360000 to 370000   Inserted batch 370000 to 380000   Inserted batch 380000 to 390000   Inserted batch 390000 to 400000
+✅ Insertion complete.
+🔨 Milvus: Building index (HNSW)...
+⚠️ Milvus: Could not get detailed stats via API. Falling back to estimation.
+    Measuring cold start and warmup...
+      Cold Start Latency: 22.92ms
+      Warmup Time: 147.22ms (21 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=6.79ms
+    Run 2: Recall@10=0.1000, Latency_p50=8.93ms
+    Run 3: Recall@10=0.1000, Latency_p50=10.27ms
+    Results: milvus_glove    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 0.9999 │
+│ Recall@100       │ 0.8483 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 10.27  │
+│ Latency p99 (ms) │ 25.05  │
+│ QPS              │ 88.4   │
+│ Build Time (s)   │ 88.53  │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/milvus/glove_milvus_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+time="2026-01-20T23:14:33Z" level=warning msg="/home/ashenrashmike2000/RAGdbEval/milvus-docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container attu  Stopping
+ Container attu  Stopped
+ Container attu  Removing
+ Container attu  Removed
+ Container milvus-standalone  Stopping
+ Container milvus-standalone  Stopped
+ Container milvus-standalone  Removing
+ Container milvus-standalone  Removed
+ Container milvus-etcd  Stopping
+ Container milvus-minio  Stopping
+ Container milvus-etcd  Stopped
+ Container milvus-etcd  Removing
+ Container milvus-etcd  Removed
+ Container milvus-minio  Stopped
+ Container milvus-minio  Removing
+ Container milvus-minio  Removed
+ Network ragdbeval_default  Removing
+ Network ragdbeval_default  Removed
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: lancedb
+Datasets: gist1m
+Runs per config: 3
+
+
+Loading dataset: gist1m
+
+Benchmarking: lancedb on gist1m
+  Vectors: (1000000, 960), Queries: (1000, 960)
+  Metric: l2
+
+  Index: IVF_PQ_L2
+    Building index...
+🚀 LanceDB: Ingesting 1000000 vectors (PyArrow Table Mode)...
+🔨 LanceDB: Building IVF-PQ (partitions=256, sub_vectors=16)...
+    Measuring cold start and warmup...
+      Cold Start Latency: 126.37ms
+      Warmup Time: 620.01ms (28 queries)
+    Run 1: Recall@10=0.0473, Latency_p50=20.49ms
+    Run 2: Recall@10=0.0473, Latency_p50=20.28ms
+    Run 3: Recall@10=0.0473, Latency_p50=21.17ms
+  Skipping IVF_PQ_Cosine: Dataset requires 'l2', Config is 'cosine'
+   Results: lancedb_gist1m   
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.0473 │
+│ Precision@10     │ 0.4729 │
+│ Recall@100       │ 0.2448 │
+│ MRR              │ 0.7734 │
+│ Latency p50 (ms) │ 21.17  │
+│ Latency p99 (ms) │ 33.98  │
+│ QPS              │ 45.7   │
+│ Build Time (s)   │ 132.70 │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/lancedb/gist1m_lancedb_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: lancedb
+Datasets: deep1m
+Runs per config: 3
+
+
+Loading dataset: deep1m
+
+Benchmarking: lancedb on deep1m
+  Vectors: (1000000, 96), Queries: (10000, 96)
+  Metric: l2
+
+  Index: IVF_PQ_L2
+    Building index...
+🚀 LanceDB: Ingesting 1000000 vectors (PyArrow Table Mode)...
+🔨 LanceDB: Building IVF-PQ (partitions=256, sub_vectors=16)...
+    Measuring cold start and warmup...
+      Cold Start Latency: 37.02ms
+      Warmup Time: 729.90ms (38 queries)
+    Run 1: Recall@10=0.0949, Latency_p50=19.19ms
+    Run 2: Recall@10=0.0949, Latency_p50=19.05ms
+    Run 3: Recall@10=0.0949, Latency_p50=18.32ms
+  Skipping IVF_PQ_Cosine: Dataset requires 'l2', Config is 'cosine'
+   Results: lancedb_deep1m   
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.0949 │
+│ Precision@10     │ 0.9486 │
+│ Recall@100       │ 0.6073 │
+│ MRR              │ 0.9953 │
+│ Latency p50 (ms) │ 18.32  │
+│ Latency p99 (ms) │ 30.03  │
+│ QPS              │ 53.3   │
+│ Build Time (s)   │ 42.50  │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/lancedb/deep1m_lancedb_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: lancedb
+Datasets: sift1m
+Runs per config: 3
+
+
+Loading dataset: sift1m
+
+Benchmarking: lancedb on sift1m
+  Vectors: (1000000, 128), Queries: (10000, 128)
+  Metric: l2
+
+  Index: IVF_PQ_L2
+    Building index...
+🚀 LanceDB: Ingesting 1000000 vectors (PyArrow Table Mode)...
+🔨 LanceDB: Building IVF-PQ (partitions=256, sub_vectors=16)...
+    Measuring cold start and warmup...
+      Cold Start Latency: 30.89ms
+      Warmup Time: 535.19ms (26 queries)
+    Run 1: Recall@10=0.0964, Latency_p50=18.28ms
+    Run 2: Recall@10=0.0964, Latency_p50=18.86ms
+    Run 3: Recall@10=0.0964, Latency_p50=18.45ms
+  Skipping IVF_PQ_Cosine: Dataset requires 'l2', Config is 'cosine'
+   Results: lancedb_sift1m   
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.0964 │
+│ Precision@10     │ 0.9644 │
+│ Recall@100       │ 0.6326 │
+│ MRR              │ 0.9973 │
+│ Latency p50 (ms) │ 18.45  │
+│ Latency p99 (ms) │ 29.94  │
+│ QPS              │ 53.1   │
+│ Build Time (s)   │ 42.76  │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/lancedb/sift1m_lancedb_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: lancedb
+Datasets: random
+Runs per config: 3
+
+
+Loading dataset: random
+
+Benchmarking: lancedb on random
+  Vectors: (1000000, 128), Queries: (10000, 128)
+  Metric: l2
+
+  Index: IVF_PQ_L2
+    Building index...
+🚀 LanceDB: Ingesting 1000000 vectors (PyArrow Table Mode)...
+🔨 LanceDB: Building IVF-PQ (partitions=256, sub_vectors=16)...
+    Measuring cold start and warmup...
+      Cold Start Latency: 27.28ms
+      Warmup Time: 528.48ms (27 queries)
+    Run 1: Recall@10=0.0254, Latency_p50=18.84ms
+    Run 2: Recall@10=0.0254, Latency_p50=19.18ms
+    Run 3: Recall@10=0.0254, Latency_p50=18.60ms
+  Skipping IVF_PQ_Cosine: Dataset requires 'l2', Config is 'cosine'
+   Results: lancedb_random   
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.0254 │
+│ Precision@10     │ 0.2544 │
+│ Recall@100       │ 0.0996 │
+│ MRR              │ 0.6076 │
+│ Latency p50 (ms) │ 18.60  │
+│ Latency p99 (ms) │ 30.86  │
+│ QPS              │ 52.5   │
+│ Build Time (s)   │ 40.85  │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/lancedb/random_lancedb_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: lancedb
+Datasets: msmarco
+Runs per config: 3
+
+
+Loading dataset: msmarco
+
+Benchmarking: lancedb on msmarco
+Loading pre-computed embeddings (subset: 100000)...
+  Vectors: (100000, 768), Queries: (1000, 768)
+  Metric: cosine
+  Skipping IVF_PQ_L2: Dataset requires 'cosine', Config is 'l2'
+
+  Index: IVF_PQ_Cosine
+    Building index...
+🚀 LanceDB: Ingesting 100000 vectors (PyArrow Table Mode)...
+🔨 LanceDB: Building IVF-PQ (partitions=256, sub_vectors=16)...
+    Measuring cold start and warmup...
+      Cold Start Latency: 33.40ms
+      Warmup Time: 475.47ms (26 queries)
+    Run 1: Recall@10=0.0852, Latency_p50=17.08ms
+    Run 2: Recall@10=0.0852, Latency_p50=17.58ms
+    Run 3: Recall@10=0.0852, Latency_p50=16.63ms
+  Results: lancedb_msmarco   
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.0852 │
+│ Precision@10     │ 0.8521 │
+│ Recall@100       │ 0.3971 │
+│ MRR              │ 0.9775 │
+│ Latency p50 (ms) │ 16.63  │
+│ Latency p99 (ms) │ 27.01  │
+│ QPS              │ 59.1   │
+│ Build Time (s)   │ 72.56  │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/lancedb/msmarco_lancedb_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: lancedb
+Datasets: glove
+Runs per config: 3
+
+
+Loading dataset: glove
+
+Benchmarking: lancedb on glove
+  Vectors: (400000, 100), Queries: (10000, 100)
+  Metric: cosine
+  Skipping IVF_PQ_L2: Dataset requires 'cosine', Config is 'l2'
+
+  Index: IVF_PQ_Cosine
+    Building index...
+🚀 LanceDB: Ingesting 400000 vectors (PyArrow Table Mode)...
+🔨 LanceDB: Building IVF-PQ (partitions=256, sub_vectors=10)...
+    Measuring cold start and warmup...
+      Cold Start Latency: 29.77ms
+      Warmup Time: 671.56ms (32 queries)
+    Run 1: Recall@10=0.0755, Latency_p50=18.14ms
+    Run 2: Recall@10=0.0755, Latency_p50=21.33ms
+    Run 3: Recall@10=0.0755, Latency_p50=19.81ms
+   Results: lancedb_glove    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.0755 │
+│ Precision@10     │ 0.7554 │
+│ Recall@100       │ 0.3914 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 19.81  │
+│ Latency p99 (ms) │ 29.99  │
+│ QPS              │ 49.8   │
+│ Build Time (s)   │ 26.16  │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/lancedb/glove_lancedb_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: faiss
+Datasets: gist1m
+Runs per config: 3
+
+
+Loading dataset: gist1m
+
+Benchmarking: faiss on gist1m
+  Vectors: (1000000, 960), Queries: (1000, 960)
+  Metric: l2
+
+  Index: IVF1024_L2
+    Building index...
+    Measuring cold start and warmup...
+      Cold Start Latency: 3.79ms
+      Warmup Time: 26.97ms (37 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=9.07ms
+    Run 2: Recall@10=0.1000, Latency_p50=9.43ms
+    Run 3: Recall@10=0.1000, Latency_p50=8.95ms
+  Skipping IVF1024_IP: Dataset requires 'l2', Config is 'cosine'
+    Results: faiss_gist1m    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.7830 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 8.95   │
+│ Latency p99 (ms) │ 17.80  │
+│ QPS              │ 105.6  │
+│ Build Time (s)   │ 47.36  │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/faiss/gist1m_faiss_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: faiss
+Datasets: deep1m
+Runs per config: 3
+
+
+Loading dataset: deep1m
+
+Benchmarking: faiss on deep1m
+  Vectors: (1000000, 96), Queries: (10000, 96)
+  Metric: l2
+
+  Index: IVF1024_L2
+    Building index...
+    Measuring cold start and warmup...
+      Cold Start Latency: 0.28ms
+      Warmup Time: 1.78ms (24 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=0.69ms
+    Run 2: Recall@10=0.1000, Latency_p50=0.69ms
+    Run 3: Recall@10=0.1000, Latency_p50=0.69ms
+  Skipping IVF1024_IP: Dataset requires 'l2', Config is 'cosine'
+    Results: faiss_deep1m    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.9202 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 0.69   │
+│ Latency p99 (ms) │ 1.50   │
+│ QPS              │ 1365.2 │
+│ Build Time (s)   │ 6.50   │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/faiss/deep1m_faiss_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: faiss
+Datasets: sift1m
+Runs per config: 3
+
+
+Loading dataset: sift1m
+
+Benchmarking: faiss on sift1m
+  Vectors: (1000000, 128), Queries: (10000, 128)
+  Metric: l2
+
+  Index: IVF1024_L2
+    Building index...
+    Measuring cold start and warmup...
+      Cold Start Latency: 0.31ms
+      Warmup Time: 4.88ms (37 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=0.92ms
+    Run 2: Recall@10=0.1000, Latency_p50=0.93ms
+    Run 3: Recall@10=0.1000, Latency_p50=1.07ms
+  Skipping IVF1024_IP: Dataset requires 'l2', Config is 'cosine'
+    Results: faiss_sift1m    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.9074 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 1.07   │
+│ Latency p99 (ms) │ 2.22   │
+│ QPS              │ 886.0  │
+│ Build Time (s)   │ 13.80  │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/faiss/sift1m_faiss_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: faiss
+Datasets: random
+Runs per config: 3
+
+
+Loading dataset: random
+
+Benchmarking: faiss on random
+  Vectors: (1000000, 128), Queries: (10000, 128)
+  Metric: l2
+
+  Index: IVF1024_L2
+    Building index...
+    Measuring cold start and warmup...
+      Cold Start Latency: 0.31ms
+      Warmup Time: 2.68ms (24 queries)
+    Run 1: Recall@10=0.0990, Latency_p50=1.23ms
+    Run 2: Recall@10=0.0987, Latency_p50=1.31ms
+    Run 3: Recall@10=0.0983, Latency_p50=1.50ms
+  Skipping IVF1024_IP: Dataset requires 'l2', Config is 'cosine'
+    Results: faiss_random    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.0983 │
+│ Precision@10     │ 0.9831 │
+│ Recall@100       │ 0.1536 │
+│ MRR              │ 0.9955 │
+│ Latency p50 (ms) │ 1.50   │
+│ Latency p99 (ms) │ 2.49   │
+│ QPS              │ 685.3  │
+│ Build Time (s)   │ 8.57   │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/faiss/random_faiss_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: faiss
+Datasets: msmarco
+Runs per config: 3
+
+
+Loading dataset: msmarco
+
+Benchmarking: faiss on msmarco
+Loading pre-computed embeddings (subset: 100000)...
+  Vectors: (100000, 768), Queries: (1000, 768)
+  Metric: cosine
+  Skipping IVF1024_L2: Dataset requires 'cosine', Config is 'l2'
+
+  Index: IVF1024_IP
+    Building index...
+WARNING clustering 10000 points to 1024 centroids: please provide at least 39936 training points
+    Measuring cold start and warmup...
+      Cold Start Latency: 0.74ms
+      Warmup Time: 4.65ms (25 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=0.71ms
+    Run 2: Recall@10=0.1000, Latency_p50=0.72ms
+    Run 3: Recall@10=0.1000, Latency_p50=0.57ms
+   Results: faiss_msmarco    
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.6653 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 0.57   │
+│ Latency p99 (ms) │ 1.06   │
+│ QPS              │ 1693.0 │
+│ Build Time (s)   │ 4.38   │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/faiss/msmarco_faiss_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+============================================================
+VectorDB Benchmark Framework
+============================================================
+
+VectorDB Benchmark
+Databases: faiss
+Datasets: glove
+Runs per config: 3
+
+
+Loading dataset: glove
+
+Benchmarking: faiss on glove
+  Vectors: (400000, 100), Queries: (10000, 100)
+  Metric: cosine
+  Skipping IVF1024_L2: Dataset requires 'cosine', Config is 'l2'
+
+  Index: IVF1024_IP
+    Building index...
+    Measuring cold start and warmup...
+      Cold Start Latency: 0.37ms
+      Warmup Time: 1.70ms (21 queries)
+    Run 1: Recall@10=0.1000, Latency_p50=0.57ms
+    Run 2: Recall@10=0.1000, Latency_p50=0.61ms
+    Run 3: Recall@10=0.1000, Latency_p50=0.62ms
+    Results: faiss_glove     
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Metric           ┃ Value  ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ Recall@10        │ 0.1000 │
+│ Precision@10     │ 1.0000 │
+│ Recall@100       │ 0.8505 │
+│ MRR              │ 1.0000 │
+│ Latency p50 (ms) │ 0.62   │
+│ Latency p99 (ms) │ 1.38   │
+│ QPS              │ 1529.2 │
+│ Build Time (s)   │ 3.37   │
+└──────────────────┴────────┘
+Recall is normalized by total
+ground truth size (typically 
+100). Precision is # Relevant
+            / K.             
+Exported JSON to results/faiss/glove_faiss_results.json
+Exported LaTeX tables to results/tables
+
+Benchmark complete!
+📊 Generating plots from /home/ashenrashmike2000/RAGdbEval/results/results.csv...
+✅ Successfully generated 26 plots in /home/ashenrashmike2000/RAGdbEval/results/plots
+♻️  RESET: Restarting qdrant...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for qdrant...
+
+▶️  Running: qdrant on sift1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database qdrant --dataset sift1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting qdrant...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for qdrant...
+
+▶️  Running: qdrant on random...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database qdrant --dataset random --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting qdrant...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for qdrant...
+
+▶️  Running: qdrant on msmarco...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database qdrant --dataset msmarco --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting qdrant...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Waiting 30s for qdrant...
+
+▶️  Running: qdrant on glove...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database qdrant --dataset glove --runs 3 --export json latex
+✅ Benchmark Run Successful.
+🛑 Stopping qdrant...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+
+============================================================
+ PREPARING BENCHMARK FOR: MILVUS
+============================================================
+🚀 Starting milvus...
+⏳ Polling Milvus port 19530...
+✅ Milvus is ready!
+
+▶️  Running: milvus on gist1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database milvus --dataset gist1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting milvus...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Polling Milvus port 19530...
+✅ Milvus is ready!
+
+▶️  Running: milvus on deep1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database milvus --dataset deep1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting milvus...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Polling Milvus port 19530...
+✅ Milvus is ready!
+
+▶️  Running: milvus on sift1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database milvus --dataset sift1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting milvus...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Polling Milvus port 19530...
+✅ Milvus is ready!
+
+▶️  Running: milvus on random...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database milvus --dataset random --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting milvus...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Polling Milvus port 19530...
+✅ Milvus is ready!
+
+▶️  Running: milvus on msmarco...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database milvus --dataset msmarco --runs 3 --export json latex
+✅ Benchmark Run Successful.
+♻️  RESET: Restarting milvus...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+⏳ Polling Milvus port 19530...
+✅ Milvus is ready!
+
+▶️  Running: milvus on glove...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database milvus --dataset glove --runs 3 --export json latex
+✅ Benchmark Run Successful.
+🛑 Stopping milvus...
+🧹 Deleting local volumes folder: /home/ashenrashmike2000/RAGdbEval/volumes...
+
+============================================================
+ PREPARING BENCHMARK FOR: LANCEDB
+============================================================
+
+▶️  Running: lancedb on gist1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database lancedb --dataset gist1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+❄️  Cooling down...
+
+▶️  Running: lancedb on deep1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database lancedb --dataset deep1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+❄️  Cooling down...
+
+▶️  Running: lancedb on sift1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database lancedb --dataset sift1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+❄️  Cooling down...
+
+▶️  Running: lancedb on random...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database lancedb --dataset random --runs 3 --export json latex
+✅ Benchmark Run Successful.
+❄️  Cooling down...
+
+▶️  Running: lancedb on msmarco...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database lancedb --dataset msmarco --runs 3 --export json latex
+✅ Benchmark Run Successful.
+❄️  Cooling down...
+
+▶️  Running: lancedb on glove...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database lancedb --dataset glove --runs 3 --export json latex
+✅ Benchmark Run Successful.
+
+============================================================
+ PREPARING BENCHMARK FOR: FAISS
+============================================================
+
+▶️  Running: faiss on gist1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database faiss --dataset gist1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+❄️  Cooling down...
+
+▶️  Running: faiss on deep1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database faiss --dataset deep1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+❄️  Cooling down...
+
+▶️  Running: faiss on sift1m...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database faiss --dataset sift1m --runs 3 --export json latex
+✅ Benchmark Run Successful.
+❄️  Cooling down...
+
+▶️  Running: faiss on random...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database faiss --dataset random --runs 3 --export json latex
+✅ Benchmark Run Successful.
+❄️  Cooling down...
+
+▶️  Running: faiss on msmarco...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database faiss --dataset msmarco --runs 3 --export json latex
+✅ Benchmark Run Successful.
+❄️  Cooling down...
+
+▶️  Running: faiss on glove...
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/run_benchmark.py" --database faiss --dataset glove --runs 3 --export json latex
+✅ Benchmark Run Successful.
+
+============================================================
+📄 COMPILING CSV
+============================================================
+🔍 Finding all benchmark JSON files to compile...
+Found 42 JSON files to compile.
+
+============================================================
+📊 GENERATING PLOTS
+============================================================
+Executing: "/usr/bin/python" "/home/ashenrashmike2000/RAGdbEval/scripts/generate_plots.py" --database chroma weaviate pgvector qdrant milvus lancedb faiss --dataset gist1m deep1m sift1m random msmarco glove
